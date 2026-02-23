@@ -786,6 +786,10 @@ After generating PDB and TAD:
    - What's unclear (questions to answer)
    - Confidence levels for each section
 
+## Notes
+
+- Use relevant agent skills and MCP tools when they apply (e.g., Context7 for accurate framework and library references, web search for current best practices and conventions). See `docs/CURSOR_PLUGINS.md` for available capabilities.
+
 ## Next Steps
 
 After documentation is generated and validated:

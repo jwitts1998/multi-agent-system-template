@@ -132,6 +132,54 @@ This is optional and most useful for teams with many agents and complex workflow
 
 ---
 
+## Agent Interoperability Protocols
+
+When agents need to access external tools or communicate with agents built on different frameworks, use these open standards.
+
+### MCP (Model Context Protocol)
+
+**Standard for tool discovery and calling.**
+
+MCP defines how agents discover and invoke tools exposed by servers. Python SDK (21.8k stars), TypeScript SDK (11.7k stars). Already integrated into this template system via Cursor plugins.
+
+For your own project, expose project-specific tools as MCP servers so any MCP-compatible agent or IDE can use them:
+
+1. Define tools as functions with typed parameters
+2. Wrap them in an MCP server (stdio or HTTP transport)
+3. Register the server in agent configuration
+4. Agents discover and call tools through the MCP protocol
+
+Use MCP when: agents need to access project-specific tools, APIs, databases, or file systems through a standardized interface.
+
+### A2A (Agent2Agent Protocol)
+
+**Standard for cross-framework agent communication.**
+
+[google/A2A](https://github.com/google/A2A) -- Apache-2.0, 21.9k stars. Donated to the Linux Foundation by Google. Python, TypeScript, and Java SDKs.
+
+A2A enables agents built with different frameworks (LangGraph, CrewAI, custom) to collaborate on tasks:
+
+- **Agent Cards**: JSON descriptors that advertise an agent's capabilities, input/output formats, and endpoint URL
+- **Task lifecycle**: Agents send task requests and receive results (or stream partial results via SSE)
+- **Transport**: JSON-RPC 2.0 over HTTP(S), supporting synchronous, streaming, and asynchronous push notification modes
+
+Use A2A when: agents built with different frameworks or running in different services need to delegate tasks to each other. For example, a LangGraph orchestrator delegating a code review subtask to a CrewAI-based QA agent running as a separate service.
+
+### MCP vs A2A
+
+| Concern | Use MCP | Use A2A |
+|---------|---------|---------|
+| Agent needs to call a tool or API | Yes | No |
+| Agent needs to delegate a task to another agent | No | Yes |
+| Agents are in the same process/framework | MCP for tools | Not needed |
+| Agents are in different services/frameworks | MCP for tools | A2A for delegation |
+
+Both protocols are complementary. A project may use MCP for tool access and A2A for inter-agent task delegation simultaneously.
+
+See `docs/research/agent_runtime_tooling_landscape.md` Section 6 for full evaluation of interoperability protocols.
+
+---
+
 ## ✅ Quality Assurance
 
 ### Agent-Specific Checklists

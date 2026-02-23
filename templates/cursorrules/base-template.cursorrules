@@ -263,6 +263,12 @@ Before completing any task, verify:
 - **Fixing bugs**: {{BUG_FIX_GUIDANCE}}
 - **Refactoring**: {{REFACTORING_GUIDANCE}}
 
+### Cursor Plugins and Skills
+
+Agents have access to **agent skills** and **MCP tools** provided by installed Cursor plugins. Use them when relevant — for example, web search for research, Context7 for library docs, BrowserStack for cross-browser testing, Figma skills for design-to-code, and workflow skills for structured plans and code review.
+
+See `docs/CURSOR_PLUGINS.md` for the full list of available capabilities.
+
 ### When Uncertain
 
 - Check `{{DOCS_DIRECTORY}}/` for existing documentation

@@ -55,6 +55,17 @@ test-writer creates component and E2E tests
 Task complete
 ```
 
+## Optional: .cursor/rules/ in This Example
+
+This example includes `.cursor/rules/` to demonstrate the alternative to a single `.cursorrules` file. These `.mdc` files are already customized for CollabDocs (no `{{VARIABLES}}` remaining).
+
+| File | Glob | Purpose |
+|------|------|---------|
+| `typescript-and-react.mdc` | `**/*.{ts,tsx}` | TypeScript strict mode, React functional components, Redux Toolkit patterns, naming |
+| `testing-and-quality.mdc` | `**/*.{test,spec}.{ts,tsx}` | Coverage targets, React Testing Library patterns, quality gates |
+
+In a real project you can use `.cursorrules` alone, `.cursor/rules/` alone, or both — Cursor merges them. See [SETUP_GUIDE.md](../../SETUP_GUIDE.md) for details on both formats.
+
 ## Success Metrics
 
 ✅ Bundle size < 250KB initial  

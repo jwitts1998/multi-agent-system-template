@@ -1,23 +1,27 @@
 # Multi-Agent Development System Template
 
-**Version**: 1.0.0  
-**Last Updated**: January 2026
+**Version**: 2.0.0  
+**Last Updated**: February 2026
 
-## 📍 Installation
+## 📍 Getting Started
 
-This is a **standalone template package** designed to be installed once and used across multiple projects.
+Clone this repo and run the interactive setup to configure it for your project:
 
-**Quick Install**:
 ```bash
-# Place template in a central location
-cd ~/dev
-# Copy/move multi-agent-system-template here
-
-# Add to ~/.zshrc or ~/.bashrc:
-export TEMPLATE_DIR=~/dev/multi-agent-system-template
+git clone https://github.com/jwitts1998/multi-agent-system-template.git my-new-project
+cd my-new-project
+./setup.sh
 ```
 
-**For detailed installation options**: See [INSTALLATION.md](./INSTALLATION.md)
+The setup script will ask for your project name, type, tech stack, and architecture — then configure `.cursorrules`, `AGENTS.md`, subagents, and task files automatically.
+
+After setup, validate that all template variables are resolved:
+
+```bash
+./validate.sh
+```
+
+**Alternative**: You can also use this as a reference library (install once, copy templates into separate projects). See [INSTALLATION.md](./INSTALLATION.md) for that workflow.
 
 ## 📖 What is This?
 
@@ -34,6 +38,12 @@ A comprehensive, modular template kit for implementing a **multi-agent developme
 - **Production-Ready**: Based on real-world multi-agent systems in active development
 - **Well-Documented**: Comprehensive guides, examples, and troubleshooting
 
+### Special Capabilities for New Ideas
+
+Starting from scratch with just an idea?
+- **Idea-to-PDB Agent**: Guides you from a raw product idea to a structured Product Design Blueprint (PDB) through idea exploration and structured output generation
+- **Idea to PDB Guide**: Step-by-step workflow for turning a net-new idea into a PDB ready for implementation ([docs/IDEA_TO_PDB.md](./docs/IDEA_TO_PDB.md))
+
 ### Special Capabilities for Existing Projects
 
 If you have existing code but missing documentation:
@@ -42,33 +52,48 @@ If you have existing code but missing documentation:
 - **Documentation Backfill Agent**: Generates Product Design Blueprint (PDB) and Technical Architecture (TAD) from code
 
 Perfect for:
+- Net-new ideas that need a PDB before building
 - MVP imports from Replit, Bolt, V0, or similar tools
 - Legacy systems that need documentation
 - Existing projects transitioning to multi-agent development
 
 ## 🚀 Quick Start
 
-### Choose Your Path
-
-- **⚡ 5-Minute Setup** (experienced): [QUICK_START.md](./QUICK_START.md)
-- **📋 30-Minute Setup** (recommended): [SETUP_GUIDE.md](./SETUP_GUIDE.md)
-- **📝 Guided Setup** (first time): Start with [PROJECT_QUESTIONNAIRE.md](./PROJECT_QUESTIONNAIRE.md)
-
-### Installation
-
-**Important**: This template package should be placed in a central location accessible to all your projects.
+### Recommended: Clone and Setup
 
 ```bash
-# Recommended locations:
-# - ~/dev/multi-agent-system-template
-# - ~/templates/multi-agent-system-template
-# - /path/to/shared/multi-agent-system-template
-
-# Then set in your shell:
-export TEMPLATE_DIR=~/dev/multi-agent-system-template
+git clone https://github.com/jwitts1998/multi-agent-system-template.git my-project
+cd my-project
+./setup.sh        # Interactive setup — configures everything
+./validate.sh     # Verify no template variables remain
 ```
 
+### Full Workflow
+
+1. **Clone** this repo
+2. **Run `./setup.sh`** — configures .cursorrules, AGENTS.md, subagents, and task files for your project
+3. **Invoke `@idea-to-pdb`** in Cursor — explore your idea and generate a Product Design Blueprint
+4. **Invoke `@pdb-to-tasks`** in Cursor — decompose the PDB into epics and task files
+5. **Start developing** — agents follow your project conventions via .cursorrules
+
+### Other Paths
+
+- **📋 Detailed Setup** (manual): [SETUP_GUIDE.md](./SETUP_GUIDE.md)
+- **📝 Guided Setup** (questionnaire): [PROJECT_QUESTIONNAIRE.md](./PROJECT_QUESTIONNAIRE.md)
+- **📦 Reference Library** (copy-from model): [INSTALLATION.md](./INSTALLATION.md)
+
 ### Basic Workflow
+
+Use the init script to copy all templates in one step:
+
+```bash
+$TEMPLATE_DIR/scripts/init-to-project.sh /path/to/your/project
+# Select project type when prompted (mobile-app, web-app, backend, full-stack)
+```
+
+Then replace `{{VARIABLES}}` and validate with `$TEMPLATE_DIR/scripts/validate-no-placeholders.sh /path/to/your/project`.
+
+### Manual Workflow
 
 1. **Identify**: Determine your project type (mobile/web/backend/full-stack)
 2. **Select**: Choose appropriate templates from `templates/` directory
@@ -163,6 +188,7 @@ graph TB
 ### Getting Started
 - [SETUP_GUIDE.md](./SETUP_GUIDE.md) - Complete setup instructions
 - [PROJECT_QUESTIONNAIRE.md](./PROJECT_QUESTIONNAIRE.md) - Project identification
+- [docs/IDEA_TO_PDB.md](./docs/IDEA_TO_PDB.md) - Guide for turning a raw idea into a PDB (Path A)
 
 ### Integration & Usage
 - [docs/INTEGRATION_GUIDE.md](./docs/INTEGRATION_GUIDE.md) - How components work together
@@ -171,6 +197,7 @@ graph TB
 ### Reference
 - [docs/TROUBLESHOOTING.md](./docs/TROUBLESHOOTING.md) - Common issues and solutions
 - [docs/FAQ.md](./docs/FAQ.md) - Frequently asked questions
+- [docs/CURSOR_PLUGINS.md](./docs/CURSOR_PLUGINS.md) - Cursor plugin capabilities and integrations
 
 ### Examples
 - [examples/mobile-app-example/](./examples/mobile-app-example/) - Flutter app setup
@@ -231,7 +258,11 @@ See [SETUP_GUIDE.md - Variable Reference](./SETUP_GUIDE.md#variable-reference) f
 ```
 multi-agent-system-template/
 ├── README.md                          # This file
-├── SETUP_GUIDE.md                     # Complete setup instructions
+├── .cursorrules                       # AI agent rules (generic starter, replaced by setup.sh)
+├── AGENTS.md                          # Agent role definitions (generic starter, replaced by setup.sh)
+├── setup.sh                           # Interactive project setup script
+├── validate.sh                        # Template variable validation script
+├── SETUP_GUIDE.md                     # Detailed setup instructions
 ├── PROJECT_QUESTIONNAIRE.md           # Project identification
 │
 ├── templates/
@@ -269,6 +300,10 @@ multi-agent-system-template/
 │   │   │   ├── security-auditor.md
 │   │   │   └── performance-optimizer.md
 │   │   │
+│   │   ├── ideation/                           # Idea-to-PDB agents
+│   │   │   ├── idea-to-pdb.md                  # Raw idea → PDB generation
+│   │   │   └── pdb-to-tasks.md                 # PDB → epics and task files
+│   │   │
 │   │   └── specialists/                        # Tech-specific templates
 │   │       ├── flutter-specialist.md
 │   │       ├── react-specialist.md
@@ -283,10 +318,12 @@ multi-agent-system-template/
 ├── examples/
 │   ├── mobile-app-example/                    # Complete Flutter setup
 │   ├── web-app-example/                       # Complete React setup
+│   │   └── .cursor/rules/                     # Example .cursor/rules/ usage
 │   ├── backend-service-example/               # Complete Node.js setup
 │   └── full-stack-example/                    # Complete Next.js setup
 │
 └── docs/
+    ├── IDEA_TO_PDB.md                         # Guide: raw idea → PDB workflow
     ├── INTEGRATION_GUIDE.md                   # How components work together
     ├── CUSTOMIZATION_GUIDE.md                 # How to customize templates
     ├── TROUBLESHOOTING.md                     # Common issues and solutions

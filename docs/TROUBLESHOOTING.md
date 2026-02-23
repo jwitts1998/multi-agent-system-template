@@ -79,6 +79,10 @@
 2. Replace all instances systematically
 3. Check conditional sections properly handled
 4. Use find-and-replace for efficiency
+5. Run the validation script to find all remaining placeholders:
+   ```bash
+   ./validate.sh
+   ```
 
 ---
 
@@ -102,6 +106,9 @@ ls -la docs/workflow/            # Should have workflow docs
 grep -r "{{" .cursorrules AGENTS.md tasks.yml
 
 # Should return nothing - if it does, replace those variables
+
+# Or use the automated validation script:
+./validate.sh
 ```
 
 ### Step 3: Test Agent Invocation

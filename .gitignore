@@ -18,8 +18,9 @@ Thumbs.db
 *.log
 npm-debug.log*
 
-# Optional: uncomment if you add scripts with deps
-# node_modules/
-# __pycache__/
-# .venv/
-# venv/
+# Dependencies and build output
+node_modules/
+__pycache__/
+.venv/
+venv/
+tools/explorer/dist/

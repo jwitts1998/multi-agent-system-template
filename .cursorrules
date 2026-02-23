@@ -1,0 +1,115 @@
+# Multi-Agent Development System — Starter Rules
+
+## Project Overview
+
+This project uses a multi-agent development system. Specialized AI agents collaborate on implementation, design, testing, and quality assurance.
+
+**Status**: This is a freshly cloned starter. Run `./setup.sh` to configure for your specific project, which will replace this file with project-specific rules.
+
+---
+
+## How This System Works
+
+### Agent Roles
+
+Agents are perspectives, not separate processes. When working on a task, adopt the role specified in the task's `agent_roles` field:
+
+- **Implementation Agent**: Write production code, follow architecture patterns, handle business logic
+- **Quality Assurance Agent**: Review code for quality, security, and architecture compliance
+- **Testing Agent**: Write tests, ensure coverage, validate behavior
+- **Documentation Agent**: Generate and maintain documentation
+
+### Task-Driven Development
+
+Work is organized through task files:
+
+- **Portfolio-level**: `tasks.yml` — milestones and high-level goals
+- **Feature-level**: `tasks/*.yml` — detailed implementation tasks with `spec_refs`, `agent_roles`, and `acceptance_criteria`
+
+### Workflow
+
+1. Select a task with `status: todo` (prefer `priority: high`)
+2. Read `spec_refs`, `description`, and `acceptance_criteria`
+3. Check `agent_roles` — adopt the appropriate role
+4. Implement following project conventions
+5. Verify all `acceptance_criteria` are met
+6. Propose `status: done` when complete
+
+---
+
+## Key Directories
+
+```
+docs/product_design/    — Product Design Blueprint (PDB)
+docs/architecture/      — Architecture documentation
+tasks/                  — Feature task files (tasks/*.yml)
+.cursor/agents/         — Subagent configurations
+```
+
+---
+
+## Standards (Generic — Will Be Replaced by setup.sh)
+
+### Code Quality
+- Functions: small, focused, < 50 lines
+- Comments: explain "why", not "what"
+- Follow DRY principle
+- Follow existing patterns in the codebase
+
+### Security
+- Never commit API keys, tokens, or credentials
+- Use environment variables for secrets
+- Validate all user input
+- Use parameterized queries
+
+### Testing
+- Write tests alongside implementation
+- Test behavior, not implementation details
+- Follow AAA pattern (Arrange, Act, Assert)
+
+---
+
+## Available Agents
+
+Subagent configs are in `templates/subagents/`. After running `./setup.sh`, they'll be copied to `.cursor/agents/`. Invoke with `@agent-name`.
+
+### Ideation (for new ideas)
+- `@idea-to-pdb` — Explore an idea and generate a Product Design Blueprint
+- `@pdb-to-tasks` — Decompose a PDB into epics and task files
+
+### Generic (for development)
+- `@code-reviewer` — Code quality, security, architecture review
+- `@test-writer` — Test creation and coverage
+- `@debugger` — Error investigation and fixes
+- `@designer` — UI/UX, design system, accessibility
+- `@doc-generator` — Documentation creation and maintenance
+- `@security-auditor` — Security scanning and hardening
+- `@performance-optimizer` — Performance analysis and optimization
+
+### Ingestion (for existing codebases)
+- `@codebase-auditor` — Analyze existing code structure
+- `@gap-analysis` — Identify production-readiness gaps
+- `@documentation-backfill` — Generate PDB from existing code
+
+### Cursor Plugins and Skills
+
+Agents have access to **agent skills** and **MCP tools** provided by installed Cursor plugins. Use them when relevant — for example, web search for research, Context7 for library docs, BrowserStack for cross-browser testing, Figma skills for design-to-code, and workflow skills for structured plans and code review.
+
+See `docs/CURSOR_PLUGINS.md` for the full list of available capabilities.
+
+---
+
+## Session Checklist
+
+Before completing any task, verify:
+
+- [ ] Task file updated with status and notes
+- [ ] Relevant documentation updated
+- [ ] Tests pass
+- [ ] No hardcoded secrets or credentials
+- [ ] Agent handoff notes added (if task has multiple `agent_roles`)
+- [ ] Acceptance criteria reviewed and met
+
+---
+
+**To configure for your project**: Run `./setup.sh` from the repo root.

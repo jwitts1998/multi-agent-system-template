@@ -10,7 +10,7 @@ Use these agents when:
 - **Path F**: You're importing MVP/prototype code from Replit, Bolt, V0, etc.
 
 **Do NOT use** for:
-- Path A: Greenfield projects (no code yet)
+- Path A: Greenfield projects (no code yet) — use the [Idea-to-PDB agent](../ideation/idea-to-pdb.md) and [Idea to PDB Guide](../../../docs/IDEA_TO_PDB.md) instead
 - Path B: Design-first projects (have PDB, minimal code)
 - Path C: Existing projects that already have comprehensive PDB
 

@@ -244,3 +244,6 @@ Generate `docs/architecture/codebase_knowledge_graph.md`:
 - Use naming conventions as hints
 - Look for patterns across codebase
 - Document ambiguities and request clarification
+
+### Agent Skills and MCP Tools
+- Use relevant agent skills and MCP tools when they apply (e.g., Context7 for identifying framework patterns, web search for dependency security advisories). See `docs/CURSOR_PLUGINS.md` for available capabilities.

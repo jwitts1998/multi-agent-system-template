@@ -1,0 +1,115 @@
+# Cursor Plugins and Integrations
+
+**Last Updated**: February 2026
+
+## Overview
+
+Cursor marketplace plugins extend what agents can do by adding **agent skills** and **MCP (Model Context Protocol) tools**. When a plugin is installed, its capabilities become available to all agents automatically — agents will use them when relevant to the task at hand.
+
+This document lists the plugins and capabilities currently available in this workspace. Keep it up to date when you install or remove plugins so that agents and documentation stay aligned.
+
+---
+
+## MCP Servers
+
+MCP servers provide tool-level integrations that agents call directly.
+
+| Server | Capabilities |
+|--------|-------------|
+| **cursor-ide-browser** | Browser automation — navigate pages, take snapshots, click elements, fill forms, type text, take screenshots. Useful for frontend testing and web interaction. |
+| **Context7** | Fetch up-to-date documentation and code examples for any library or framework. Resolve a library ID, then query its docs. |
+
+---
+
+## Skills by Area
+
+### Research and Web
+
+| Skill | What It Does |
+|-------|-------------|
+| **parallel-web-search** | Default for any lookup or research query. Fast, cost-effective web search. |
+| **parallel-deep-research** | Exhaustive, multi-source research. Use only when explicitly asked for "deep" or "comprehensive" research. |
+| **parallel-web-extract** | Fetch and extract content from any URL (articles, pages, PDFs). Token-efficient. |
+| **citation-standards** | Format and cite web search results consistently. |
+
+### Testing and QA
+
+| Skill | What It Does |
+|-------|-------------|
+| **BrowserStack Automate** | Run automated web tests on real browsers across platforms (Selenium, Playwright, Cypress). |
+| **BrowserStack App Automate** | Run mobile app tests on real devices (Appium, Espresso, XCUITest). |
+| **BrowserStack Accessibility** | Scan pages for WCAG violations and generate fix suggestions. |
+| **BrowserStack Percy** | Visual regression testing — capture screenshots, detect visual changes, approve/reject builds. |
+| **BrowserStack Test Management** | Create projects, folders, test cases, test runs, and track results. |
+| **run-web-tests-on-browserstack** | Skill for setting up and running web test suites on BrowserStack. |
+| **run-mobile-tests-on-browserstack** | Skill for running mobile test suites on BrowserStack. |
+| **scan-and-fix-accessibility** | Skill for scanning pages and generating accessibility fixes. |
+
+### Design and Frontend
+
+| Skill | What It Does |
+|-------|-------------|
+| **implement-design** | Translate Figma designs into production code with 1:1 visual fidelity. |
+| **code-connect-components** | Connect Figma design components to code components via Code Connect. |
+| **create-design-system-rules** | Generate project-specific design system rules from Figma. |
+| **frontend-design** | Create distinctive, production-grade frontend interfaces with high design quality. |
+| **vercel-react-best-practices** | React and Next.js performance optimization patterns from Vercel Engineering. |
+
+### Documentation and Learning
+
+| Skill | What It Does |
+|-------|-------------|
+| **documentation-lookup** (Context7) | Look up library docs, API references, and code examples for any framework. |
+| **create-rule** | Create Cursor rules for persistent AI guidance (`.cursor/rules/`). |
+| **create-skill** | Author new agent skills with proper structure and best practices. |
+
+### Workflow and Process
+
+| Skill | What It Does |
+|-------|-------------|
+| **brainstorming** | Explore intent, approaches, and design decisions before implementation. |
+| **writing-plans** | Create structured implementation plans from specs or requirements. |
+| **executing-plans** | Execute implementation plans with review checkpoints. |
+| **subagent-driven-development** | Execute plans with independent tasks using parallel subagents. |
+| **test-driven-development** | Write tests before implementation code. |
+| **systematic-debugging** | Investigate bugs and failures methodically before proposing fixes. |
+| **requesting-code-review** | Request structured code review after completing work. |
+| **receiving-code-review** | Process code review feedback with technical rigor. |
+| **verification-before-completion** | Run verification commands and confirm output before claiming success. |
+| **finishing-a-development-branch** | Guide branch completion — merge, PR, or cleanup. |
+| **using-git-worktrees** | Create isolated git worktrees for parallel feature work. |
+| **dispatching-parallel-agents** | Run 2+ independent tasks in parallel when no shared state is needed. |
+| **continual-learning** | Mine past chat transcripts for recurring corrections and durable facts, then update AGENTS.md. |
+
+### Stack-Specific
+
+| Skill | What It Does |
+|-------|-------------|
+| **stripe-best-practices** | Best practices for building Stripe payment integrations. |
+| **upgrade-stripe** | Guide for upgrading Stripe API versions and SDKs. |
+| **supabase-postgres-best-practices** | Postgres performance optimization and best practices from Supabase. |
+| **dhh-rails-style** | Ruby and Rails code in DHH's 37signals style. |
+| **dspy-ruby** | Build type-safe LLM applications with DSPy.rb in Ruby. |
+| **andrew-kane-gem-writer** | Write Ruby gems following Andrew Kane's patterns. |
+
+### Other
+
+| Skill | What It Does |
+|-------|-------------|
+| **agent-browser** | Browse websites, fill forms, click buttons, take screenshots via CLI. |
+| **gemini-imagegen** | Generate and edit images using the Gemini API. |
+| **rclone** | Upload, sync, and manage files across cloud storage (S3, R2, GCS, etc.). |
+| **every-style-editor** | Review and edit text content to conform to Every's editorial style guide. |
+| **create-plugin-scaffold** | Create a new Cursor plugin scaffold with manifest and structure. |
+| **review-plugin-submission** | Audit a Cursor plugin for marketplace readiness. |
+| **apply-multi-agent-template** | Deploy the multi-agent system template into a target project. |
+
+---
+
+## Maintaining This List
+
+**When you install a new plugin**: Add its skills and/or MCP tools to the appropriate section above. You can see what a plugin provides by checking the skills and tools that appear in your Cursor session after installation.
+
+**When you remove a plugin**: Delete its entries from this list so agents don't reference unavailable capabilities.
+
+**Project-specific customization**: Remove entries for plugins you don't use (e.g., remove Stripe skills if you don't process payments, remove Figma skills if you don't use Figma for design). This keeps agent context focused on what's actually available.

@@ -76,6 +76,93 @@ For large teams, complex platforms, or projects that need coordination across ma
 
 ---
 
+## 🔌 Cursor Plugins and Skills
+
+Cursor marketplace plugins add **agent skills** and **MCP tools** that agents use automatically when relevant. A starter list of available capabilities ships with this template at [docs/CURSOR_PLUGINS.md](./CURSOR_PLUGINS.md).
+
+### Customizing for Your Project
+
+1. **Remove what you don't use**: If you don't process payments, delete the Stripe entries. If you don't use Figma, delete the Figma entries. Keeping the list focused prevents agents from referencing unavailable capabilities.
+2. **Add what you install**: When you add a new plugin from the Cursor marketplace, add its skills and MCP tools to the appropriate section in `docs/CURSOR_PLUGINS.md`.
+3. **Stack-specific entries**: The "Stack-Specific" section is a good place to add plugins that match your tech stack (e.g., Rails plugins for a Rails project, Supabase plugins if you use Supabase).
+
+Agents reference this file to know which skills and tools are available, so keeping it current improves the quality of agent suggestions.
+
+---
+
+## 🗑️ Post-Setup Pruning Checklist
+
+After running `./setup.sh` (or manually copying templates), remove files you don't need to keep the project clean. If you chose automatic pruning during setup, most of this is already done.
+
+### Always Safe to Remove
+
+These are template-library files, not project files:
+
+| File / Directory | Why |
+|-----------------|-----|
+| `INSTALLATION.md` | Instructions for installing the template centrally (not needed after clone) |
+| `PROJECT_QUESTIONNAIRE.md` | One-time questionnaire (already answered during setup) |
+| `QUICK_START.md` | Template quick-start guide (setup is done) |
+| `examples/` | Reference examples — useful to read, but not part of your project |
+| `feedback/` | Template feedback system (meta, not project-level) |
+
+### Remove Based on Project Type
+
+After choosing your project type, delete the templates for other types:
+
+**If you chose `mobile-app`**, remove:
+- `templates/cursorrules/web-app.cursorrules`
+- `templates/cursorrules/backend-service.cursorrules`
+- `templates/cursorrules/full-stack.cursorrules`
+- `templates/agents/AGENTS-web.md`, `AGENTS-backend.md`, `AGENTS-full-stack.md`
+- `templates/subagents/specialists/react-specialist.md`, `node-specialist.md`
+
+**If you chose `web-app`**, remove:
+- `templates/cursorrules/mobile-app.cursorrules`
+- `templates/cursorrules/backend-service.cursorrules`
+- `templates/cursorrules/full-stack.cursorrules`
+- `templates/agents/AGENTS-mobile.md`, `AGENTS-backend.md`, `AGENTS-full-stack.md`
+- `templates/subagents/specialists/flutter-specialist.md`, `node-specialist.md`
+
+**If you chose `backend-service`**, remove:
+- `templates/cursorrules/mobile-app.cursorrules`
+- `templates/cursorrules/web-app.cursorrules`
+- `templates/cursorrules/full-stack.cursorrules`
+- `templates/agents/AGENTS-mobile.md`, `AGENTS-web.md`, `AGENTS-full-stack.md`
+- `templates/subagents/specialists/flutter-specialist.md`, `react-specialist.md`
+
+**If you chose `full-stack`**, remove:
+- `templates/cursorrules/mobile-app.cursorrules`
+- `templates/cursorrules/web-app.cursorrules`
+- `templates/cursorrules/backend-service.cursorrules`
+- `templates/agents/AGENTS-mobile.md`, `AGENTS-web.md`, `AGENTS-backend.md`
+- `templates/subagents/specialists/flutter-specialist.md`
+
+### Always Keep
+
+| File / Directory | Why |
+|-----------------|-----|
+| `.cursorrules` | Active project rules (at root) |
+| `AGENTS.md` | Active agent definitions (at root) |
+| `tasks.yml` and `tasks/` | Active task tracking |
+| `.cursor/agents/` | Active subagent configs |
+| `docs/` | Project documentation |
+| `SETUP_GUIDE.md` | Useful reference for understanding the system |
+| `CHANGELOG.md` | Template version history (helpful for updates) |
+| `templates/tasks/TASK_SCHEMA_GUIDE.md` | Reference for task file format |
+| `validate.sh` | Variable validation (useful ongoing) |
+
+### Optional — Remove When Confident
+
+| File / Directory | Why you might keep it |
+|-----------------|----------------------|
+| `templates/` (entire directory) | Source reference for re-customizing or adding agents later |
+| `setup.sh` | Re-run if you need to reconfigure |
+| `templates/subagents/ingestion/` | Only needed if importing existing code later |
+| `templates/memory/` | Only needed if adopting multi-session memory |
+
+---
+
 ## 🔧 Component Customization
 
 ### `.cursorrules` Customization
@@ -118,6 +205,32 @@ For large teams, complex platforms, or projects that need coordination across ma
 - Test all API integrations
 - Run contract tests in CI/CD
 ```
+
+### `.cursor/rules/` Customization (Alternative Format)
+
+Instead of (or in addition to) a single `.cursorrules` file, you can use `.cursor/rules/*.mdc` files. Each `.mdc` file uses YAML frontmatter to control when it applies.
+
+**When to prefer `.cursor/rules/`**:
+- You want rules that activate only when specific file types are open (e.g., `globs: **/*.ts`)
+- You prefer separate, focused rule files over a single large file
+- Your team wants to discover and toggle rules via Cursor's rule picker
+
+**How to split `.cursorrules` into `.mdc` files**:
+1. Identify logical sections in your `.cursorrules` (e.g., code style, security, testing, workflow)
+2. Create one `.mdc` file per section in `.cursor/rules/`
+3. Add frontmatter with `description` and either `globs` (file-specific) or `alwaysApply: true` (global)
+4. Move the relevant content from `.cursorrules` into each `.mdc` file
+
+**Example frontmatter**:
+```yaml
+---
+description: TypeScript conventions for MyProject
+globs: **/*.{ts,tsx}
+alwaysApply: false
+---
+```
+
+Pre-made `.mdc` templates are available at `templates/cursorrules/rules/`. Copy them to your project's `.cursor/rules/` and customize.
 
 ### `AGENTS.md` Customization
 

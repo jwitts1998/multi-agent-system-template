@@ -61,6 +61,87 @@ class UserProfile extends ConsumerWidget {
 - Handle loading/error/success states consistently
 - Test on both iOS and Android
 
+## Conversational / Agent UI
+
+When the project includes an AI assistant or agent chat interface, use the following stack and patterns.
+
+### Recommended Library
+
+**flutter_chat_ui** (`flyerhq/flutter_chat_ui`) -- Apache-2.0, high modularity.
+Production-grade chat rendering with clean message models, custom message types, and theming support. Use as the core chat thread UI layer.
+
+Reference repos (architecture inspiration only, not dependencies):
+- `extrawest/local-llm-flutter-chat` -- provider abstraction, streaming UX, model-switching settings
+- `PocketLLM/PocketLLM` -- conversation management patterns
+
+See `docs/research/agent_ui_memory_landscape.md` Section 1 for full evaluation.
+
+### Domain Model Mapping
+
+Define an internal `AgentMessage` model and map to Flyer message types at the UI boundary. This keeps domain logic decoupled from the rendering library.
+
+```dart
+class AgentMessage {
+  final String id;
+  final String senderId;
+  final AgentMessageType type;
+  final String? text;
+  final Map<String, dynamic>? payload;
+  final DateTime createdAt;
+  final MessageStatus status;
+
+  AgentMessage({
+    required this.id,
+    required this.senderId,
+    required this.type,
+    this.text,
+    this.payload,
+    required this.createdAt,
+    this.status = MessageStatus.sent,
+  });
+}
+
+enum AgentMessageType {
+  text,
+  toolResult,
+  structuredCard,
+  approvalPrompt,
+  actionConfirmation,
+}
+
+enum MessageStatus { sending, sent, error }
+```
+
+### Custom Message Types
+
+Use flutter_chat_ui's custom message type to render agent-specific content:
+
+- **Tool results**: Rendered as expandable cards showing tool name, input, and output
+- **Structured cards**: Data summaries, entity details, status reports
+- **Approval prompts**: Action buttons (Approve / Reject / Modify) for tool execution gating
+- **Action confirmations**: Success/failure feedback with optional details
+
+### Streaming Updates
+
+Implement streaming via message mutation rather than appending:
+
+1. Insert a placeholder message with `status: sending` when the agent begins responding
+2. Mutate the message text in-place as tokens stream in
+3. Update `status: sent` when streaming completes or `status: error` on failure
+4. For tool calls mid-stream, append a `toolResult` custom message and continue the text stream in the original message
+
+### Provider Abstraction
+
+Abstract the LLM/agent backend behind a provider interface so the UI layer is backend-agnostic:
+
+```dart
+abstract class AgentProvider {
+  Stream<AgentMessage> sendMessage(String text, {List<AgentMessage>? history});
+  Future<void> cancelGeneration();
+  Future<List<AgentMessage>> loadHistory(String conversationId);
+}
+```
+
 ## Integration Checklist
 
 - [ ] Uses theme tokens from `lib/core/theme/`
@@ -70,3 +151,6 @@ class UserProfile extends ConsumerWidget {
 - [ ] Works on iOS and Android
 - [ ] Accessibility labels added
 - [ ] Tests written (widget + integration)
+- [ ] Agent UI uses domain model mapped to flutter_chat_ui types (if chat feature present)
+- [ ] Streaming UX uses message mutation, not append-and-scroll (if chat feature present)
+- [ ] Custom message types defined for tool results and approval prompts (if agent UI present)

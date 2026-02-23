@@ -76,6 +76,7 @@ Before setting up the multi-agent system, ensure you have:
 
 - **Active Project**: An existing or new software project
 - **Cursor IDE**: The multi-agent system is designed for Cursor
+- **Cursor Plugins** (optional but recommended): Marketplace plugins add agent skills and MCP tools (web search, browser automation, visual testing, design-to-code, docs lookup, and more). See [docs/CURSOR_PLUGINS.md](./docs/CURSOR_PLUGINS.md) for the full list of available capabilities.
 - **Project Documentation**: Basic understanding of your project's architecture and goals (or willingness to generate it)
 - **Version Control**: Git repository for tracking changes
 
@@ -88,11 +89,12 @@ Before setting up the multi-agent system, ensure you have:
 
 **Setup Flow**:
 1. Complete PROJECT_QUESTIONNAIRE.md
-2. Create Product Design Blueprint (PDB) first
+2. Create Product Design Blueprint (PDB) — see [Idea to PDB Guide](./docs/IDEA_TO_PDB.md) for the full workflow, or use the `@idea-to-pdb` agent ([templates/subagents/ideation/](./templates/subagents/ideation/)) to generate one inside Cursor
 3. Set up multi-agent system with standard templates
-4. Use agents to implement from PDB
+4. Reference PDB in task files (`spec_refs`)
+5. Use agents to implement from PDB
 
-**Recommended Agents**: Implementation, UI/UX, Testing
+**Recommended Agents**: Idea-to-PDB (for step 2), Implementation, UI/UX, Testing
 
 **Skip**: Codebase Auditor, Gap Analysis, Documentation Backfill
 
@@ -195,7 +197,7 @@ Before setting up the multi-agent system, ensure you have:
 
 | Your Situation | Path | First Step | Required Agents |
 |----------------|------|------------|-----------------|
-| Starting from scratch | **A** | Create PDB | Standard agents |
+| Starting from scratch | **A** | Create PDB ([Idea to PDB Guide](./docs/IDEA_TO_PDB.md)) | Idea-to-PDB → Standard agents |
 | Have design, no code | **B** | Review design docs | Standard agents |
 | Code + PDB exists | **C** | Set up standard system | Standard agents |
 | Code + docs (no PDB) | **D** | Run Documentation Backfill | Backfill → Standard |
@@ -297,6 +299,15 @@ Based on your project type, you'll use different agent roles:
 
 ### Part 2: Template Setup
 
+**Quick alternative**: Run the init script to copy all templates at once, then skip to variable replacement:
+
+```bash
+$TEMPLATE_DIR/scripts/init-to-project.sh /path/to/your/project
+# Or with project type: $TEMPLATE_DIR/scripts/init-to-project.sh /path/to/your/project web-app
+```
+
+If you prefer manual control, follow the steps below.
+
 #### 2.1 Set Up .cursorrules
 
 The `.cursorrules` file defines workspace-level AI agent behavior.
@@ -331,6 +342,37 @@ The `.cursorrules` file defines workspace-level AI agent behavior.
 TaskMaster is a collaborative task management app for remote teams.
 **Key Philosophy**: Feature-first architecture with shared infrastructure
 ```
+
+#### 2.1b (Optional) Set Up .cursor/rules/
+
+As an alternative (or supplement) to a single `.cursorrules` file, you can use Cursor's `.cursor/rules/` directory with multiple `.mdc` files. Each `.mdc` file has YAML frontmatter that controls when it applies.
+
+**When to use `.cursor/rules/`**:
+- You want file-scoped rules (e.g., TypeScript conventions only when `.ts` files are open)
+- You prefer splitting concerns into separate, focused rule files
+- You want rules discoverable in Cursor's rule picker
+
+**Both formats are supported** — you can use `.cursorrules` alone, `.cursor/rules/` alone, or both together.
+
+1. **Copy the rule templates**:
+   ```bash
+   mkdir -p /path/to/your/project/.cursor/rules
+   cp $TEMPLATE_DIR/templates/cursorrules/rules/*.mdc /path/to/your/project/.cursor/rules/
+   ```
+
+2. **Customize variables**: Replace `{{VARIABLE_NAME}}` placeholders just as you would in `.cursorrules`.
+
+3. **Adjust scope** (optional): Edit the `globs` or `alwaysApply` fields in each file's frontmatter to control when rules activate.
+
+**Included rule templates**:
+
+| File | Scope | Content |
+|------|-------|---------|
+| `code-style-and-security.mdc` | Always apply | Naming, file org, code quality, security |
+| `testing-and-docs.mdc` | Always apply | Test strategy, coverage, documentation |
+| `workflow-and-tasks.mdc` | Always apply | Task-driven dev, multi-agent workflow |
+
+See [Cursor Rules: .cursorrules vs .cursor/rules/](#cursor-rules-cursorrules-vs-cursorrules) in Component Reference for details on the two formats.
 
 #### 2.2 Set Up AGENTS.md
 
@@ -442,6 +484,10 @@ Subagents are specialized AI assistants that handle specific tasks.
    - Search for remaining `{{VARIABLE_NAME}}` patterns
    - Ensure all placeholders are replaced
    - Check conditional sections are correct
+   - Or run the validation script:
+     ```bash
+     $TEMPLATE_DIR/scripts/validate-no-placeholders.sh /path/to/your/project
+     ```
 
 3. **Review agent descriptions**:
    - Open each subagent .md file
@@ -501,6 +547,22 @@ Subagents are specialized AI assistants that handle specific tasks.
 - Workflow Guidelines: Task tracking, agent usage
 
 **Customization**: Replace variables, add project-specific sections, adjust for team workflow
+
+### Cursor Rules: .cursorrules vs .cursor/rules/
+
+Cursor supports two formats for workspace rules. This template ships templates for both.
+
+| Aspect | `.cursorrules` | `.cursor/rules/*.mdc` |
+|--------|---------------|----------------------|
+| **Location** | Single file at project root | Multiple files in `.cursor/rules/` |
+| **Scope** | All content applies globally | Per-file via `globs`, or global via `alwaysApply` |
+| **Format** | Plain markdown | Markdown with YAML frontmatter (`description`, `globs`, `alwaysApply`) |
+| **Rule picker** | Shown as one rule | Each `.mdc` shown separately in Cursor's rule picker |
+| **Best for** | Simple projects, quick setup | File-specific rules, large projects, team collaboration |
+
+**Recommendation**: Start with `.cursorrules` for simplicity. Adopt `.cursor/rules/` when you want file-scoped rules or prefer splitting concerns across multiple files. You can use both simultaneously — Cursor merges them.
+
+**Adding more rules**: You can create additional `.mdc` files at any time via Cursor's rule picker (Cursor Settings > Rules) or by adding files directly to `.cursor/rules/`. The templates provided here are a starting point, not a ceiling.
 
 ### AGENTS.md
 

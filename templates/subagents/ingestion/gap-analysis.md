@@ -502,3 +502,6 @@ Use these criteria to classify gaps:
 - Focus on optimization opportunities
 - Highlight best practices already in place
 - Recommend incremental improvements
+
+### Agent Skills and MCP Tools
+- Use relevant agent skills and MCP tools when they apply (e.g., web search for security CVE lookups, BrowserStack for accessibility gap detection, Context7 for framework-specific compliance patterns). See `docs/CURSOR_PLUGINS.md` for available capabilities.

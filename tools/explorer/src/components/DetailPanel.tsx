@@ -2,16 +2,19 @@ import type { Edge, Node } from '@xyflow/react';
 import type { ExplorerNodeData } from '../data/nodes';
 import type { PipelineNodeData } from '../data/workflow-nodes';
 import { categoryMeta } from '../data/nodes';
+import type { ViewMode } from '../App';
 
 interface DetailPanelProps {
   node: Node | null;
-  viewMode: 'system' | 'workflow';
+  viewMode: ViewMode;
   allNodes: Node[];
   allEdges: Edge[];
   onClose: () => void;
 }
 
 const phaseLabels: Record<string, { label: string; color: string }> = {
+  setup: { label: 'Setup', color: '#94a3b8' },
+  ingest: { label: 'Ingest', color: '#f59e0b' },
   ideate: { label: 'Ideate', color: '#2dd4bf' },
   build: { label: 'Build', color: '#3b82f6' },
   verify: { label: 'Verify', color: '#f59e0b' },
@@ -26,11 +29,35 @@ const agentRoleColors: Record<string, string> = {
   ingestion: '#f59e0b',
 };
 
+const agentPillColors: Record<string, string> = {
+  '@idea-to-pdb': '#2dd4bf',
+  '@pdb-to-tasks': '#2dd4bf',
+  '@codebase-auditor': '#f59e0b',
+  '@gap-analysis': '#f59e0b',
+  '@documentation-backfill': '#f59e0b',
+  '@code-reviewer': '#60a5fa',
+  '@security-auditor': '#60a5fa',
+  '@test-writer': '#60a5fa',
+  '@doc-generator': '#60a5fa',
+  '@performance-optimizer': '#60a5fa',
+  '@debugger': '#60a5fa',
+  '@designer': '#60a5fa',
+  '@evaluation-specialist': '#818cf8',
+  '@orchestration-specialist': '#818cf8',
+  '@react-specialist': '#818cf8',
+  '@flutter-specialist': '#818cf8',
+  '@observability-specialist': '#818cf8',
+  'Implementation Agent': '#3b82f6',
+  'QA Agent': '#3b82f6',
+  'Testing Agent': '#3b82f6',
+  'Documentation Agent': '#3b82f6',
+};
+
 export function DetailPanel({ node, viewMode, allNodes, allEdges, onClose }: DetailPanelProps) {
   if (!node) return null;
 
-  if (viewMode === 'workflow' && node.type === 'pipelineNode') {
-    return <PipelineDetail node={node} allNodes={allNodes} allEdges={allEdges} onClose={onClose} />;
+  if (viewMode !== 'system' && node.type === 'pipelineNode') {
+    return <PipelineDetail node={node} allNodes={allNodes} allEdges={allEdges} onClose={onClose} viewMode={viewMode} />;
   }
 
   return <SystemDetail node={node} allNodes={allNodes} allEdges={allEdges} onClose={onClose} />;
@@ -41,20 +68,23 @@ function PipelineDetail({
   allNodes,
   allEdges,
   onClose,
+  viewMode,
 }: {
   node: Node;
   allNodes: Node[];
   allEdges: Edge[];
   onClose: () => void;
+  viewMode: ViewMode;
 }) {
   const d = node.data as PipelineNodeData;
   const phase = phaseLabels[d.phase] || phaseLabels.build;
 
+  const feedbackId = viewMode === 'newIdea' ? 'wf-feedback' : 'er-feedback';
   const connectedEdges = allEdges.filter(e => e.source === node.id || e.target === node.id);
-  const incomingEdge = connectedEdges.find(e => e.target === node.id && e.id !== 'wf-feedback');
-  const outgoingEdge = connectedEdges.find(e => e.source === node.id && e.id !== 'wf-feedback');
-  const hasFeedbackIn = connectedEdges.some(e => e.id === 'wf-feedback' && e.target === node.id);
-  const hasFeedbackOut = connectedEdges.some(e => e.id === 'wf-feedback' && e.source === node.id);
+  const incomingEdge = connectedEdges.find(e => e.target === node.id && e.id !== feedbackId);
+  const outgoingEdge = connectedEdges.find(e => e.source === node.id && e.id !== feedbackId);
+  const hasFeedbackIn = connectedEdges.some(e => e.id === feedbackId && e.target === node.id);
+  const hasFeedbackOut = connectedEdges.some(e => e.id === feedbackId && e.source === node.id);
 
   const prevNode = incomingEdge ? allNodes.find(n => n.id === incomingEdge.source) : null;
   const nextNode = outgoingEdge ? allNodes.find(n => n.id === outgoingEdge.target) : null;
@@ -64,7 +94,7 @@ function PipelineDetail({
       position: 'absolute',
       top: 0,
       right: 0,
-      width: 380,
+      width: 420,
       height: '100%',
       background: '#1e293b',
       borderLeft: '1px solid #334155',
@@ -136,27 +166,29 @@ function PipelineDetail({
           </p>
         </Section>
 
-        <Section title={`Agents Involved (${d.agents.length})`}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {d.agents.map((agent, i) => (
-              <div key={i} style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-                fontSize: 12,
-                padding: '5px 8px',
-                background: '#0f172a',
-                borderRadius: 6,
-                borderLeft: `3px solid ${agentRoleColors[agent.role] || '#64748b'}`,
-              }}>
-                <span style={{ color: '#e2e8f0', fontWeight: 500 }}>{agent.name}</span>
-                <span style={{ color: '#64748b', marginLeft: 'auto', fontSize: 10, textTransform: 'uppercase' }}>
-                  {agent.role}
-                </span>
-              </div>
-            ))}
-          </div>
-        </Section>
+        {d.agents.length > 0 && (
+          <Section title={`Agents Involved (${d.agents.length})`}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {d.agents.map((agent, i) => (
+                <div key={i} style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  fontSize: 12,
+                  padding: '5px 8px',
+                  background: '#0f172a',
+                  borderRadius: 6,
+                  borderLeft: `3px solid ${agentRoleColors[agent.role] || '#64748b'}`,
+                }}>
+                  <span style={{ color: '#e2e8f0', fontWeight: 500 }}>{agent.name}</span>
+                  <span style={{ color: '#64748b', marginLeft: 'auto', fontSize: 10, textTransform: 'uppercase' }}>
+                    {agent.role}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </Section>
+        )}
 
         <Section title="Sub-Steps">
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -185,6 +217,64 @@ function PipelineDetail({
           </div>
         </Section>
 
+        {/* Terminal Commands */}
+        {d.commands && d.commands.length > 0 && (
+          <Section title="Terminal Commands">
+            <div className="command-block">
+              {d.commands.map((cmd, i) => (
+                <div key={i} className="command-line">
+                  <span className="command-prompt">$</span>
+                  <code>{cmd}</code>
+                </div>
+              ))}
+            </div>
+          </Section>
+        )}
+
+        {/* Example Prompts */}
+        {d.examplePrompts && d.examplePrompts.length > 0 && (
+          <Section title={`Example Prompts (${d.examplePrompts.length})`}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {d.examplePrompts.map((ep, i) => (
+                <div key={i} className="prompt-card">
+                  <div className="prompt-card-header">
+                    <span
+                      className="prompt-agent-pill"
+                      style={{
+                        borderColor: agentPillColors[ep.agent] || '#64748b',
+                        color: agentPillColors[ep.agent] || '#94a3b8',
+                      }}
+                    >
+                      {ep.agent}
+                    </span>
+                  </div>
+                  <div className="prompt-text">
+                    {ep.prompt}
+                  </div>
+                  {ep.context && (
+                    <div className="prompt-context">
+                      {ep.context}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </Section>
+        )}
+
+        {/* Tips */}
+        {d.tips && d.tips.length > 0 && (
+          <Section title="Tips">
+            <div className="tips-list">
+              {d.tips.map((tip, i) => (
+                <div key={i} className="tip-item">
+                  {tip}
+                </div>
+              ))}
+            </div>
+          </Section>
+        )}
+
         <Section title="Output Artifact">
           <div style={{
             display: 'flex',
@@ -210,23 +300,25 @@ function PipelineDetail({
           </div>
         </Section>
 
-        <Section title="Template Files">
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            {d.templateFiles.map((file, i) => (
-              <code key={i} style={{
-                fontSize: 11,
-                background: '#0f172a',
-                padding: '4px 8px',
-                borderRadius: 4,
-                color: '#7dd3fc',
-                display: 'block',
-                wordBreak: 'break-all',
-              }}>
-                {file}
-              </code>
-            ))}
-          </div>
-        </Section>
+        {d.templateFiles.length > 0 && (
+          <Section title="Template Files">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              {d.templateFiles.map((file, i) => (
+                <code key={i} style={{
+                  fontSize: 11,
+                  background: '#0f172a',
+                  padding: '4px 8px',
+                  borderRadius: 4,
+                  color: '#7dd3fc',
+                  display: 'block',
+                  wordBreak: 'break-all',
+                }}>
+                  {file}
+                </code>
+              ))}
+            </div>
+          </Section>
+        )}
 
         <Section title="Handoff">
           <p style={{ margin: 0, fontSize: 12, lineHeight: 1.6, color: '#94a3b8' }}>
@@ -287,7 +379,9 @@ function PipelineDetail({
                 borderLeft: '3px solid #f97316',
               }}>
                 <span style={{ color: '#fb923c' }}>{'\u21A9'}</span>
-                <span style={{ color: '#fb923c' }}>Receives feedback from Quality Review</span>
+                <span style={{ color: '#fb923c' }}>
+                  {viewMode === 'newIdea' ? 'Receives feedback from Quality Review' : 'Receives next cycle from Quality & Ship'}
+                </span>
               </div>
             )}
             {hasFeedbackOut && (
@@ -302,7 +396,9 @@ function PipelineDetail({
                 borderLeft: '3px solid #f97316',
               }}>
                 <span style={{ color: '#fb923c' }}>{'\u21AA'}</span>
-                <span style={{ color: '#fb923c' }}>Sends issues back to Development</span>
+                <span style={{ color: '#fb923c' }}>
+                  {viewMode === 'newIdea' ? 'Sends issues back to Development' : 'Starts next development cycle'}
+                </span>
               </div>
             )}
           </div>

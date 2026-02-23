@@ -1,22 +1,46 @@
 import { categoryMeta, type NodeCategory } from '../data/nodes';
+import type { ViewMode } from '../App';
 
 interface LegendProps {
-  viewMode: 'system' | 'workflow';
+  viewMode: ViewMode;
   hiddenCategories: Set<NodeCategory>;
   onToggleCategory: (category: NodeCategory) => void;
   searchQuery: string;
   onSearchChange: (query: string) => void;
 }
 
-const workflowPhases = [
-  { label: 'Ideate (Stages 1-3)', color: '#2dd4bf' },
-  { label: 'Build (Stages 4-5)', color: '#3b82f6' },
-  { label: 'Verify (Stages 6-7)', color: '#f59e0b' },
-  { label: 'Ship (Stages 8-9)', color: '#22c55e' },
+const newIdeaPhases = [
+  { label: 'Setup (Stage 1)', color: '#94a3b8' },
+  { label: 'Ideate (Stages 2-4)', color: '#2dd4bf' },
+  { label: 'Build (Stages 5-6)', color: '#3b82f6' },
+  { label: 'Verify (Stages 7-8)', color: '#f59e0b' },
+  { label: 'Ship (Stages 9-10)', color: '#22c55e' },
 ];
+
+const existingRepoPhases = [
+  { label: 'Setup (Stage 1)', color: '#94a3b8' },
+  { label: 'Ingest (Stages 2-5)', color: '#f59e0b' },
+  { label: 'Ideate (Stage 6)', color: '#2dd4bf' },
+  { label: 'Build (Stages 7-8)', color: '#3b82f6' },
+  { label: 'Ship (Stage 9)', color: '#22c55e' },
+];
+
+const viewTitles: Record<ViewMode, string> = {
+  system: 'Multi-Agent System Explorer',
+  newIdea: 'New Idea Workflow',
+  existingRepo: 'Existing Repo Workflow',
+};
+
+const viewDescriptions: Record<ViewMode, string> = {
+  system: '',
+  newIdea: 'Clone the template, flush your idea into a PDB, decompose into tasks, build with agents',
+  existingRepo: 'Copy template files into your project, audit code, generate a PDB, fix gaps, then build',
+};
 
 export function Legend({ viewMode, hiddenCategories, onToggleCategory, searchQuery, onSearchChange }: LegendProps) {
   const categories = Object.entries(categoryMeta) as [NodeCategory, { label: string; color: string }][];
+  const isPipeline = viewMode === 'newIdea' || viewMode === 'existingRepo';
+  const phases = viewMode === 'newIdea' ? newIdeaPhases : existingRepoPhases;
 
   return (
     <div style={{
@@ -36,10 +60,10 @@ export function Legend({ viewMode, hiddenCategories, onToggleCategory, searchQue
         fontSize: 13,
         fontWeight: 700,
         color: '#f1f5f9',
-        marginBottom: 12,
+        marginBottom: isPipeline ? 6 : 12,
         letterSpacing: '0.3px',
       }}>
-        {viewMode === 'system' ? 'Multi-Agent System Explorer' : 'Idea to Production'}
+        {viewTitles[viewMode]}
       </div>
 
       {viewMode === 'system' ? (
@@ -102,18 +126,19 @@ export function Legend({ viewMode, hiddenCategories, onToggleCategory, searchQue
         </>
       ) : (
         <>
-          {/* Workflow phase legend */}
+          {/* Workflow description */}
           <div style={{
             fontSize: 11,
             color: '#94a3b8',
             marginBottom: 10,
             lineHeight: 1.5,
           }}>
-            End-to-end pipeline from raw idea to production-ready system
+            {viewDescriptions[viewMode]}
           </div>
 
+          {/* Phase legend */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            {workflowPhases.map((phase) => (
+            {phases.map((phase) => (
               <div key={phase.label} className="workflow-legend-phase">
                 <span className="workflow-legend-dot" style={{ backgroundColor: phase.color }} />
                 {phase.label}
@@ -128,7 +153,7 @@ export function Legend({ viewMode, hiddenCategories, onToggleCategory, searchQue
           }}>
             <div className="workflow-legend-feedback">
               <span className="workflow-legend-dash" />
-              Feedback loop
+              {viewMode === 'newIdea' ? 'Feedback loop' : 'Iterative cycle'}
             </div>
           </div>
 
@@ -138,7 +163,23 @@ export function Legend({ viewMode, hiddenCategories, onToggleCategory, searchQue
             color: '#64748b',
             lineHeight: 1.5,
           }}>
-            Stages 5-7 form an iterative cycle. Issues found in Quality Review are sent back to Development.
+            {viewMode === 'newIdea'
+              ? 'Stages 6-8 form an iterative cycle. Issues found in Quality Review are sent back to Feature Development.'
+              : 'Stages 8-9 repeat for each development cycle. New features follow the same implement/test/review/ship pattern.'
+            }
+          </div>
+
+          {/* Prompt framework hint */}
+          <div style={{
+            marginTop: 8,
+            padding: '6px 8px',
+            background: '#0f172a',
+            borderRadius: 6,
+            border: '1px solid #334155',
+          }}>
+            <div style={{ fontSize: 10, color: '#94a3b8', lineHeight: 1.5 }}>
+              Click any stage to see example prompts for invoking agents at that step.
+            </div>
           </div>
         </>
       )}

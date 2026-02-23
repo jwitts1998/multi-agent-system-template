@@ -12,6 +12,8 @@ import { nodes as rawNodes, categoryMeta, type ExplorerNode, type ExplorerNodeDa
 import { edges as allEdges } from './data/edges';
 import { workflowNodes as rawWorkflowNodes } from './data/workflow-nodes';
 import { workflowEdges } from './data/workflow-edges';
+import { existingRepoNodes as rawExistingRepoNodes } from './data/existing-repo-nodes';
+import { existingRepoEdges } from './data/existing-repo-edges';
 import { getLayoutedElements } from './data/layout';
 import { AgentNode } from './components/AgentNode';
 import { MemoryNode } from './components/MemoryNode';
@@ -21,7 +23,7 @@ import { PipelineNode } from './components/PipelineNode';
 import { DetailPanel } from './components/DetailPanel';
 import { Legend } from './components/Legend';
 
-type ViewMode = 'system' | 'workflow';
+export type ViewMode = 'system' | 'newIdea' | 'existingRepo';
 
 const nodeTypes: NodeTypes = {
   agentNode: AgentNode,
@@ -32,7 +34,13 @@ const nodeTypes: NodeTypes = {
 };
 
 const { nodes: systemNodes } = getLayoutedElements(rawNodes, allEdges);
-const { nodes: pipelineNodes } = getLayoutedElements(rawWorkflowNodes, workflowEdges, {
+const { nodes: newIdeaNodes } = getLayoutedElements(rawWorkflowNodes, workflowEdges, {
+  nodeWidth: 280,
+  nodeHeight: 280,
+  ranksep: 180,
+  nodesep: 50,
+});
+const { nodes: existingRepoLayoutNodes } = getLayoutedElements(rawExistingRepoNodes, existingRepoEdges, {
   nodeWidth: 280,
   nodeHeight: 280,
   ranksep: 180,
@@ -83,13 +91,24 @@ export default function App() {
     return allEdges.filter(e => visibleSystemNodeIds.has(e.source) && visibleSystemNodeIds.has(e.target));
   }, [visibleSystemNodeIds]);
 
-  const activeNodes = viewMode === 'system' ? filteredSystemNodes : pipelineNodes;
-  const activeEdges = viewMode === 'system' ? filteredSystemEdges : workflowEdges;
+  const activeNodes = viewMode === 'system'
+    ? filteredSystemNodes
+    : viewMode === 'newIdea'
+      ? newIdeaNodes
+      : existingRepoLayoutNodes;
+
+  const activeEdges = viewMode === 'system'
+    ? filteredSystemEdges
+    : viewMode === 'newIdea'
+      ? workflowEdges
+      : existingRepoEdges;
 
   const minimapNodeColor = useCallback((node: Node) => {
-    if (viewMode === 'workflow') {
+    if (viewMode !== 'system') {
       const phase = (node.data as Record<string, unknown>).phase as string;
       const phaseColorMap: Record<string, string> = {
+        setup: '#94a3b8',
+        ingest: '#f59e0b',
         ideate: '#2dd4bf',
         build: '#3b82f6',
         verify: '#f59e0b',
@@ -105,6 +124,8 @@ export default function App() {
     setViewMode(mode);
     setSelectedNode(null);
   }, []);
+
+  const isPipelineView = viewMode === 'newIdea' || viewMode === 'existingRepo';
 
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
@@ -147,10 +168,16 @@ export default function App() {
           System Map
         </button>
         <button
-          className={viewMode === 'workflow' ? 'active' : ''}
-          onClick={() => handleViewChange('workflow')}
+          className={viewMode === 'newIdea' ? 'active' : ''}
+          onClick={() => handleViewChange('newIdea')}
         >
-          Example Workflow
+          New Idea
+        </button>
+        <button
+          className={viewMode === 'existingRepo' ? 'active' : ''}
+          onClick={() => handleViewChange('existingRepo')}
+        >
+          Existing Repo
         </button>
       </div>
 
@@ -165,7 +192,7 @@ export default function App() {
       <DetailPanel
         node={selectedNode}
         viewMode={viewMode}
-        allNodes={viewMode === 'system' ? systemNodes : pipelineNodes}
+        allNodes={activeNodes}
         allEdges={activeEdges}
         onClose={() => setSelectedNode(null)}
       />

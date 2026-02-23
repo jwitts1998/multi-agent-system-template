@@ -5,6 +5,20 @@ const phaseColors: Record<
   string,
   { bg: string; border: string; text: string; badge: string; badgeText: string }
 > = {
+  setup: {
+    bg: '#1e293b',
+    border: '#94a3b8',
+    text: '#e2e8f0',
+    badge: '#64748b',
+    badgeText: '#f8fafc',
+  },
+  ingest: {
+    bg: '#2a1a04',
+    border: '#f59e0b',
+    text: '#fef3c7',
+    badge: '#d97706',
+    badgeText: '#fffbeb',
+  },
   ideate: {
     bg: '#0f2d2b',
     border: '#2dd4bf',
@@ -46,6 +60,8 @@ const agentRoleColors: Record<string, string> = {
 export function PipelineNode({ data, selected }: NodeProps) {
   const d = data as PipelineNodeData;
   const colors = phaseColors[d.phase] || phaseColors.build;
+  const promptCount = d.examplePrompts?.length || 0;
+  const hasCommands = d.commands && d.commands.length > 0;
 
   return (
     <>
@@ -72,20 +88,22 @@ export function PipelineNode({ data, selected }: NodeProps) {
           <div className="pipeline-title">{d.title}</div>
         </div>
 
-        <div className="pipeline-agents">
-          {d.agents.map((agent, i) => (
-            <span
-              key={i}
-              className="pipeline-agent-pill"
-              style={{
-                borderColor: agentRoleColors[agent.role] || '#64748b',
-                color: agentRoleColors[agent.role] || '#94a3b8',
-              }}
-            >
-              {agent.name}
-            </span>
-          ))}
-        </div>
+        {d.agents.length > 0 && (
+          <div className="pipeline-agents">
+            {d.agents.map((agent, i) => (
+              <span
+                key={i}
+                className="pipeline-agent-pill"
+                style={{
+                  borderColor: agentRoleColors[agent.role] || '#64748b',
+                  color: agentRoleColors[agent.role] || '#94a3b8',
+                }}
+              >
+                {agent.name}
+              </span>
+            ))}
+          </div>
+        )}
 
         <div className="pipeline-substeps">
           {d.substeps.map((step, i) => (
@@ -100,6 +118,21 @@ export function PipelineNode({ data, selected }: NodeProps) {
             </div>
           ))}
         </div>
+
+        {(promptCount > 0 || hasCommands) && (
+          <div className="pipeline-indicators">
+            {hasCommands && (
+              <span className="pipeline-indicator-pill" style={{ borderColor: '#64748b', color: '#94a3b8' }}>
+                {d.commands!.length} cmd{d.commands!.length > 1 ? 's' : ''}
+              </span>
+            )}
+            {promptCount > 0 && (
+              <span className="pipeline-indicator-pill" style={{ borderColor: colors.border, color: colors.border }}>
+                {promptCount} prompt{promptCount > 1 ? 's' : ''}
+              </span>
+            )}
+          </div>
+        )}
 
         <div className="pipeline-artifact" style={{ borderColor: colors.border }}>
           <span className="pipeline-artifact-label">Output</span>

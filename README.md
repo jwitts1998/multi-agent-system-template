@@ -199,11 +199,14 @@ graph TB
 - [docs/FAQ.md](./docs/FAQ.md) - Frequently asked questions
 - [docs/CURSOR_PLUGINS.md](./docs/CURSOR_PLUGINS.md) - Cursor plugin capabilities and integrations
 
-### Examples
-- [examples/mobile-app-example/](./examples/mobile-app-example/) - Flutter app setup
-- [examples/web-app-example/](./examples/web-app-example/) - React app setup
-- [examples/backend-service-example/](./examples/backend-service-example/) - Node.js API setup
-- [examples/full-stack-example/](./examples/full-stack-example/) - Next.js app setup
+### Examples (Net-New Ideas — Clone and Setup)
+- [examples/mobile-app-example/](./examples/mobile-app-example/) - Flutter fitness app from idea to tasks
+- [examples/web-app-example/](./examples/web-app-example/) - React collaborative editor from idea to tasks
+- [examples/backend-service-example/](./examples/backend-service-example/) - Node.js payment API from idea to tasks
+- [examples/full-stack-example/](./examples/full-stack-example/) - Next.js task manager from idea to tasks
+
+### Examples (Existing Projects — Copy Template In)
+- [examples/existing-project-example/](./examples/existing-project-example/) - Adding multi-agent system to an existing Next.js codebase
 
 ### Workflow
 - [templates/workflow/TASK_LIFECYCLE_EXAMPLE.md](./templates/workflow/TASK_LIFECYCLE_EXAMPLE.md) - End-to-end task walkthrough with agent handoffs
@@ -316,11 +319,11 @@ multi-agent-system-template/
 │       └── RESEARCH_CONTEXT_TEMPLATE.md        # Deep research context template
 │
 ├── examples/
-│   ├── mobile-app-example/                    # Complete Flutter setup
-│   ├── web-app-example/                       # Complete React setup
-│   │   └── .cursor/rules/                     # Example .cursor/rules/ usage
-│   ├── backend-service-example/               # Complete Node.js setup
-│   └── full-stack-example/                    # Complete Next.js setup
+│   ├── mobile-app-example/                    # Net-new: Flutter app from idea
+│   ├── web-app-example/                       # Net-new: React app from idea
+│   ├── backend-service-example/               # Net-new: Node.js API from idea
+│   ├── full-stack-example/                    # Net-new: Next.js app from idea
+│   └── existing-project-example/              # Existing: add template to live codebase
 │
 └── docs/
     ├── IDEA_TO_PDB.md                         # Guide: raw idea → PDB workflow

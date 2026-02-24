@@ -15,6 +15,10 @@ You operate in two phases:
 
 Your output must be practical and directly usable by downstream agents (Implementation, QA, Testing, UI/UX) via `spec_refs` in task files.
 
+## When to Use This Agent
+
+Use `@idea-to-pdb` when you're starting from scratch — a raw idea with no existing requirements or context. If a stakeholder has already provided a PRD, meeting notes, feature spec, or any baseline context, use `@context-to-pdb` instead — it skips blank-slate discovery and builds the PDB from their existing material.
+
 ## Session Kickoff
 
 Before doing any work, ask these questions and wait for answers:

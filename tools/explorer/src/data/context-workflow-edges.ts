@@ -1,0 +1,91 @@
+import type { Edge } from '@xyflow/react';
+
+export const contextWorkflowEdges: Edge[] = [
+  {
+    id: 'ctx-1-2',
+    source: 'ctx-pipeline-1',
+    target: 'ctx-pipeline-2',
+    animated: true,
+    label: 'Context Summary',
+  },
+  {
+    id: 'ctx-2-3',
+    source: 'ctx-pipeline-2',
+    target: 'ctx-pipeline-3',
+    animated: true,
+    label: 'Validated Gaps',
+  },
+  {
+    id: 'ctx-3-4',
+    source: 'ctx-pipeline-3',
+    target: 'ctx-pipeline-4',
+    animated: true,
+    label: 'PDB Document',
+  },
+  {
+    id: 'ctx-4-5',
+    source: 'ctx-pipeline-4',
+    target: 'ctx-pipeline-5',
+    animated: true,
+    label: 'tasks/*.yml',
+  },
+  {
+    id: 'ctx-5-6',
+    source: 'ctx-pipeline-5',
+    target: 'ctx-pipeline-6',
+    animated: true,
+    label: 'Scaffolding',
+  },
+  {
+    id: 'ctx-6-7',
+    source: 'ctx-pipeline-6',
+    target: 'ctx-pipeline-7',
+    animated: true,
+    label: 'Working Code',
+  },
+  {
+    id: 'ctx-7-8',
+    source: 'ctx-pipeline-7',
+    target: 'ctx-pipeline-8',
+    animated: true,
+    label: 'Test Suites',
+  },
+  {
+    id: 'ctx-8-9',
+    source: 'ctx-pipeline-8',
+    target: 'ctx-pipeline-9',
+    animated: true,
+    label: 'Demo Ready',
+  },
+  {
+    id: 'ctx-9-10',
+    source: 'ctx-pipeline-9',
+    target: 'ctx-pipeline-10',
+    animated: true,
+    label: 'Demo Package',
+  },
+  // Feedback loop: Quality Review back to Feature Development
+  {
+    id: 'ctx-feedback-qa',
+    source: 'ctx-pipeline-8',
+    target: 'ctx-pipeline-6',
+    animated: true,
+    label: 'Issues Found',
+    type: 'smoothstep',
+    style: { stroke: '#f97316', strokeWidth: 2, strokeDasharray: '8 4' },
+    labelStyle: { fill: '#fb923c', fontSize: 11, fontWeight: 600 },
+    labelBgStyle: { fill: '#1e293b', fillOpacity: 0.9 },
+  },
+  // Feedback loop: Stakeholder Review back to Gap Analysis
+  {
+    id: 'ctx-feedback-stakeholder',
+    source: 'ctx-pipeline-10',
+    target: 'ctx-pipeline-2',
+    animated: true,
+    label: 'Stakeholder Feedback',
+    type: 'smoothstep',
+    style: { stroke: '#c084fc', strokeWidth: 2, strokeDasharray: '8 4' },
+    labelStyle: { fill: '#c084fc', fontSize: 11, fontWeight: 600 },
+    labelBgStyle: { fill: '#1e293b', fillOpacity: 0.9 },
+  },
+];

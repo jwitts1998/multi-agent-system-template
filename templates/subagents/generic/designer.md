@@ -84,6 +84,13 @@ Enforce design system consistency, user experience best practices, accessibility
 - [ ] Motion clarifies state changes (loading, success, error)
 - [ ] Reduced-motion preferences respected if supported
 
+### 8. Tooling Gaps
+- [ ] Is design-to-code tooling set up (e.g., Figma MCP server, Code Connect mappings)?
+- [ ] Is accessibility scanning available (e.g., BrowserStack accessibility, axe-core integration)?
+- [ ] Is visual regression testing available (e.g., Percy for screenshot comparison)?
+- [ ] Would a custom design system skill improve consistency across agents (encoding token usage, component selection, layout patterns)?
+- [ ] Are design-related skills listed in `docs/CURSOR_PLUGINS.md` being used effectively?
+
 ## Process
 
 1. **Understand scope**: What screen, flow, or component is in focus?

@@ -12,35 +12,54 @@ interface LegendProps {
 const newIdeaPhases = [
   { label: 'Setup (Stage 1)', color: '#94a3b8' },
   { label: 'Ideate (Stages 2-4)', color: '#2dd4bf' },
-  { label: 'Build (Stages 5-6)', color: '#3b82f6' },
-  { label: 'Verify (Stages 7-8)', color: '#f59e0b' },
-  { label: 'Ship (Stages 9-10)', color: '#22c55e' },
+  { label: 'Operate (Stages 5, 10, 13)', color: '#c084fc' },
+  { label: 'Build (Stages 6-7)', color: '#3b82f6' },
+  { label: 'Verify (Stages 8-9)', color: '#f59e0b' },
+  { label: 'Ship (Stages 11-12)', color: '#22c55e' },
 ];
 
 const existingRepoPhases = [
   { label: 'Setup (Stage 1)', color: '#94a3b8' },
   { label: 'Ingest (Stages 2-5)', color: '#f59e0b' },
   { label: 'Ideate (Stage 6)', color: '#2dd4bf' },
-  { label: 'Build (Stages 7-8)', color: '#3b82f6' },
+  { label: 'Operate (Stages 7, 11-12)', color: '#c084fc' },
+  { label: 'Build (Stages 8-9)', color: '#3b82f6' },
+  { label: 'Ship (Stage 10)', color: '#22c55e' },
+];
+
+const contextToMvpPhases = [
+  { label: 'Ingest (Stage 1)', color: '#f59e0b' },
+  { label: 'Ideate (Stages 2-4)', color: '#2dd4bf' },
+  { label: 'Build (Stages 5-6)', color: '#3b82f6' },
+  { label: 'Verify (Stages 7-8)', color: '#f59e0b' },
   { label: 'Ship (Stage 9)', color: '#22c55e' },
+  { label: 'Operate (Stage 10)', color: '#c084fc' },
 ];
 
 const viewTitles: Record<ViewMode, string> = {
   system: 'Multi-Agent System Explorer',
   newIdea: 'New Idea Workflow',
   existingRepo: 'Existing Repo Workflow',
+  contextToMvp: 'Context to MVP Workflow',
+  monitor: 'Session Monitor',
 };
 
 const viewDescriptions: Record<ViewMode, string> = {
   system: '',
   newIdea: 'Clone the template, flush your idea into a PDB, decompose into tasks, build with agents',
   existingRepo: 'Copy template files into your project, audit code, generate a PDB, fix gaps, then build',
+  contextToMvp: 'Ingest stakeholder context, fill gaps, generate a PDB, build a demo, and iterate with feedback',
+  monitor: 'Visualize agent session transcripts — see agent flow, tool usage, and token consumption',
 };
 
 export function Legend({ viewMode, hiddenCategories, onToggleCategory, searchQuery, onSearchChange }: LegendProps) {
   const categories = Object.entries(categoryMeta) as [NodeCategory, { label: string; color: string }][];
-  const isPipeline = viewMode === 'newIdea' || viewMode === 'existingRepo';
-  const phases = viewMode === 'newIdea' ? newIdeaPhases : existingRepoPhases;
+  const isPipeline = viewMode === 'newIdea' || viewMode === 'existingRepo' || viewMode === 'contextToMvp';
+  const phases = viewMode === 'newIdea'
+    ? newIdeaPhases
+    : viewMode === 'contextToMvp'
+      ? contextToMvpPhases
+      : existingRepoPhases;
 
   return (
     <div style={{
@@ -153,7 +172,7 @@ export function Legend({ viewMode, hiddenCategories, onToggleCategory, searchQue
           }}>
             <div className="workflow-legend-feedback">
               <span className="workflow-legend-dash" />
-              {viewMode === 'newIdea' ? 'Feedback loop' : 'Iterative cycle'}
+              {viewMode === 'contextToMvp' ? 'Feedback loops' : viewMode === 'newIdea' ? 'Feedback loop' : 'Iterative cycle'}
             </div>
           </div>
 
@@ -164,8 +183,10 @@ export function Legend({ viewMode, hiddenCategories, onToggleCategory, searchQue
             lineHeight: 1.5,
           }}>
             {viewMode === 'newIdea'
-              ? 'Stages 6-8 form an iterative cycle. Issues found in Quality Review are sent back to Feature Development.'
-              : 'Stages 8-9 repeat for each development cycle. New features follow the same implement/test/review/ship pattern.'
+              ? 'Stages 7-9 form an iterative cycle. Issues found in Quality Review are sent back to Feature Development. System agents (purple) handle routing, monitoring, and memory.'
+              : viewMode === 'contextToMvp'
+                ? 'Quality Review routes issues back to Feature Development. Stakeholder Review feeds new context back to Gap Analysis for iterative refinement toward a demo-ready MVP.'
+                : 'Stages 9-10 repeat for each development cycle. System agents (purple) handle routing, monitoring, and memory across the workflow.'
             }
           </div>
 

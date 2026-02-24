@@ -106,6 +106,35 @@ MCP servers provide tool-level integrations that agents call directly.
 
 ---
 
+## Gap Identification
+
+Agents should actively identify when installing a plugin, creating a custom skill, or exposing an MCP server would improve development quality or velocity. Use these guidelines:
+
+### When to Install an Existing Plugin
+
+- The project uses a framework, service, or tool (e.g., Stripe, Supabase, Figma, a specific testing framework) that has a Cursor marketplace plugin but it is not listed above
+- Agents are performing tasks manually that a plugin automates — accessibility scanning, visual regression testing, docs lookup, cross-browser testing, design-to-code translation
+- A new dependency or integration has been added to the project and a corresponding plugin exists
+
+### When to Create a Custom Skill
+
+- A multi-step workflow is repeated across tasks (e.g., a specific deployment sequence, data migration pattern, code generation recipe) and would benefit from codification
+- Project-specific domain knowledge — naming conventions, validation rules, architecture decisions, code patterns — is being re-derived each session instead of encoded once
+- Agents make the same mistakes repeatedly because conventions are not persisted in a skill
+- Use the `create-skill` workflow skill to author new skills with proper structure
+
+### When to Expose an MCP Server
+
+- Agents frequently shell out to a project CLI, database client, or internal API — structured MCP access would be safer and more efficient
+- Multiple agents need the same tool access and each builds ad-hoc shell commands independently
+- The project has tools that would benefit from structured input/output rather than raw terminal interaction
+
+### After Installing or Creating
+
+Update this file (`docs/CURSOR_PLUGINS.md`) with the new capability so all agents are aware. Add entries to the appropriate section above (MCP Servers, Skills by Area) with a brief description of what it does.
+
+---
+
 ## Maintaining This List
 
 **When you install a new plugin**: Add its skills and/or MCP tools to the appropriate section above. You can see what a plugin provides by checking the skills and tools that appear in your Cursor session after installation.

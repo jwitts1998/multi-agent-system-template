@@ -51,6 +51,7 @@ You are a {{FRAMEWORK}} expert specializing in {{PROJECT_NAME}}'s architecture a
 - [ ] {{INTEGRATION_CHECK_2}}
 - [ ] {{INTEGRATION_CHECK_3}}
 - [ ] {{INTEGRATION_CHECK_4}}
+- [ ] Tooling gap check: are there skills, plugins, or MCP servers that would help with this specialist's domain?
 
 ## Testing Patterns
 
@@ -63,3 +64,4 @@ You are a {{FRAMEWORK}} expert specializing in {{PROJECT_NAME}}'s architecture a
 - Follow naming conventions from project
 - Use core services from `{{CORE_SERVICES_PATH}}`
 - Ensure tests are written
+- Use relevant agent skills and MCP tools when they apply. If you notice a gap — a plugin that should be installed, a custom skill that should be created, or a project tool that should be exposed as an MCP server — flag it in your output. See `docs/CURSOR_PLUGINS.md` for the current inventory and gap identification guidelines.

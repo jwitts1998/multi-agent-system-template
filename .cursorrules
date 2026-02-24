@@ -75,6 +75,7 @@ Subagent configs are in `templates/subagents/`. After running `./setup.sh`, they
 
 ### Ideation (for new ideas)
 - `@idea-to-pdb` — Explore an idea and generate a Product Design Blueprint
+- `@context-to-pdb` — Transform stakeholder context into a PDB (skip blank-slate discovery)
 - `@pdb-to-tasks` — Decompose a PDB into epics and task files
 
 ### Generic (for development)

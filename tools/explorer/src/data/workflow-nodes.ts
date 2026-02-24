@@ -19,7 +19,7 @@ export interface PipelineNodeData {
   substeps: string[];
   artifact: string;
   artifactPath?: string;
-  phase: 'setup' | 'ideate' | 'build' | 'verify' | 'ship' | 'ingest';
+  phase: 'setup' | 'ideate' | 'build' | 'verify' | 'ship' | 'ingest' | 'operate';
   templateFiles: string[];
   handoff: string;
   commands?: string[];
@@ -208,6 +208,53 @@ export const workflowNodes: WorkflowNode[] = [
     position: P,
     data: {
       stageNumber: 5,
+      title: 'Query Routing & Orchestration',
+      description:
+        'The system coordination layer activates here. The query router triages incoming requests to the right agent, while the task orchestrator manages the queue — picking the highest-priority unblocked task, assigning it to the correct agent, and enforcing dependency ordering.',
+      agents: [
+        { name: 'query-router', role: 'system' },
+        { name: 'task-orchestrator', role: 'system' },
+      ],
+      substeps: [
+        'Scan task files for eligible work (status: todo, unblocked)',
+        'Sort by priority and enforce schema-first ordering',
+        'Route first task to the correct agent via delegation matrix',
+        'Pass spec_refs, acceptance criteria, and context to the assigned agent',
+        'Track task status transitions (todo → in_progress)',
+      ],
+      artifact: 'Routed Tasks',
+      phase: 'operate',
+      templateFiles: [
+        'templates/subagents/system/query-router.md',
+        'templates/subagents/system/task-orchestrator.md',
+      ],
+      handoff:
+        'Tasks are prioritized, assigned to agents, and in_progress. Agents have full context from spec_refs and the delegation matrix.',
+      examplePrompts: [
+        {
+          agent: '@query-router',
+          prompt: '@query-router I need to start building features for the fitness tracker. Route me to the right agent and task.\n\nContext: PDB is at docs/product_design/fittracker_pdb.md, tasks are in tasks/.',
+          context: 'The router reads task files, identifies the highest-priority unblocked task, and routes you to the right agent with full context.',
+        },
+        {
+          agent: '@task-orchestrator',
+          prompt: '@task-orchestrator Show me the current task queue. What should I work on next?\n\nFilter: Phase 1 tasks only. Show blocked/unblocked status.',
+          context: 'The orchestrator scans all task files and presents a prioritized queue with dependency status, so you always work on the most impactful unblocked task.',
+        },
+      ],
+      tips: [
+        'The router is optional for small projects — invoke it when you have 10+ tasks across multiple agents',
+        'Use the orchestrator at session start to avoid wasting time on blocked tasks',
+        'The delegation matrix in query-router.md maps intent keywords to agent roles — customize it for your project',
+      ],
+    },
+  },
+  {
+    id: 'pipeline-6',
+    type: 'pipelineNode',
+    position: P,
+    data: {
+      stageNumber: 6,
       title: 'Architecture Setup',
       description:
         'Establish the project foundation: define data schemas, set up API contracts, configure infrastructure, and complete all Phase 0 schema-first tasks before feature work begins.',
@@ -248,11 +295,11 @@ export const workflowNodes: WorkflowNode[] = [
     },
   },
   {
-    id: 'pipeline-6',
+    id: 'pipeline-7',
     type: 'pipelineNode',
     position: P,
     data: {
-      stageNumber: 6,
+      stageNumber: 7,
       title: 'Feature Development',
       description:
         'Implement features following the task files. The Implementation Agent picks high-priority tasks, reads spec_refs, writes production code following .cursorrules conventions, and adds handoff notes for QA.',
@@ -267,6 +314,7 @@ export const workflowNodes: WorkflowNode[] = [
         'Read spec_refs & acceptance criteria',
         'Implement feature code',
         'Handle edge cases & errors',
+        'Flag tooling gaps (missing plugins, skills, or MCP servers)',
         'Add handoff notes for next agent',
       ],
       artifact: 'Production Code',
@@ -299,15 +347,16 @@ export const workflowNodes: WorkflowNode[] = [
         'Work through tasks in priority order — don\'t skip ahead to fun features',
         'Always include handoff notes when marking a task complete',
         'Use framework specialists for stack-specific guidance',
+        'If you notice a missing plugin, skill, or MCP server that would help, flag it under Tooling Recommendations',
       ],
     },
   },
   {
-    id: 'pipeline-7',
+    id: 'pipeline-8',
     type: 'pipelineNode',
     position: P,
     data: {
-      stageNumber: 7,
+      stageNumber: 8,
       title: 'Testing & Evaluation',
       description:
         'Write tests that validate behavior, not implementation. Unit tests for business logic, integration tests for user flows, and LLM evaluation pipelines for AI features. Coverage targets from .cursorrules are verified.',
@@ -350,11 +399,11 @@ export const workflowNodes: WorkflowNode[] = [
     },
   },
   {
-    id: 'pipeline-8',
+    id: 'pipeline-9',
     type: 'pipelineNode',
     position: P,
     data: {
-      stageNumber: 8,
+      stageNumber: 9,
       title: 'Quality Review',
       description:
         'Multi-perspective review covering code quality, security, performance, and design. Critical issues are sent back for development. The QA Agent coordinates code-reviewer, security-auditor, performance-optimizer, and designer.',
@@ -370,6 +419,7 @@ export const workflowNodes: WorkflowNode[] = [
         'Security audit & guardrails',
         'Performance optimization check',
         'Design & accessibility review',
+        'Tooling & capability gap audit',
         'Issue triage: fix vs. accept',
       ],
       artifact: 'Review Reports',
@@ -381,7 +431,7 @@ export const workflowNodes: WorkflowNode[] = [
         'templates/subagents/generic/designer.md',
       ],
       handoff:
-        'If critical issues found: task sent back to Feature Development with feedback. If approved: proceed to Documentation.',
+        'If critical issues found: task sent back to Feature Development with feedback. If approved: proceed to Execution Monitoring.',
       examplePrompts: [
         {
           agent: '@code-reviewer',
@@ -401,17 +451,66 @@ export const workflowNodes: WorkflowNode[] = [
       ],
       tips: [
         'Run security audit on every feature that handles user data or authentication',
-        'Critical issues go back to Stage 6 — don\'t ship with known security gaps',
+        'Critical issues go back to Stage 7 — don\'t ship with known security gaps',
         'Performance review is optional for internal tools but critical for user-facing features',
+        'Review docs/CURSOR_PLUGINS.md for available skills — flag gaps where a plugin or custom skill would help',
       ],
     },
   },
   {
-    id: 'pipeline-9',
+    id: 'pipeline-10',
     type: 'pipelineNode',
     position: P,
     data: {
-      stageNumber: 9,
+      stageNumber: 10,
+      title: 'Execution Monitoring',
+      description:
+        'The execution monitor verifies that completed tasks genuinely meet their acceptance criteria, detects stalled work, and triggers recovery workflows on failure. Acts as the quality gate between development and shipping.',
+      agents: [
+        { name: 'execution-monitor', role: 'system' },
+        { name: 'task-orchestrator', role: 'system' },
+      ],
+      substeps: [
+        'Verify acceptance criteria for each completed task',
+        'Detect stalled or long-running in_progress tasks',
+        'Classify failures and route to recovery agents',
+        'Run phase gate verification (all phase tasks done?)',
+        'Generate execution summary report',
+      ],
+      artifact: 'Execution Report',
+      phase: 'operate',
+      templateFiles: [
+        'templates/subagents/system/execution-monitor.md',
+        'templates/subagents/system/task-orchestrator.md',
+      ],
+      handoff:
+        'If all tasks pass: proceed to Documentation. If failures detected: route back to Feature Development or Debugging. Execution report feeds into Memory & Learning.',
+      examplePrompts: [
+        {
+          agent: '@execution-monitor',
+          prompt: '@execution-monitor Verify completion of task E01_T3_user_dashboard.\n\nAcceptance criteria from the task file:\n- Dashboard loads user stats within 2 seconds\n- Charts render with real data from the API\n- Empty state shows onboarding prompt\n\nCheck the implementation against each criterion and report pass/fail.',
+          context: 'Always pass the specific acceptance criteria so the monitor can verify objectively. It checks code and tests, not just the agent\'s claim of completion.',
+        },
+        {
+          agent: '@execution-monitor',
+          prompt: '@execution-monitor Run a phase gate check for Phase 1.\n\nVerify all Phase 1 tasks in tasks/ have status: done. Report any that are still in_progress or blocked. Confirm Phase 2 tasks are unblocked.',
+          context: 'Phase gates prevent moving forward with incomplete prerequisites. Run this before starting a new development phase.',
+        },
+      ],
+      tips: [
+        'Run execution monitoring after every batch of task completions, not just at the end',
+        'A task is not done until the monitor confirms ALL acceptance criteria are met',
+        'Stall detection catches tasks that silently fell off the radar',
+        'The execution report feeds valuable data into the Memory & Learning stage',
+      ],
+    },
+  },
+  {
+    id: 'pipeline-11',
+    type: 'pipelineNode',
+    position: P,
+    data: {
+      stageNumber: 11,
       title: 'Documentation',
       description:
         'Generate and maintain documentation at all levels: inline code docs, project-level markdown, API references, and architecture documentation. Keeps docs current with code.',
@@ -450,11 +549,11 @@ export const workflowNodes: WorkflowNode[] = [
     },
   },
   {
-    id: 'pipeline-10',
+    id: 'pipeline-12',
     type: 'pipelineNode',
     position: P,
     data: {
-      stageNumber: 10,
+      stageNumber: 12,
       title: 'Production Readiness',
       description:
         'Final production readiness assessment. Gap analysis identifies remaining issues across security, infrastructure, testing, and compliance. Observability is configured. A production checklist gates the release.',
@@ -477,7 +576,7 @@ export const workflowNodes: WorkflowNode[] = [
         'templates/subagents/specialists/observability-specialist.md',
       ],
       handoff:
-        'Gap analysis report generated. Production checklist complete. System is production-ready.',
+        'Gap analysis report generated. Production checklist complete. System is production-ready. Proceed to Memory & Learning to capture session knowledge.',
       examplePrompts: [
         {
           agent: '@gap-analysis',
@@ -494,6 +593,54 @@ export const workflowNodes: WorkflowNode[] = [
         'Don\'t skip gap analysis — it catches issues that individual reviews miss',
         'Address all "critical" severity items before deploying',
         'Set up observability before you need it, not after an incident',
+      ],
+    },
+  },
+  {
+    id: 'pipeline-13',
+    type: 'pipelineNode',
+    position: P,
+    data: {
+      stageNumber: 13,
+      title: 'Memory & Learning',
+      description:
+        'Capture session knowledge and update the project\'s institutional memory. Archive working memory to episodic logs, extract recurring patterns, and promote validated patterns to semantic memory. This recursive loop ensures agents improve across sessions.',
+      agents: [
+        { name: 'memory-updater', role: 'system' },
+      ],
+      substeps: [
+        'Archive working memory to episodic log',
+        'Summarize session: tasks, decisions, problems solved',
+        'Scan episodic history for recurring patterns',
+        'Promote validated patterns to semantic memory',
+        'Update .cursorrules if new project-wide conventions emerged',
+      ],
+      artifact: 'Updated Memory',
+      artifactPath: 'docs/memory/',
+      phase: 'operate',
+      templateFiles: [
+        'templates/subagents/system/memory-updater.md',
+        'templates/memory/README.md',
+      ],
+      handoff:
+        'Session archived. Patterns extracted and promoted. Semantic memory updated for next session. The learning cycle feeds back into Query Routing for improved future routing.',
+      examplePrompts: [
+        {
+          agent: '@memory-updater',
+          prompt: '@memory-updater Archive today\'s session and update memory.\n\nTasks completed: E01_T3, E01_T4, E01_T5\nKey decisions: Chose React Query over SWR for data fetching, added rate limiting middleware\nProblems solved: Hydration mismatch fixed by moving client-only logic to useEffect\n\nCheck if any of these patterns should be promoted to semantic memory.',
+          context: 'Providing a structured summary helps the memory updater create a useful episodic entry. Mentioning decisions and solutions surfaces patterns for semantic promotion.',
+        },
+        {
+          agent: '@memory-updater',
+          prompt: '@memory-updater Review the last 5 episodic entries in docs/memory/episodic/.\n\nLook for recurring patterns, repeated decisions, or solutions that were applied more than once. Propose any candidates for promotion to semantic memory.',
+          context: 'Periodic pattern extraction catches conventions that emerged organically. Patterns with 3+ occurrences are candidates for semantic promotion.',
+        },
+      ],
+      tips: [
+        'Run memory updates at the end of every session — don\'t let knowledge evaporate',
+        'Wait for 3+ successful applications before promoting a pattern to semantic memory',
+        'Semantic patterns should be concise and actionable — one rule, one sentence',
+        'If a pattern contradicts an existing semantic rule, flag it for review rather than overwriting',
       ],
     },
   },

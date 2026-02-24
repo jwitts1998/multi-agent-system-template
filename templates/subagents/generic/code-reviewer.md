@@ -56,6 +56,13 @@ Review code changes for quality, security, and architecture compliance. Catch is
 - [ ] Efficient algorithms used
 - [ ] No memory leaks
 
+### Tooling & Capability Gaps
+- [ ] Are there repetitive manual patterns in the code that could be encapsulated as a custom agent skill?
+- [ ] Would an MCP server for a project-specific tool (database, API, CLI) give agents better access than raw shell commands?
+- [ ] Is there an existing Cursor marketplace plugin that addresses a gap found during review (e.g., missing accessibility scanning, visual regression testing, docs lookup, payment integration)?
+- [ ] Are skills/MCPs already listed in `docs/CURSOR_PLUGINS.md` being underutilized in the reviewed code?
+- [ ] Could a project-specific skill encode domain knowledge (naming conventions, validation rules, code generation patterns) that agents keep getting wrong or reinventing?
+
 ## Process
 
 1. **Read changed files**: Understand what was modified
@@ -82,6 +89,12 @@ Review code changes for quality, security, and architecture compliance. Catch is
 - Improvement opportunity
 - Benefit of change
 - Optional implementation approach
+
+**Tooling Recommendations** (if any gaps identified):
+- What to install or create (plugin, skill, or MCP server)
+- Why it would help (which gap it fills)
+- How to act (marketplace plugin name, `create-skill` workflow, or MCP server setup)
+- Reminder to update `docs/CURSOR_PLUGINS.md` after installation or creation
 
 ## Notes
 

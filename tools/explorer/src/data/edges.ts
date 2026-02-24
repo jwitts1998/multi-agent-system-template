@@ -63,6 +63,13 @@ export const edges: Edge[] = [
   // ── Config targets ──
   { id: 'e-cfg-base-agents', source: 'cfg-base', target: 'cfg-agents-base', label: 'paired with', type: 'smoothstep' },
 
+  // ── Plugin & Skill Awareness ──
+  { id: 'e-plugin-rule-ref', source: 'cfg-plugin-awareness', target: 'cfg-cursor-plugins', label: 'references', type: 'smoothstep' },
+  { id: 'e-cr-plugins', source: 'gen-code-reviewer', target: 'cfg-cursor-plugins', label: 'audits gaps', style: { strokeDasharray: '5,5' }, type: 'smoothstep' },
+  { id: 'e-des-plugins', source: 'gen-designer', target: 'cfg-cursor-plugins', label: 'audits gaps', style: { strokeDasharray: '5,5' }, type: 'smoothstep' },
+  { id: 'e-role-impl-plugin', source: 'role-impl', target: 'cfg-plugin-awareness', label: 'guided by', style: { strokeDasharray: '5,5' }, type: 'smoothstep' },
+  { id: 'e-role-qa-plugin', source: 'role-qa', target: 'cfg-plugin-awareness', label: 'guided by', style: { strokeDasharray: '5,5' }, type: 'smoothstep' },
+
   // ── Orchestration specialist recommends Research Repos ──
   { id: 'e-spec-orch-lg', source: 'spec-orchestration', target: 'res-langgraph', label: 'recommends', style: { strokeDasharray: '5,5' }, type: 'smoothstep' },
   { id: 'e-spec-orch-crew', source: 'spec-orchestration', target: 'res-crewai', style: { strokeDasharray: '5,5' }, type: 'smoothstep' },
@@ -89,6 +96,19 @@ export const edges: Edge[] = [
   // ── Workflow connects to Interoperability Protocols ──
   { id: 'e-wf-a2a', source: 'wf-multi-agent', target: 'res-a2a', label: 'protocol', style: { strokeDasharray: '5,5' }, type: 'smoothstep' },
   { id: 'e-wf-mcp', source: 'wf-multi-agent', target: 'res-mcp', style: { strokeDasharray: '5,5' }, type: 'smoothstep' },
+
+  // ── System Agents ──
+  { id: 'e-sys-router-impl', source: 'sys-query-router', target: 'role-impl', label: 'routes to', type: 'smoothstep' },
+  { id: 'e-sys-router-qa', source: 'sys-query-router', target: 'role-qa', type: 'smoothstep' },
+  { id: 'e-sys-router-test', source: 'sys-query-router', target: 'role-test', type: 'smoothstep' },
+  { id: 'e-sys-router-doc', source: 'sys-query-router', target: 'role-doc', type: 'smoothstep' },
+  { id: 'e-sys-orch-tasks', source: 'sys-task-orchestrator', target: 'task-schema', label: 'manages', type: 'smoothstep' },
+  { id: 'e-sys-orch-router', source: 'sys-task-orchestrator', target: 'sys-query-router', label: 'assigns via', type: 'smoothstep' },
+  { id: 'e-sys-mem-working', source: 'sys-memory-updater', target: 'mem-working', label: 'archives', type: 'smoothstep' },
+  { id: 'e-sys-mem-episodic', source: 'sys-memory-updater', target: 'mem-episodic', label: 'writes to', type: 'smoothstep' },
+  { id: 'e-sys-mem-semantic', source: 'sys-memory-updater', target: 'mem-semantic', label: 'promotes to', type: 'smoothstep' },
+  { id: 'e-sys-monitor-orch', source: 'sys-execution-monitor', target: 'sys-task-orchestrator', label: 'reports to', type: 'smoothstep' },
+  { id: 'e-sys-monitor-router', source: 'sys-execution-monitor', target: 'sys-query-router', label: 're-routes on failure', style: { strokeDasharray: '5,5' }, type: 'smoothstep' },
 
   // ── Research repo relationships ──
   { id: 'e-res-aui-tui', source: 'res-assistant-ui', target: 'res-tool-ui', label: 'pairs with', type: 'smoothstep' },

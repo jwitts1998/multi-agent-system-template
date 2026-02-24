@@ -47,6 +47,13 @@ const phaseColors: Record<
     badge: '#16a34a',
     badgeText: '#f0fdf4',
   },
+  operate: {
+    bg: '#2e1065',
+    border: '#c084fc',
+    text: '#f3e8ff',
+    badge: '#9333ea',
+    badgeText: '#faf5ff',
+  },
 };
 
 const agentRoleColors: Record<string, string> = {
@@ -55,6 +62,7 @@ const agentRoleColors: Record<string, string> = {
   specialist: '#818cf8',
   'agent-role': '#3b82f6',
   ingestion: '#f59e0b',
+  system: '#c084fc',
 };
 
 export function PipelineNode({ data, selected }: NodeProps) {

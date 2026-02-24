@@ -1,0 +1,36 @@
+---
+description: Plugin, skill, and MCP gap identification for {{PROJECT_NAME}}
+alwaysApply: true
+---
+
+# Plugin, Skill & MCP Awareness
+
+## Recognizing Gaps
+
+While working on any task, watch for these signals that a plugin, skill, or MCP server would help:
+
+**Missing plugin signals**:
+- You are using a framework or service (e.g., Stripe, Supabase, Figma) that likely has a Cursor marketplace plugin, but it is not listed in `docs/CURSOR_PLUGINS.md`
+- You are manually looking up library documentation that a docs-lookup plugin (e.g., Context7) could provide instantly
+- You are doing accessibility checks, visual regression comparisons, or cross-browser testing manually when plugins exist for these
+
+**Missing custom skill signals**:
+- You are repeating the same multi-step workflow across different tasks (e.g., a specific deployment sequence, a data migration pattern, a code generation recipe)
+- You keep re-deriving project-specific conventions (naming patterns, validation rules, architecture decisions) that should be encoded once and reused
+- Multiple sessions make the same mistakes because domain knowledge is not persisted
+
+**Missing MCP server signals**:
+- You are shelling out to a project CLI, database client, or internal API repeatedly — structured MCP access would be safer and more efficient
+- Multiple agents need the same tool access and each builds ad-hoc shell commands independently
+
+## What to Do
+
+When you identify a gap:
+1. Note it in your output under a **Tooling Recommendations** heading
+2. Specify whether to **install** (existing marketplace plugin), **create** (custom skill via `create-skill`), or **expose** (wrap a tool as an MCP server)
+3. Explain the benefit concisely
+4. After any installation or creation, update `docs/CURSOR_PLUGINS.md` so all agents are aware
+
+## Reference
+
+See `docs/CURSOR_PLUGINS.md` for the current inventory of installed plugins, skills, and MCP servers.

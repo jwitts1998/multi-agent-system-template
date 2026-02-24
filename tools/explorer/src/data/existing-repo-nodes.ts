@@ -227,7 +227,7 @@ export const existingRepoNodes: WorkflowNode[] = [
         'templates/tasks/TASK_SCHEMA_GUIDE.md',
       ],
       handoff:
-        'Task files written to tasks/. Phase 0 gap-fix tasks are highest priority. Ready for development.',
+        'Task files written to tasks/. Phase 0 gap-fix tasks are highest priority. Ready for routing and orchestration.',
       examplePrompts: [
         {
           agent: '@pdb-to-tasks',
@@ -248,6 +248,53 @@ export const existingRepoNodes: WorkflowNode[] = [
     position: P,
     data: {
       stageNumber: 7,
+      title: 'Query Routing & Orchestration',
+      description:
+        'The system coordination layer activates here. The query router triages incoming requests to the right agent, while the task orchestrator manages the queue — picking the highest-priority unblocked task, assigning it to the correct agent, and enforcing dependency ordering. For existing repos, Phase 0 gap-fix tasks are routed first.',
+      agents: [
+        { name: 'query-router', role: 'system' },
+        { name: 'task-orchestrator', role: 'system' },
+      ],
+      substeps: [
+        'Scan task files for eligible work (status: todo, unblocked)',
+        'Prioritize Phase 0 gap-fix tasks over new features',
+        'Route first task to the correct agent via delegation matrix',
+        'Pass spec_refs, gap report references, and context',
+        'Track task status transitions (todo → in_progress)',
+      ],
+      artifact: 'Routed Tasks',
+      phase: 'operate',
+      templateFiles: [
+        'templates/subagents/system/query-router.md',
+        'templates/subagents/system/task-orchestrator.md',
+      ],
+      handoff:
+        'Tasks are prioritized (gap fixes first), assigned to agents, and in_progress. Agents have full context from spec_refs and gap report.',
+      examplePrompts: [
+        {
+          agent: '@task-orchestrator',
+          prompt: '@task-orchestrator Show the current task queue for this existing project.\n\nGroup by phase: Phase 0 (gap fixes), Phase 1 (improvements), Phase 2 (new features).\nHighlight which Phase 0 tasks are still blocking Phase 1 work.',
+          context: 'For existing repos, the orchestrator prioritizes gap-fix tasks that block new development. Seeing the full queue helps plan work across phases.',
+        },
+        {
+          agent: '@query-router',
+          prompt: '@query-router I need to fix the hardcoded secrets identified in the gap analysis. Route me to the right agent with the gap report context.',
+          context: 'The router reads the gap analysis and routes security fixes to the Implementation Agent with security-auditor as secondary reviewer.',
+        },
+      ],
+      tips: [
+        'Always address Phase 0 gap fixes before Phase 1+ features',
+        'The orchestrator enforces dependency ordering — trust it over manual task picking',
+        'Customize the delegation matrix in query-router.md for your project\'s domain-specific agents',
+      ],
+    },
+  },
+  {
+    id: 'existing-8',
+    type: 'pipelineNode',
+    position: P,
+    data: {
+      stageNumber: 8,
       title: 'Gap Fix Development',
       description:
         'Address Phase 0 critical gaps identified in the gap analysis. These are typically security fixes, missing error handling, test coverage gaps, and infrastructure issues. Fix these before building new features.',
@@ -290,11 +337,11 @@ export const existingRepoNodes: WorkflowNode[] = [
     },
   },
   {
-    id: 'existing-8',
+    id: 'existing-9',
     type: 'pipelineNode',
     position: P,
     data: {
-      stageNumber: 8,
+      stageNumber: 9,
       title: 'Feature Development',
       description:
         'With gaps fixed, proceed to Phase 1 (existing feature improvements) and Phase 2+ (new features). This follows the same pattern as the net-new workflow: pick tasks, implement, test, review.',
@@ -308,6 +355,7 @@ export const existingRepoNodes: WorkflowNode[] = [
         'Read spec_refs and acceptance criteria',
         'Implement following .cursorrules patterns',
         'Write tests for the feature',
+        'Flag tooling gaps (missing plugins, skills, or MCP servers)',
         'Submit for code review',
       ],
       artifact: 'Production Code + Tests',
@@ -317,7 +365,7 @@ export const existingRepoNodes: WorkflowNode[] = [
         'templates/subagents/generic/code-reviewer.md',
       ],
       handoff:
-        'Features implemented, tested, and reviewed. Ready for documentation and production readiness assessment.',
+        'Features implemented, tested, and reviewed. Ready for quality assessment and execution monitoring.',
       examplePrompts: [
         {
           agent: 'Implementation Agent',
@@ -338,11 +386,11 @@ export const existingRepoNodes: WorkflowNode[] = [
     },
   },
   {
-    id: 'existing-9',
+    id: 'existing-10',
     type: 'pipelineNode',
     position: P,
     data: {
-      stageNumber: 9,
+      stageNumber: 10,
       title: 'Quality & Ship',
       description:
         'Final quality gate and production readiness assessment. Run documentation generation, security audit, performance review, and comprehensive gap analysis. Ensure all critical items are resolved before shipping.',
@@ -356,6 +404,7 @@ export const existingRepoNodes: WorkflowNode[] = [
         'Generate/update documentation',
         'Final security audit',
         'Production gap analysis (re-run)',
+        'Tooling & capability gap audit',
         'Verify all critical gaps resolved',
         'Commit and deploy',
       ],
@@ -368,7 +417,7 @@ export const existingRepoNodes: WorkflowNode[] = [
         'templates/subagents/generic/security-auditor.md',
       ],
       handoff:
-        'System is production-ready with documentation, security clearance, and all critical gaps resolved.',
+        'System is production-ready with documentation, security clearance, and all critical gaps resolved. Proceed to execution monitoring and memory capture.',
       examplePrompts: [
         {
           agent: '@gap-analysis',
@@ -384,7 +433,102 @@ export const existingRepoNodes: WorkflowNode[] = [
       tips: [
         'Re-run gap analysis to verify critical items are actually resolved',
         'Update the PDB to reflect what was built — it\'s a living document',
-        'The multi-agent workflow continues for ongoing development — repeat stages 8-9 for each new feature cycle',
+        'The multi-agent workflow continues for ongoing development — repeat stages 9-10 for each new feature cycle',
+      ],
+    },
+  },
+  {
+    id: 'existing-11',
+    type: 'pipelineNode',
+    position: P,
+    data: {
+      stageNumber: 11,
+      title: 'Execution Monitoring',
+      description:
+        'The execution monitor verifies that completed tasks genuinely meet their acceptance criteria, detects stalled work, and validates that gap fixes actually resolved the issues identified in the original gap analysis.',
+      agents: [
+        { name: 'execution-monitor', role: 'system' },
+        { name: 'task-orchestrator', role: 'system' },
+      ],
+      substeps: [
+        'Verify acceptance criteria for completed tasks',
+        'Compare gap-fix results against original gap report',
+        'Detect stalled or long-running tasks',
+        'Run phase gate verification',
+        'Generate execution summary report',
+      ],
+      artifact: 'Execution Report',
+      phase: 'operate',
+      templateFiles: [
+        'templates/subagents/system/execution-monitor.md',
+        'templates/subagents/system/task-orchestrator.md',
+      ],
+      handoff:
+        'All tasks verified. Gap fixes confirmed against original report. Execution report feeds into Memory & Learning.',
+      examplePrompts: [
+        {
+          agent: '@execution-monitor',
+          prompt: '@execution-monitor Verify all Phase 0 gap-fix tasks are complete.\n\nCross-reference against the original gap analysis at docs/architecture/gap_analysis_report.md.\n\nFor each critical gap, confirm the fix was implemented and verified by the security auditor.',
+          context: 'For existing repos, the monitor should specifically validate that gap fixes resolved the issues they were meant to address, not just that code was written.',
+        },
+        {
+          agent: '@execution-monitor',
+          prompt: '@execution-monitor Generate an execution summary for this development cycle.\n\nInclude: tasks completed, tasks remaining, velocity, stalled tasks, and risks.',
+          context: 'The execution summary provides data for the Memory & Learning stage and helps plan the next development cycle.',
+        },
+      ],
+      tips: [
+        'For existing repos, always cross-reference gap fixes against the original gap report',
+        'Phase gate checks are essential before moving from Phase 0 to Phase 1',
+        'The execution report feeds valuable data into Memory & Learning',
+      ],
+    },
+  },
+  {
+    id: 'existing-12',
+    type: 'pipelineNode',
+    position: P,
+    data: {
+      stageNumber: 12,
+      title: 'Memory & Learning',
+      description:
+        'Capture session knowledge and update the project\'s institutional memory. For existing repos, this is especially valuable — it preserves domain knowledge about the codebase that was discovered during ingestion, gap analysis, and development.',
+      agents: [
+        { name: 'memory-updater', role: 'system' },
+      ],
+      substeps: [
+        'Archive working memory to episodic log',
+        'Capture codebase-specific discoveries and gotchas',
+        'Extract patterns from gap-fix solutions',
+        'Promote validated patterns to semantic memory',
+        'Update .cursorrules with new conventions',
+      ],
+      artifact: 'Updated Memory',
+      artifactPath: 'docs/memory/',
+      phase: 'operate',
+      templateFiles: [
+        'templates/subagents/system/memory-updater.md',
+        'templates/memory/README.md',
+      ],
+      handoff:
+        'Session archived. Codebase-specific patterns captured. Semantic memory updated. The learning cycle feeds back into Query Routing for future sessions.',
+      examplePrompts: [
+        {
+          agent: '@memory-updater',
+          prompt: '@memory-updater Archive this session and capture learnings from the existing repo onboarding.\n\nKey discoveries:\n- The codebase uses a non-standard auth pattern (custom JWT middleware)\n- Database migrations are managed manually, not via ORM\n- The API has undocumented rate limiting in the nginx config\n\nThese should be preserved so future agents don\'t rediscover them.',
+          context: 'For existing repos, the first few sessions produce the most valuable memory entries — they capture tribal knowledge that isn\'t in the code or docs.',
+        },
+        {
+          agent: '@memory-updater',
+          prompt: '@memory-updater Promote these gap-fix patterns to semantic memory:\n\n1. "Always use environment variables for secrets — hardcoded secrets were found in 3 files during gap analysis"\n2. "Add rate limiting middleware to all public API routes — the original codebase had none"\n3. "Run security-auditor after every auth-related change"',
+          context: 'Gap-fix lessons are prime candidates for semantic memory. They prevent regression and guide future development.',
+        },
+      ],
+      tips: [
+        'Existing repo onboarding produces high-value memory — capture it immediately',
+        'Codebase-specific gotchas (undocumented behavior, legacy patterns) are the most important things to remember',
+        'Gap-fix solutions should become semantic patterns to prevent regression',
+        'The learning cycle improves routing accuracy as the system learns project-specific patterns',
       ],
     },
   },

@@ -22,6 +22,7 @@ This document defines specialized **development agents** for the {{PROJECT_NAME}
 - Implement error handling and edge cases
 - Review and refactor existing code
 - Optimize for performance and maintainability
+- Identify gaps in available skills, plugins, or MCP tools that would accelerate development, and recommend installing or creating them
 
 **When to Use**:
 - Feature implementation tasks
@@ -57,6 +58,7 @@ This document defines specialized **development agents** for the {{PROJECT_NAME}
 - Verify documentation is updated
 - Check for code duplication and anti-patterns
 - Validate adherence to `.cursorrules` standards
+- Evaluate whether available skills, plugins, and MCP tools are being used effectively, and flag missing capabilities
 
 **When to Use**:
 - After implementation is complete
@@ -335,6 +337,7 @@ When multiple agents work on the same task:
 - [ ] No hardcoded secrets or API keys
 - [ ] Code is maintainable and performant
 - [ ] Related task acceptance criteria met
+- [ ] Tooling gaps flagged (missing skills, plugins, or MCP servers that would help)
 
 ### Quality Assurance Agent Checklist
 - [ ] Code quality meets standards
@@ -343,6 +346,7 @@ When multiple agents work on the same task:
 - [ ] No code duplication or anti-patterns
 - [ ] Performance considerations addressed
 - [ ] Documentation adequate
+- [ ] Plugin/skill/MCP coverage reviewed — gaps identified and recommendations made
 
 ### Testing Agent Checklist
 - [ ] Unit tests for business logic
@@ -397,6 +401,35 @@ When multiple agents work on the same task:
 - Use clear, concise language
 - Include practical examples
 - Document "why" not just "what"
+
+### Plugin, Skill & MCP Awareness
+
+All agents should actively identify gaps in available tooling — not just use what's already installed. There are two trigger points:
+
+**During review** (QA Agent, code-reviewer subagent, designer subagent):
+- Check whether installed skills and MCP tools from `docs/CURSOR_PLUGINS.md` are being used where they would help
+- Flag opportunities where an existing Cursor marketplace plugin would address a quality, accessibility, testing, or documentation gap
+- Recommend creating a custom skill when the review reveals a repetitive pattern that agents keep reinventing
+
+**During development** (Implementation Agent, specialist subagents):
+- Notice when manual workarounds are used that a plugin or MCP server could handle (e.g., shelling out to a CLI that should be an MCP server, repeatedly looking up docs that Context7 could provide)
+- Flag when domain knowledge is being re-derived each session that a custom skill could encode (naming conventions, validation rules, code generation patterns)
+
+**When to recommend installing** an existing plugin:
+- The project uses a framework or service (Stripe, Supabase, Figma) that has a marketplace plugin but it's not installed
+- Agents are doing work manually that a skill automates (visual regression, accessibility scanning, docs lookup)
+
+**When to recommend creating** a custom skill:
+- A multi-step workflow is repeated across tasks and would benefit from codification
+- Project-specific domain knowledge (architecture decisions, naming patterns, validation logic) is lost between sessions
+- Agents make the same mistakes repeatedly because conventions aren't encoded anywhere persistent
+
+**When to recommend exposing an MCP server**:
+- The project has a CLI, internal API, or database that agents interact with frequently via shell commands
+- Structured access would be safer or more efficient than raw shell execution
+- Multiple agents need the same tool access
+
+**After installing or creating**: Always update `docs/CURSOR_PLUGINS.md` so all agents are aware of the new capability.
 
 ---
 

@@ -51,6 +51,7 @@ This document defines specialized **development agents** for backend service dev
 - [ ] Rate limiting configured
 - [ ] API documented (Swagger/OpenAPI)
 - [ ] Authentication/authorization checked
+- [ ] Relevant MCP tools and skills used where applicable (see `docs/CURSOR_PLUGINS.md`)
 
 **Special Instructions**:
 - Follow RESTful conventions (GET /resource, POST /resource, etc.)
@@ -102,6 +103,7 @@ This document defines specialized **development agents** for backend service dev
 - [ ] No N+1 query problems
 - [ ] Connection pooling configured
 - [ ] Queries optimized (EXPLAIN analyzed)
+- [ ] Relevant MCP tools and skills used where applicable (see `docs/CURSOR_PLUGINS.md`)
 
 **Special Instructions**:
 - Always create reversible migrations
@@ -157,6 +159,7 @@ This document defines specialized **development agents** for backend service dev
 - [ ] Test database setup/teardown working
 - [ ] External services mocked
 - [ ] Tests run in CI/CD
+- [ ] Relevant MCP tools and skills used where applicable (see `docs/CURSOR_PLUGINS.md`)
 
 **Special Instructions**:
 - Use test database (not production)
@@ -210,6 +213,7 @@ This document defines specialized **development agents** for backend service dev
 - [ ] Security headers configured
 - [ ] No sensitive data in logs
 - [ ] HTTPS enforced in production
+- [ ] Relevant MCP tools and skills used where applicable (see `docs/CURSOR_PLUGINS.md`)
 
 **Special Instructions**:
 - Never store plain-text passwords
@@ -238,6 +242,53 @@ This document defines specialized **development agents** for backend service dev
 
 ---
 
+## 📋 Role Mapping
+
+Task files use short `agent_roles` values. This table maps each value to the role (and checklist) the agent should adopt:
+
+| `agent_roles` value | Role to adopt | Notes |
+|----------------------|---------------|-------|
+| `api` | API Agent | Endpoint design, validation, request handling |
+| `database` | Database Agent | Schema, migrations, query optimization |
+| `testing` | Testing Agent | Unit, integration, and security tests |
+| `security` | Security Agent | Auth, authorization, input sanitization |
+| `implementation` | API Agent | Generic implementation — defaults to API Agent |
+| `backend` | API Agent | Backend-scoped — use API Agent checklist |
+| `quality_assurance` | Security Agent | Code review — apply QA lens with security checklist |
+| `documentation` | API Agent | Documentation — apply docs lens to API endpoints |
+| `ui_ux` | API Agent | Rarely used in backend — treat as API Agent |
+
+If a task lists a value not in this table, treat it as API Agent.
+
+---
+
+## 📋 Task Execution Protocol
+
+When you pick up a task with multiple `agent_roles`, follow this protocol:
+
+1. **Read the task** — review `agent_roles`, `spec_refs`, `description`, and `acceptance_criteria`
+2. **Resolve roles** — map each `agent_roles` value to a role using the Role Mapping table above
+3. **Execute in order** — work through the roles in the order they are listed in `agent_roles` (default to sequential workflow order: API → Database → Security → Testing)
+4. **Per role** — complete that role's checklist, then add a handoff note to the task before moving to the next role
+5. **Final role** — after completing the last role's work, validate all `acceptance_criteria` and propose `status: done`
+6. **Single role** — if only one role is listed, complete its checklist and propose status when done
+
+---
+
+## 🔌 Plugins and MCP Tools
+
+Agents have access to MCP tools and skills provided by installed Cursor plugins. See `docs/CURSOR_PLUGINS.md` for the full list. Use them when relevant to the task.
+
+**Stack-relevant examples**:
+- **Context7**: Look up current docs for {{BACKEND_FRAMEWORK}}, {{ORM_LIBRARY}}, and any dependency before implementing unfamiliar APIs
+- **Supabase Postgres**: Query optimization and database best practices for {{DATABASE_TYPE}}
+- **Stripe**: Payment integration best practices (if applicable)
+- **parallel-web-search**: Verify security practices, CVE lookups, and current OWASP guidance
+
+Flag gaps: if agents are doing work manually that a plugin, skill, or MCP server could handle, recommend installing or creating one and update `docs/CURSOR_PLUGINS.md`.
+
+---
+
 ## ✅ Agent-Specific Checklists
 
 ### API Agent Checklist
@@ -247,6 +298,7 @@ This document defines specialized **development agents** for backend service dev
 - [ ] Proper HTTP status codes
 - [ ] API documented
 - [ ] Rate limiting configured
+- [ ] Relevant MCP tools and skills used where applicable (see `docs/CURSOR_PLUGINS.md`)
 
 ### Database Agent Checklist
 - [ ] Schema properly designed
@@ -255,6 +307,7 @@ This document defines specialized **development agents** for backend service dev
 - [ ] Transactions used appropriately
 - [ ] No N+1 queries
 - [ ] Connection pooling configured
+- [ ] Relevant MCP tools and skills used where applicable (see `docs/CURSOR_PLUGINS.md`)
 
 ### Testing Agent Checklist
 - [ ] Unit tests for business logic
@@ -263,6 +316,7 @@ This document defines specialized **development agents** for backend service dev
 - [ ] Mocks external services
 - [ ] Coverage meets target
 - [ ] Tests are fast
+- [ ] Relevant MCP tools and skills used where applicable (see `docs/CURSOR_PLUGINS.md`)
 
 ### Security Agent Checklist
 - [ ] Authentication secure
@@ -271,6 +325,7 @@ This document defines specialized **development agents** for backend service dev
 - [ ] No SQL injection risk
 - [ ] Secrets managed securely
 - [ ] Rate limiting enabled
+- [ ] Relevant MCP tools and skills used where applicable (see `docs/CURSOR_PLUGINS.md`)
 
 ---
 

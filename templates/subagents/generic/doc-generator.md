@@ -110,4 +110,5 @@ Practical usage examples.
 - Use clear, concise language
 - Include diagrams for complex concepts
 - Review `.cursorrules` documentation section for standards
+- When documenting patterns, libraries, or APIs, use Context7 or `parallel-web-search` to verify that documented usage reflects current best practices — don't perpetuate deprecated patterns in documentation
 - Use relevant agent skills and MCP tools when they apply (e.g., Context7 for accurate library references, web search for current best practices). See `docs/CURSOR_PLUGINS.md` for available capabilities.

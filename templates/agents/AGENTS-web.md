@@ -157,6 +157,7 @@ This document defines specialized **development agents** for web application dev
 - [ ] Tests are deterministic (no flakiness)
 - [ ] Network requests are mocked
 - [ ] Tests run in CI/CD
+- [ ] Relevant MCP tools and skills used where applicable (see `docs/CURSOR_PLUGINS.md`)
 
 **Special Instructions**:
 - Use Testing Library queries (getByRole, etc.)
@@ -206,6 +207,7 @@ This document defines specialized **development agents** for web application dev
 - [ ] Core Web Vitals meet targets
 - [ ] No unnecessary re-renders
 - [ ] Proper caching headers
+- [ ] Relevant MCP tools and skills used where applicable (see `docs/CURSOR_PLUGINS.md`)
 
 **Special Instructions**:
 - Use bundle analyzer to identify large dependencies
@@ -232,6 +234,54 @@ This document defines specialized **development agents** for web application dev
 
 ---
 
+## 📋 Role Mapping
+
+Task files use short `agent_roles` values. This table maps each value to the role (and checklist) the agent should adopt:
+
+| `agent_roles` value | Role to adopt | Notes |
+|----------------------|---------------|-------|
+| `frontend` | Frontend Agent | Component development and state management |
+| `design_system` | Design System Agent | UI consistency, theming, accessibility |
+| `testing` | Testing Agent | Unit, component, integration, and E2E tests |
+| `performance` | Performance Agent | Bundle optimization and Core Web Vitals |
+| `implementation` | Frontend Agent | Generic implementation — defaults to Frontend Agent |
+| `ui_ux` | Design System Agent | UI/UX focus — use Design System Agent checklist |
+| `quality_assurance` | Design System Agent | Code review — apply QA lens with design review checklist |
+| `documentation` | Frontend Agent | Documentation — apply docs lens to components and features |
+| `security` | Frontend Agent | Security focus — apply security lens to input handling, XSS prevention |
+
+If a task lists a value not in this table, treat it as Frontend Agent.
+
+---
+
+## 📋 Task Execution Protocol
+
+When you pick up a task with multiple `agent_roles`, follow this protocol:
+
+1. **Read the task** — review `agent_roles`, `spec_refs`, `description`, and `acceptance_criteria`
+2. **Resolve roles** — map each `agent_roles` value to a role using the Role Mapping table above
+3. **Execute in order** — work through the roles in the order they are listed in `agent_roles` (default to sequential workflow order: Design System → Frontend → Testing → Performance)
+4. **Per role** — complete that role's checklist, then add a handoff note to the task before moving to the next role
+5. **Final role** — after completing the last role's work, validate all `acceptance_criteria` and propose `status: done`
+6. **Single role** — if only one role is listed, complete its checklist and propose status when done
+
+---
+
+## 🔌 Plugins and MCP Tools
+
+Agents have access to MCP tools and skills provided by installed Cursor plugins. See `docs/CURSOR_PLUGINS.md` for the full list. Use them when relevant to the task.
+
+**Stack-relevant examples**:
+- **Context7**: Look up current docs for {{FRONTEND_FRAMEWORK}}, component libraries, and any dependency before implementing unfamiliar APIs
+- **BrowserStack**: Cross-browser testing and WCAG accessibility scanning
+- **Figma skills**: Translate Figma designs to frontend code with 1:1 visual fidelity
+- **Vercel React best practices**: Performance optimization patterns (if React/Next.js)
+- **parallel-web-search**: Verify best practices when introducing new patterns, libraries, or performance techniques
+
+Flag gaps: if agents are doing work manually that a plugin, skill, or MCP server could handle, recommend installing or creating one and update `docs/CURSOR_PLUGINS.md`.
+
+---
+
 ## ✅ Agent-Specific Checklists
 
 ### Frontend Agent Checklist
@@ -243,6 +293,7 @@ This document defines specialized **development agents** for web application dev
 - [ ] API integration working
 - [ ] Routing configured
 - [ ] Code follows `.cursorrules`
+- [ ] Relevant MCP tools and skills used where applicable (see `docs/CURSOR_PLUGINS.md`)
 
 ### Design System Agent Checklist
 - [ ] Design tokens used consistently
@@ -252,6 +303,7 @@ This document defines specialized **development agents** for web application dev
 - [ ] Theme support (if applicable)
 - [ ] Browser compatibility verified
 - [ ] Visual consistency maintained
+- [ ] Relevant MCP tools and skills used where applicable (see `docs/CURSOR_PLUGINS.md`)
 
 ### Testing Agent Checklist
 - [ ] Unit tests for logic
@@ -261,6 +313,7 @@ This document defines specialized **development agents** for web application dev
 - [ ] Accessibility tested
 - [ ] Tests are fast and reliable
 - [ ] Coverage meets target
+- [ ] Relevant MCP tools and skills used where applicable (see `docs/CURSOR_PLUGINS.md`)
 
 ### Performance Agent Checklist
 - [ ] Bundle size within budget
@@ -269,6 +322,7 @@ This document defines specialized **development agents** for web application dev
 - [ ] Rendering optimized
 - [ ] Core Web Vitals meet targets
 - [ ] No performance regressions
+- [ ] Relevant MCP tools and skills used where applicable (see `docs/CURSOR_PLUGINS.md`)
 
 ---
 

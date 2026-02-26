@@ -92,4 +92,5 @@ Based on error and context, form ranked hypotheses about the cause. Test each sy
 - Make minimal changes
 - Add tests to prevent regression
 - Document fix reasoning
+- When a fix involves changing patterns (e.g., switching async strategies, updating error handling approaches, changing state management), validate the new pattern against current best practices using `parallel-web-search` or Context7 before applying
 - Use relevant agent skills and MCP tools when they apply (e.g., systematic-debugging workflow, browser automation for reproducing UI issues, Context7 for framework-specific error patterns). See `docs/CURSOR_PLUGINS.md` for available capabilities.

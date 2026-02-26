@@ -168,6 +168,22 @@ cp templates/subagents/ideation/*.md .cursor/agents/ideation/ 2>/dev/null && \
   print_success "Copied ideation subagents → .cursor/agents/ideation/" || \
   print_warning "Could not copy ideation subagents"
 
+# Copy domain micro-agents
+echo ""
+printf "  Include domain micro-agents (vertical expertise agents)? [y/N]: "
+read -r INCLUDE_DOMAINS
+if [ "$INCLUDE_DOMAINS" = "y" ] || [ "$INCLUDE_DOMAINS" = "Y" ]; then
+  mkdir -p .cursor/agents/domains .cursor/agents/system
+  cp templates/subagents/domains/*.md .cursor/agents/domains/ 2>/dev/null && \
+    print_success "Copied domain micro-agents → .cursor/agents/domains/"
+  cp templates/subagents/system/product-orchestrator.md .cursor/agents/system/ 2>/dev/null
+  cp templates/subagents/system/domain-router.md .cursor/agents/system/ 2>/dev/null && \
+    print_success "Copied domain orchestration agents → .cursor/agents/system/"
+  DOMAINS_ENABLED=true
+else
+  DOMAINS_ENABLED=false
+fi
+
 # Copy task templates
 cp templates/tasks/tasks-schema.yml tasks.yml 2>/dev/null && \
   print_success "Copied tasks-schema.yml → tasks.yml" || true
@@ -324,8 +340,14 @@ echo ""
 echo -e "${BOLD}  Next steps:${NC}"
 echo -e "    1. ${CYAN}Open this project in Cursor${NC}"
 echo -e "    2. ${CYAN}Invoke @idea-to-pdb to explore your idea and generate a PDB${NC}"
+if [ "$DOMAINS_ENABLED" = true ]; then
+echo -e "    3. ${CYAN}Invoke @vertical-calibrator to configure domain agents for your vertical${NC}"
+echo -e "    4. ${CYAN}Invoke @pdb-to-tasks to create domain-aware task files${NC}"
+echo -e "    5. ${CYAN}Start developing with domain expertise active${NC}"
+else
 echo -e "    3. ${CYAN}Invoke @pdb-to-tasks to create task files from the PDB${NC}"
 echo -e "    4. ${CYAN}Start developing — agents will follow your project conventions${NC}"
+fi
 echo ""
 echo -e "  ${DIM}Run ./validate.sh to check for remaining template variables.${NC}"
 echo ""

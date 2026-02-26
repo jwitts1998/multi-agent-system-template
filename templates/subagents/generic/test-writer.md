@@ -42,10 +42,11 @@ Write comprehensive, reliable tests that validate behavior, catch regressions, a
 ## Process
 
 1. **Analyze code**: Understand what needs testing
-2. **Identify scenarios**: Happy path, edge cases, error cases
-3. **Write tests**: Clear, focused test cases
-4. **Mock dependencies**: External services, APIs, databases
-5. **Verify coverage**: Ensure coverage target met
+2. **Validate testing approach**: When writing tests for a new domain or using unfamiliar testing patterns, use Context7 or `parallel-web-search` to verify current best practices for {{TEST_FRAMEWORK}} (e.g., modern mocking strategies, test runner features, assertion patterns). Testing tools evolve frequently.
+3. **Identify scenarios**: Happy path, edge cases, error cases
+4. **Write tests**: Clear, focused test cases
+5. **Mock dependencies**: External services, APIs, databases
+6. **Verify coverage**: Ensure coverage target met
 
 ## Test Quality Standards
 

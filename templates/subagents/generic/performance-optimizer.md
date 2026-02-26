@@ -31,6 +31,13 @@ Identify performance bottlenecks, measure baselines, apply targeted optimization
 - Establish baseline metrics (response time, memory, CPU, bundle size)
 - Focus measurement on the hot path, not the entire system
 
+### 1.5. Validate Optimization Approach
+
+Before applying optimizations, verify that the techniques you plan to use reflect current best practices for the stack:
+- Use `parallel-web-search` or Context7 to check current {{FRAMEWORK}} performance recommendations
+- Verify that caching strategies, bundling tools, and database optimization techniques are current (e.g., framework-specific SSR/RSC patterns, modern build tools, current ORM performance guides)
+- Document which sources informed the optimization approach in task notes
+
 ### 2. Identify Bottlenecks
 
 Common performance issues:

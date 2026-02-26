@@ -208,6 +208,51 @@ export const workflowNodes: WorkflowNode[] = [
     position: P,
     data: {
       stageNumber: 5,
+      title: 'Domain Calibration',
+      description:
+        'Configure the domain micro-agent system for your product\'s business vertical. The calibrator reads the PDB, identifies which domains are core vs. supporting, calibrates AI applications per domain, and generates a domain-config.yml that downstream task generation uses to auto-populate domain_agents.',
+      agents: [
+        { name: 'vertical-calibrator', role: 'ideation' },
+        { name: 'product-orchestrator', role: 'system' },
+      ],
+      substeps: [
+        'Read PDB to extract vertical, value prop, and domain signals',
+        'Present 15 domains — classify as core / supporting / not-applicable',
+        'Calibrate AI applications per domain (critical / useful / skip)',
+        'Set implementation priorities and identify AI differentiator',
+        'Generate docs/architecture/domain-config.yml',
+      ],
+      artifact: 'domain-config.yml',
+      artifactPath: 'docs/architecture/domain-config.yml',
+      phase: 'ideate',
+      templateFiles: [
+        'templates/subagents/ideation/vertical-calibrator.md',
+        'templates/subagents/system/product-orchestrator.md',
+        'templates/subagents/domains/README.md',
+      ],
+      handoff:
+        'Domain configuration is saved. The pdb-to-tasks agent will read this to auto-populate domain_agents on generated tasks.',
+      examplePrompts: [
+        {
+          agent: '@vertical-calibrator',
+          prompt: '@vertical-calibrator Configure the domain agents for my product. The PDB is at docs/product_design/fittracker_pdb.md.\n\nThis is a fitness/health vertical. Core domains should include schema-data, auth-identity, and analytics-telemetry. The AI differentiator is personalized workout recommendations.',
+          context: 'The calibrator reads the PDB to pre-fill domain suggestions. You confirm or adjust relevance, rate AI applications, and set priorities. The output domain-config.yml drives task generation.',
+        },
+      ],
+      tips: [
+        'Run this AFTER generating the PDB but BEFORE creating tasks',
+        'The calibrator auto-suggests domain relevance based on the PDB — review but don\'t skip',
+        'The AI differentiator domain gets special treatment in task prioritization and monitoring',
+        'Re-run calibration when your product pivots or adds major new features',
+      ],
+    },
+  },
+  {
+    id: 'pipeline-6',
+    type: 'pipelineNode',
+    position: P,
+    data: {
+      stageNumber: 6,
       title: 'Query Routing & Orchestration',
       description:
         'The system coordination layer activates here. The query router triages incoming requests to the right agent, while the task orchestrator manages the queue — picking the highest-priority unblocked task, assigning it to the correct agent, and enforcing dependency ordering.',
@@ -250,11 +295,11 @@ export const workflowNodes: WorkflowNode[] = [
     },
   },
   {
-    id: 'pipeline-6',
+    id: 'pipeline-7',
     type: 'pipelineNode',
     position: P,
     data: {
-      stageNumber: 6,
+      stageNumber: 7,
       title: 'Architecture Setup',
       description:
         'Establish the project foundation: define data schemas, set up API contracts, configure infrastructure, and complete all Phase 0 schema-first tasks before feature work begins.',
@@ -295,11 +340,11 @@ export const workflowNodes: WorkflowNode[] = [
     },
   },
   {
-    id: 'pipeline-7',
+    id: 'pipeline-8',
     type: 'pipelineNode',
     position: P,
     data: {
-      stageNumber: 7,
+      stageNumber: 8,
       title: 'Feature Development',
       description:
         'Implement features following the task files. The Implementation Agent picks high-priority tasks, reads spec_refs, writes production code following .cursorrules conventions, and adds handoff notes for QA.',
@@ -352,11 +397,11 @@ export const workflowNodes: WorkflowNode[] = [
     },
   },
   {
-    id: 'pipeline-8',
+    id: 'pipeline-9',
     type: 'pipelineNode',
     position: P,
     data: {
-      stageNumber: 8,
+      stageNumber: 9,
       title: 'Testing & Evaluation',
       description:
         'Write tests that validate behavior, not implementation. Unit tests for business logic, integration tests for user flows, and LLM evaluation pipelines for AI features. Coverage targets from .cursorrules are verified.',
@@ -399,11 +444,11 @@ export const workflowNodes: WorkflowNode[] = [
     },
   },
   {
-    id: 'pipeline-9',
+    id: 'pipeline-10',
     type: 'pipelineNode',
     position: P,
     data: {
-      stageNumber: 9,
+      stageNumber: 10,
       title: 'Quality Review',
       description:
         'Multi-perspective review covering code quality, security, performance, and design. Critical issues are sent back for development. The QA Agent coordinates code-reviewer, security-auditor, performance-optimizer, and designer.',
@@ -458,11 +503,11 @@ export const workflowNodes: WorkflowNode[] = [
     },
   },
   {
-    id: 'pipeline-10',
+    id: 'pipeline-11',
     type: 'pipelineNode',
     position: P,
     data: {
-      stageNumber: 10,
+      stageNumber: 11,
       title: 'Execution Monitoring',
       description:
         'The execution monitor verifies that completed tasks genuinely meet their acceptance criteria, detects stalled work, and triggers recovery workflows on failure. Acts as the quality gate between development and shipping.',
@@ -506,11 +551,11 @@ export const workflowNodes: WorkflowNode[] = [
     },
   },
   {
-    id: 'pipeline-11',
+    id: 'pipeline-12',
     type: 'pipelineNode',
     position: P,
     data: {
-      stageNumber: 11,
+      stageNumber: 12,
       title: 'Documentation',
       description:
         'Generate and maintain documentation at all levels: inline code docs, project-level markdown, API references, and architecture documentation. Keeps docs current with code.',
@@ -549,11 +594,11 @@ export const workflowNodes: WorkflowNode[] = [
     },
   },
   {
-    id: 'pipeline-12',
+    id: 'pipeline-13',
     type: 'pipelineNode',
     position: P,
     data: {
-      stageNumber: 12,
+      stageNumber: 13,
       title: 'Production Readiness',
       description:
         'Final production readiness assessment. Gap analysis identifies remaining issues across security, infrastructure, testing, and compliance. Observability is configured. A production checklist gates the release.',
@@ -597,11 +642,11 @@ export const workflowNodes: WorkflowNode[] = [
     },
   },
   {
-    id: 'pipeline-13',
+    id: 'pipeline-14',
     type: 'pipelineNode',
     position: P,
     data: {
-      stageNumber: 13,
+      stageNumber: 14,
       title: 'Memory & Learning',
       description:
         'Capture session knowledge and update the project\'s institutional memory. Archive working memory to episodic logs, extract recurring patterns, and promote validated patterns to semantic memory. This recursive loop ensures agents improve across sessions.',

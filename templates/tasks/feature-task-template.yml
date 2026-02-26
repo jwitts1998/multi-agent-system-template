@@ -24,6 +24,9 @@ tasks:
     agent_roles:
       - {{AGENT_ROLE_1}}    # implementation | quality_assurance | testing | documentation
       - {{AGENT_ROLE_2}}    # ui_ux | frontend | backend | database | api | security
+    domain_agents: []        # Domain micro-agents: schema-data | api-connections | auth-identity | infrastructure
+                             # maps-geo | messaging | search-discovery | payments-billing | notifications | media-content
+                             # animation-motion | accessibility | internationalization | performance | analytics-telemetry
     spec_refs:
       - "{{SPEC_REFERENCE_1}}"
       - "{{SPEC_REFERENCE_2}}"

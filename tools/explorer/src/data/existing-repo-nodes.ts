@@ -243,11 +243,53 @@ export const existingRepoNodes: WorkflowNode[] = [
     },
   },
   {
-    id: 'existing-7',
+    id: 'repo-pipeline-7',
     type: 'pipelineNode',
     position: P,
     data: {
       stageNumber: 7,
+      title: 'Domain Calibration',
+      description:
+        'Configure the domain micro-agent system for the existing product\'s vertical. The calibrator reads the PDB and codebase audit results to auto-detect which domains are already implemented and which need attention.',
+      agents: [
+        { name: 'vertical-calibrator', role: 'ideation' },
+        { name: 'product-orchestrator', role: 'system' },
+      ],
+      substeps: [
+        'Read PDB and codebase audit for domain signals',
+        'Auto-detect implemented domains from existing code structure',
+        'Present 15 domains — classify as core / supporting / not-applicable',
+        'Calibrate AI applications and identify gaps',
+        'Generate docs/architecture/domain-config.yml',
+      ],
+      artifact: 'domain-config.yml',
+      artifactPath: 'docs/architecture/domain-config.yml',
+      phase: 'ideate',
+      templateFiles: [
+        'templates/subagents/ideation/vertical-calibrator.md',
+        'templates/subagents/system/product-orchestrator.md',
+      ],
+      handoff:
+        'Domain configuration identifies which domains exist in the codebase and which need to be built or improved.',
+      examplePrompts: [
+        {
+          agent: '@vertical-calibrator',
+          prompt: '@vertical-calibrator Configure domain agents for this existing project. The PDB is at docs/product_design/app_pdb.md and the codebase audit is at docs/architecture/.',
+          context: 'For existing repos, the calibrator also considers what domains are already partially implemented based on the codebase audit.',
+        },
+      ],
+      tips: [
+        'The codebase audit from Stage 2 helps identify which domains are already implemented',
+        'Focus calibration on domains that need improvement or AI enhancement',
+      ],
+    },
+  },
+  {
+    id: 'existing-8',
+    type: 'pipelineNode',
+    position: P,
+    data: {
+      stageNumber: 8,
       title: 'Query Routing & Orchestration',
       description:
         'The system coordination layer activates here. The query router triages incoming requests to the right agent, while the task orchestrator manages the queue — picking the highest-priority unblocked task, assigning it to the correct agent, and enforcing dependency ordering. For existing repos, Phase 0 gap-fix tasks are routed first.',
@@ -290,11 +332,11 @@ export const existingRepoNodes: WorkflowNode[] = [
     },
   },
   {
-    id: 'existing-8',
+    id: 'existing-9',
     type: 'pipelineNode',
     position: P,
     data: {
-      stageNumber: 8,
+      stageNumber: 9,
       title: 'Gap Fix Development',
       description:
         'Address Phase 0 critical gaps identified in the gap analysis. These are typically security fixes, missing error handling, test coverage gaps, and infrastructure issues. Fix these before building new features.',
@@ -337,11 +379,11 @@ export const existingRepoNodes: WorkflowNode[] = [
     },
   },
   {
-    id: 'existing-9',
+    id: 'existing-10',
     type: 'pipelineNode',
     position: P,
     data: {
-      stageNumber: 9,
+      stageNumber: 10,
       title: 'Feature Development',
       description:
         'With gaps fixed, proceed to Phase 1 (existing feature improvements) and Phase 2+ (new features). This follows the same pattern as the net-new workflow: pick tasks, implement, test, review.',
@@ -386,11 +428,11 @@ export const existingRepoNodes: WorkflowNode[] = [
     },
   },
   {
-    id: 'existing-10',
+    id: 'existing-11',
     type: 'pipelineNode',
     position: P,
     data: {
-      stageNumber: 10,
+      stageNumber: 11,
       title: 'Quality & Ship',
       description:
         'Final quality gate and production readiness assessment. Run documentation generation, security audit, performance review, and comprehensive gap analysis. Ensure all critical items are resolved before shipping.',
@@ -433,16 +475,16 @@ export const existingRepoNodes: WorkflowNode[] = [
       tips: [
         'Re-run gap analysis to verify critical items are actually resolved',
         'Update the PDB to reflect what was built — it\'s a living document',
-        'The multi-agent workflow continues for ongoing development — repeat stages 9-10 for each new feature cycle',
+        'The multi-agent workflow continues for ongoing development — repeat stages 10-11 for each new feature cycle',
       ],
     },
   },
   {
-    id: 'existing-11',
+    id: 'existing-12',
     type: 'pipelineNode',
     position: P,
     data: {
-      stageNumber: 11,
+      stageNumber: 12,
       title: 'Execution Monitoring',
       description:
         'The execution monitor verifies that completed tasks genuinely meet their acceptance criteria, detects stalled work, and validates that gap fixes actually resolved the issues identified in the original gap analysis.',
@@ -485,11 +527,11 @@ export const existingRepoNodes: WorkflowNode[] = [
     },
   },
   {
-    id: 'existing-12',
+    id: 'existing-13',
     type: 'pipelineNode',
     position: P,
     data: {
-      stageNumber: 12,
+      stageNumber: 13,
       title: 'Memory & Learning',
       description:
         'Capture session knowledge and update the project\'s institutional memory. For existing repos, this is especially valuable — it preserves domain knowledge about the codebase that was discovered during ingestion, gap analysis, and development.',

@@ -21,8 +21,21 @@ Optional but helpful:
 - `AGENTS.md` — for available agent roles
 - `templates/tasks/TASK_SCHEMA_GUIDE.md` — for task schema reference
 - `templates/tasks/feature-task-template.yml` — for YAML structure reference
+- `docs/architecture/domain-config.yml` — domain micro-agent configuration (relevance, AI priorities, domain rankings). If present, use it to populate `domain_agents` on generated tasks.
 
 ## Process
+
+### Step 0: Read Domain Configuration (if available)
+
+Before reading the PDB, check if `docs/architecture/domain-config.yml` exists. If it does:
+
+1. Load the domain configuration and extract:
+   - **Core domains** — domains marked `relevance: core` (these should appear on most tasks)
+   - **Supporting domains** — domains marked `relevance: supporting`
+   - **AI differentiator** — the domain with `is_ai_differentiator: true`
+   - **Priority rankings** — implementation order for core domains
+2. Use this information in Step 4 when populating `domain_agents` on tasks.
+3. If no domain-config.yml exists, skip domain population but add a note: "Consider running `@vertical-calibrator` to configure domain agents for this product."
 
 ### Step 1: Read and Understand the PDB
 
@@ -102,6 +115,9 @@ tasks:
     priority: high
     agent_roles:
       - implementation
+    domain_agents:
+      - maps-geo        # primary — core location feature
+      - schema-data     # supporting — spatial data models
     spec_refs:
       - "PDB: docs/product_design/{{PROJECT_NAME}}_pdb.md — Section X.Y"
     description: >
@@ -183,6 +199,35 @@ This prevents implementation from proceeding without agreed-upon data contracts.
 - `ui_ux` — design and UX tasks
 - `security` — security-specific work
 
+### Domain Agent Assignment
+
+If `domain-config.yml` is available, populate `domain_agents` on each task:
+
+1. **Match task signals** against the domain routing matrix:
+   - Task title/description keywords (e.g. "location search" → `maps-geo`, `search-discovery`)
+   - PDB section references (e.g. Section 4 architecture → `infrastructure`, `api-connections`)
+   - Code areas (e.g. `src/maps/` → `maps-geo`)
+
+2. **Classify involvement**:
+   - **Primary** (first in list) — the domain owning the core logic
+   - **Supporting** (subsequent) — domains consulted for data models, infra, or APIs
+   - Add comments explaining the classification
+
+3. **Validate against domain-config.yml**:
+   - Core domains should appear frequently across tasks
+   - Tasks should not reference `not-applicable` domains
+   - The AI differentiator domain should appear on AI-related tasks
+
+4. **Coverage report**: After generating all tasks, report:
+   ```
+   Domain Coverage Report
+   ======================
+   Tasks with domain_agents: X/Y (Z%)
+   Core domains referenced: [list]
+   Missing core domains: [list, if any]
+   AI differentiator tasks: N tasks reference [domain]
+   ```
+
 ### Typical Task Sequence per Feature
 1. Schema/design task (`chore`, `implementation` + `documentation`)
 2. Backend/data implementation (`story`, `implementation`)
@@ -250,6 +295,8 @@ Do not skip checkpoints. Do not write files without approval.
 
 Guide the user to:
 1. Review all generated task files
-2. Adjust priorities and phases as needed
-3. Begin development by selecting the first `priority: high` task with `status: todo`
-4. Follow the multi-agent workflow in `AGENTS.md`
+2. Verify `domain_agents` assignments are correct (if populated)
+3. Adjust priorities and phases as needed
+4. If `domain_agents` are missing, run `@vertical-calibrator` followed by the domain-routing skill
+5. Begin development by selecting the first `priority: high` task with `status: todo`
+6. Follow the multi-agent workflow in `AGENTS.md`

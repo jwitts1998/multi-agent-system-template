@@ -87,6 +87,53 @@ This document defines specialized **development agents** for full-stack applicat
     Full-stack feature: API contract → backend → database → frontend → tests
 ```
 
+### Role Mapping
+
+Task files use short `agent_roles` values. This table maps each value to the role (and checklist) the agent should adopt:
+
+| `agent_roles` value | Role to adopt | Notes |
+|----------------------|---------------|-------|
+| `api_contract` | API Contract Agent | Define shared types and contracts |
+| `backend` | Backend Agent | Server-side logic and endpoints |
+| `database` | Database Agent | Schema, migrations, repositories |
+| `frontend` | Frontend Agent | Client-side components and UI |
+| `testing` | Testing Agent | Tests across the full stack |
+| `implementation` | Backend Agent | Generic implementation — defaults to Backend; use Frontend if task is clearly UI-only |
+| `ui_ux` | Frontend Agent | UI/UX focus — use Frontend checklist plus design review |
+| `quality_assurance` | Backend Agent | Code review — apply QA lens to the relevant stack layer |
+| `documentation` | Backend Agent | Documentation — apply docs lens to the relevant stack layer |
+| `security` | Backend Agent | Security focus — apply security lens to auth, input validation, etc. |
+
+When `agent_roles` lists multiple values, prefer the full-stack workflow order (API Contract → Backend → Database → Frontend → Testing) unless the task explicitly sequences them differently.
+
+---
+
+## 📋 Task Execution Protocol
+
+When you pick up a task with multiple `agent_roles`, follow this protocol:
+
+1. **Read the task** — review `agent_roles`, `spec_refs`, `description`, and `acceptance_criteria`
+2. **Resolve roles** — map each `agent_roles` value to a role using the Role Mapping table above
+3. **Execute in order** — work through the roles in the order they are listed in `agent_roles` (default to the full-stack workflow order if ambiguous)
+4. **Per role** — complete that role's checklist, then add a handoff note to the task before moving to the next role
+5. **Final role** — after completing the last role's work, validate all `acceptance_criteria` and propose `status: done`
+6. **Single role** — if only one role is listed, complete its checklist and propose status when done
+
+---
+
+## 🔌 Plugins and MCP Tools
+
+Agents have access to MCP tools and skills provided by installed Cursor plugins. See `docs/CURSOR_PLUGINS.md` for the full list. Use them when relevant to the task.
+
+**Stack-relevant examples**:
+- **Context7**: Look up current docs for {{FRONTEND_FRAMEWORK}}, {{BACKEND_FRAMEWORK}}, or any dependency before implementing unfamiliar APIs
+- **BrowserStack**: Cross-browser and cross-device testing for frontend work
+- **Figma skills**: Translate Figma designs to frontend code with 1:1 fidelity
+- **Supabase Postgres**: Database optimization guidance for {{DATABASE_TYPE}} queries
+- **parallel-web-search**: Verify best practices when introducing new patterns, libraries, or security-sensitive code
+
+Flag gaps: if agents are doing work manually that a plugin, skill, or MCP server could handle, recommend installing or creating one and update `docs/CURSOR_PLUGINS.md`.
+
 ---
 
 ## ✅ Full-Stack Checklists
@@ -95,26 +142,31 @@ This document defines specialized **development agents** for full-stack applicat
 - [ ] Types defined in `shared/types/`
 - [ ] Request/response shapes documented
 - [ ] Types shared between client and server
+- [ ] Relevant MCP tools and skills used where applicable (see `docs/CURSOR_PLUGINS.md`)
 
 ### Backend Checklist
 - [ ] Endpoint follows REST conventions
 - [ ] Validation implemented
 - [ ] Error handling consistent
+- [ ] Relevant MCP tools and skills used where applicable (see `docs/CURSOR_PLUGINS.md`)
 
 ### Database Checklist
 - [ ] Schema designed
 - [ ] Migration created
 - [ ] Repository implemented
+- [ ] Relevant MCP tools and skills used where applicable (see `docs/CURSOR_PLUGINS.md`)
 
 ### Frontend Checklist
 - [ ] API client created
 - [ ] UI components built
 - [ ] State management integrated
+- [ ] Relevant MCP tools and skills used where applicable (see `docs/CURSOR_PLUGINS.md`)
 
 ### Testing Checklist
 - [ ] Backend tests (unit, integration)
 - [ ] Frontend tests (component, integration)
 - [ ] E2E test for critical flow
+- [ ] Relevant MCP tools and skills used where applicable (see `docs/CURSOR_PLUGINS.md`)
 
 ---
 

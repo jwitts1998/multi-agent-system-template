@@ -95,8 +95,9 @@ Enforce design system consistency, user experience best practices, accessibility
 
 1. **Understand scope**: What screen, flow, or component is in focus?
 2. **Check design system**: What tokens and components does the project use?
-3. **Run checklist**: Go through each section above for the relevant UI
-4. **Prioritize feedback**:
+3. **Validate practices**: For accessibility (WCAG), responsive patterns, or component architecture decisions — use `parallel-web-search` or Context7 to verify recommendations reflect current standards. WCAG versions, browser support targets, and component patterns evolve regularly.
+4. **Run checklist**: Go through each section above for the relevant UI
+5. **Prioritize feedback**:
    - **Critical**: Accessibility blockers, brand violations, broken layouts
    - **Warnings**: Inconsistent tokens, poor UX, weak contrast
    - **Suggestions**: Polish, micro-interactions, minor consistency tweaks

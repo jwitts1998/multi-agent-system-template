@@ -112,15 +112,15 @@ Subagent configs (AI assistants)
 - id: FEATURE_T1_profile
   title: "Implement user profile"
   agent_roles:
-    - implementation   # Maps to Implementation Agent in AGENTS.md
-    - ui_ux           # Maps to UI/UX Agent in AGENTS.md
-    - testing         # Maps to Testing Agent in AGENTS.md
+    - implementation   # Resolved via Role Mapping table in AGENTS.md
+    - ui_ux           # Resolved via Role Mapping table in AGENTS.md
+    - testing         # Resolved via Role Mapping table in AGENTS.md
 ```
 
 **Integration**:
 1. Task file specifies `agent_roles`
-2. Agent reads `AGENTS.md` for their responsibilities
-3. Agent follows checklist from `AGENTS.md`
+2. Agent resolves each value to a role using the **Role Mapping** table in `AGENTS.md` (each stack-specific AGENTS template defines its own mappings — e.g. `ui_ux` maps to UI/UX Agent in mobile, Design System Agent in web, Frontend Agent in full-stack)
+3. Agent follows the **Task Execution Protocol** in `AGENTS.md` — executing roles in list order, completing each role's checklist, and leaving handoff notes
 4. Agent completes work per acceptance criteria in task
 
 ---
@@ -190,13 +190,13 @@ Implements feature following project patterns
     - "Tests cover main scenarios"
 ```
 
-**Step 2: Implementation Agent Workflow**
-1. **Read task file**: Understands requirements, checks `agent_roles`
+**Step 2: Task Execution Protocol**
+1. **Read task file**: Understands requirements, resolves `agent_roles` via Role Mapping table in `AGENTS.md`
 2. **Check `.cursorrules`**: Reviews architecture pattern, code style
-3. **Check `AGENTS.md`**: Reviews Implementation Agent responsibilities
-4. **Invoke flutter-specialist**: Gets Flutter-specific implementation help
-5. **Implement feature**: Follows project patterns
-6. **Update task**: Marks `status: in_progress` → `done` when criteria met
+3. **Check `AGENTS.md`**: Reviews mapped role responsibilities and checklist
+4. **Execute roles in order**: Works through each role per Task Execution Protocol, leaving handoff notes between roles
+5. **Implement feature**: Follows project patterns, invokes relevant subagents
+6. **Final role validates**: Last role checks all acceptance criteria and proposes `status: done`
 
 **Step 3: Automatic Code Review**
 - **code-reviewer subagent** automatically activates

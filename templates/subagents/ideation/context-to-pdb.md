@@ -55,6 +55,7 @@ Parse the provided context and extract:
 - **Technical signals** — any stack, architecture, or integration mentions
 - **Constraints** — timelines, budgets, regulatory, or technical boundaries
 - **Success criteria** — how the stakeholder defines success
+- **Domain signals** — identify which software craft areas the context implies (geolocation/maps, messaging, search, payments, notifications, media, AI features). Tag each with the corresponding domain agent ID (e.g. `maps-geo`, `messaging`, `search-discovery`)
 
 Tag each extracted element with `[STAKEHOLDER]` to indicate it came directly from the provided context.
 
@@ -105,6 +106,7 @@ Evaluate the context against PDB requirements and flag missing elements:
 | Data | Entities, storage, schemas | Found / Partial / Missing |
 | UX/UI | Screens, flows, interaction patterns | Found / Partial / Missing |
 | Scope | MVP boundary, non-goals, constraints | Found / Partial / Missing |
+| Domain Coverage | Domain signals, AI opportunities, domain dependencies | Found / Partial / Missing |
 
 #### 2.2 Targeted Questions
 
@@ -115,6 +117,11 @@ Example:
 - GOOD: "The context mentions 'small teams' as users. Should we focus on teams of 2-5, 5-20, or 20+? Are these technical or non-technical users?"
 
 Batch questions into a single message. Limit to 5-7 questions maximum. If more gaps exist, prioritize by impact on MVP scope.
+
+**Domain-specific gap questions**: If domain signals were detected in Phase 1 but critical domains appear to be missing, ask targeted questions:
+- "The context mentions location features — should we treat geolocation as a CORE domain or just supporting?"
+- "No payment or billing features are mentioned. Is monetization in scope for MVP?"
+- "Where do you see AI as the competitive advantage in this product?"
 
 #### 2.3 Inference & Labeling
 
@@ -222,6 +229,18 @@ Include concise descriptions of:
 **4.2 API Contracts** (deep-dive only)
 
 **4.3 Environment Strategy** (deep-dive only)
+
+#### 4.5 Domain Architecture (if domain micro-agents enabled)
+
+Map extracted domain signals to domain micro-agent areas:
+
+| Domain | Relevance | Source | AI Opportunity |
+|---|---|---|---|
+| maps-geo | core / supporting / n/a | `[STAKEHOLDER]` / `[INFERRED]` | Brief description |
+| messaging | core / supporting / n/a | `[STAKEHOLDER]` / `[INFERRED]` | Brief description |
+| ... | ... | ... | ... |
+
+Tag each domain's relevance with its traceability source. This section feeds into `@vertical-calibrator` for detailed configuration.
 
 #### 5. AI Architecture (if applicable)
 
@@ -412,7 +431,9 @@ Once the PDB is saved, guide the user to:
 
 1. Review the PDB, paying special attention to `[INFERRED]` and `[ASSUMPTION]` sections
 2. Share the PDB with the stakeholder for validation (if appropriate)
-3. Follow [SETUP_GUIDE.md](../../../SETUP_GUIDE.md) Path B (they now have a PDB)
-4. Set up standard agents (Implementation, QA, Testing)
-5. Create task files with `spec_refs` pointing to the PDB
+3. **If domain micro-agents are enabled**: invoke `@vertical-calibrator` to generate `docs/architecture/domain-config.yml` — the PDB's Domain Architecture section (4.5) and domain signals provide the starting input
+4. Create task files with `@pdb-to-tasks` — if `domain-config.yml` exists, tasks will be auto-populated with `domain_agents`
+5. Set up standard agents (Implementation, QA, Testing)
 6. Begin implementation using the multi-agent workflow
+
+**Recommended pipeline**: `@context-to-pdb` → `@vertical-calibrator` → `@pdb-to-tasks` → development

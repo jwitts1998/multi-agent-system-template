@@ -56,6 +56,14 @@ Review code changes for quality, security, and architecture compliance. Catch is
 - [ ] Efficient algorithms used
 - [ ] No memory leaks
 
+### Practice Validation
+- [ ] New libraries or frameworks cite official docs or authoritative source for chosen approach
+- [ ] Security-sensitive code (auth, crypto, data handling) validated against current best practices, not just training knowledge
+- [ ] Architecture decisions reference current guidance (framework docs, official migration guides)
+- [ ] If a domain agent's "Modern Practices" drove the implementation, those practices were verified against current sources
+- [ ] No cargo-culted patterns — approaches are justified, not just familiar
+- [ ] Outdated practices flagged for template/rules update if discovered
+
 ### Tooling & Capability Gaps
 - [ ] Are there repetitive manual patterns in the code that could be encapsulated as a custom agent skill?
 - [ ] Would an MCP server for a project-specific tool (database, API, CLI) give agents better access than raw shell commands?
@@ -67,8 +75,9 @@ Review code changes for quality, security, and architecture compliance. Catch is
 
 1. **Read changed files**: Understand what was modified
 2. **Check `.cursorrules`**: Verify adherence to project standards
-3. **Run checklist**: Go through each category above
-4. **Prioritize feedback**:
+3. **Validate practices**: For new patterns, libraries, or security-sensitive code — use `parallel-web-search` or Context7 to verify the approach reflects current best practices. Check task notes for sources the implementer cited.
+4. **Run checklist**: Go through each category above
+5. **Prioritize feedback**:
    - **Critical** (MUST fix): Security vulnerabilities, breaking changes
    - **Warnings** (SHOULD fix): Code quality issues, missing error handling
    - **Suggestions** (NICE to have): Optimizations, refactoring opportunities
@@ -95,6 +104,22 @@ Review code changes for quality, security, and architecture compliance. Catch is
 - Why it would help (which gap it fills)
 - How to act (marketplace plugin name, `create-skill` workflow, or MCP server setup)
 - Reminder to update `docs/CURSOR_PLUGINS.md` after installation or creation
+
+## Domain Consultation
+
+When reviewing a task that has `domain_agents` specified:
+
+1. Read the task's `domain_agents` field.
+2. For each listed domain, read its agent definition and find the `## Consulted By` section.
+3. Collect all Tier 3 agents referenced as consultants (typically: `animation-motion`, `accessibility`, `internationalization`, `performance`, `analytics-telemetry`).
+4. Apply each Tier 3 agent's craft lens during review:
+   - **Animation/Motion**: Are transitions smooth and purposeful? Is `prefers-reduced-motion` respected?
+   - **Accessibility**: Is the feature keyboard-navigable? Are ARIA attributes correct? Sufficient color contrast?
+   - **Internationalization**: Are strings externalized? Does layout handle RTL? Are dates/numbers locale-aware?
+   - **Performance**: Unnecessary re-renders? Acceptable bundle impact? Optimized images?
+   - **Analytics**: Are key user actions tracked? Do events follow the schema?
+
+Load only the **Quick Reference** section of each consulting agent to keep context lightweight.
 
 ## Notes
 

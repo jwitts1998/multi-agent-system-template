@@ -7,33 +7,43 @@ interface LegendProps {
   onToggleCategory: (category: NodeCategory) => void;
   searchQuery: string;
   onSearchChange: (query: string) => void;
+  onShowArchDocs?: () => void;
+  onShowCalibration?: () => void;
+  hasCalibration?: boolean;
 }
 
 const newIdeaPhases = [
   { label: 'Setup (Stage 1)', color: '#94a3b8' },
-  { label: 'Ideate (Stages 2-4)', color: '#2dd4bf' },
-  { label: 'Operate (Stages 5, 10, 13)', color: '#c084fc' },
-  { label: 'Build (Stages 6-7)', color: '#3b82f6' },
-  { label: 'Verify (Stages 8-9)', color: '#f59e0b' },
-  { label: 'Ship (Stages 11-12)', color: '#22c55e' },
+  { label: 'Ideate (Stages 2-5)', color: '#2dd4bf' },
+  { label: 'Operate (Stages 6, 11, 14)', color: '#c084fc' },
+  { label: 'Build (Stages 7-8)', color: '#3b82f6' },
+  { label: 'Verify (Stages 9-10)', color: '#f59e0b' },
+  { label: 'Ship (Stages 12-13)', color: '#22c55e' },
 ];
 
 const existingRepoPhases = [
   { label: 'Setup (Stage 1)', color: '#94a3b8' },
   { label: 'Ingest (Stages 2-5)', color: '#f59e0b' },
-  { label: 'Ideate (Stage 6)', color: '#2dd4bf' },
-  { label: 'Operate (Stages 7, 11-12)', color: '#c084fc' },
-  { label: 'Build (Stages 8-9)', color: '#3b82f6' },
-  { label: 'Ship (Stage 10)', color: '#22c55e' },
+  { label: 'Ideate (Stages 6-7)', color: '#2dd4bf' },
+  { label: 'Operate (Stages 8, 12-13)', color: '#c084fc' },
+  { label: 'Build (Stages 9-10)', color: '#3b82f6' },
+  { label: 'Ship (Stage 11)', color: '#22c55e' },
 ];
 
 const contextToMvpPhases = [
   { label: 'Ingest (Stage 1)', color: '#f59e0b' },
-  { label: 'Ideate (Stages 2-4)', color: '#2dd4bf' },
-  { label: 'Build (Stages 5-6)', color: '#3b82f6' },
-  { label: 'Verify (Stages 7-8)', color: '#f59e0b' },
-  { label: 'Ship (Stage 9)', color: '#22c55e' },
-  { label: 'Operate (Stage 10)', color: '#c084fc' },
+  { label: 'Ideate (Stages 2-5)', color: '#2dd4bf' },
+  { label: 'Build (Stages 6-7)', color: '#3b82f6' },
+  { label: 'Verify (Stages 8-9)', color: '#f59e0b' },
+  { label: 'Ship (Stage 10)', color: '#22c55e' },
+  { label: 'Operate (Stage 11)', color: '#c084fc' },
+];
+
+const domainArchitecturePhases = [
+  { label: 'Orchestration (coordination)', color: '#34d399' },
+  { label: 'Tier 1 — Foundation (shared substrate)', color: '#f59e0b' },
+  { label: 'Tier 2 — Feature (user-facing)', color: '#3b82f6' },
+  { label: 'Tier 3 — Experience (cross-cutting)', color: '#a78bfa' },
 ];
 
 const viewTitles: Record<ViewMode, string> = {
@@ -41,6 +51,7 @@ const viewTitles: Record<ViewMode, string> = {
   newIdea: 'New Idea Workflow',
   existingRepo: 'Existing Repo Workflow',
   contextToMvp: 'Context to MVP Workflow',
+  domainArchitecture: 'Domain Micro-Agents',
   monitor: 'Session Monitor',
 };
 
@@ -49,17 +60,20 @@ const viewDescriptions: Record<ViewMode, string> = {
   newIdea: 'Clone the template, flush your idea into a PDB, decompose into tasks, build with agents',
   existingRepo: 'Copy template files into your project, audit code, generate a PDB, fix gaps, then build',
   contextToMvp: 'Ingest stakeholder context, fill gaps, generate a PDB, build a demo, and iterate with feedback',
+  domainArchitecture: 'Domain-expertise agents organized by software craft area. Each owns a vertical, applies modern practices, and evaluates where AI fits.',
   monitor: 'Visualize agent session transcripts — see agent flow, tool usage, and token consumption',
 };
 
-export function Legend({ viewMode, hiddenCategories, onToggleCategory, searchQuery, onSearchChange }: LegendProps) {
+export function Legend({ viewMode, hiddenCategories, onToggleCategory, searchQuery, onSearchChange, onShowArchDocs, onShowCalibration, hasCalibration }: LegendProps) {
   const categories = Object.entries(categoryMeta) as [NodeCategory, { label: string; color: string }][];
-  const isPipeline = viewMode === 'newIdea' || viewMode === 'existingRepo' || viewMode === 'contextToMvp';
+  const isPipeline = viewMode === 'newIdea' || viewMode === 'existingRepo' || viewMode === 'contextToMvp' || viewMode === 'domainArchitecture';
   const phases = viewMode === 'newIdea'
     ? newIdeaPhases
     : viewMode === 'contextToMvp'
       ? contextToMvpPhases
-      : existingRepoPhases;
+      : viewMode === 'domainArchitecture'
+        ? domainArchitecturePhases
+        : existingRepoPhases;
 
   return (
     <div style={{
@@ -165,43 +179,121 @@ export function Legend({ viewMode, hiddenCategories, onToggleCategory, searchQue
             ))}
           </div>
 
-          <div style={{
-            marginTop: 10,
-            paddingTop: 10,
-            borderTop: '1px solid #334155',
-          }}>
-            <div className="workflow-legend-feedback">
-              <span className="workflow-legend-dash" />
-              {viewMode === 'contextToMvp' ? 'Feedback loops' : viewMode === 'newIdea' ? 'Feedback loop' : 'Iterative cycle'}
-            </div>
-          </div>
+          {viewMode !== 'domainArchitecture' && (
+            <>
+              <div style={{
+                marginTop: 10,
+                paddingTop: 10,
+                borderTop: '1px solid #334155',
+              }}>
+                <div className="workflow-legend-feedback">
+                  <span className="workflow-legend-dash" />
+                  {viewMode === 'contextToMvp' ? 'Feedback loops' : viewMode === 'newIdea' ? 'Feedback loop' : 'Iterative cycle'}
+                </div>
+              </div>
 
-          <div style={{
-            marginTop: 8,
-            fontSize: 10,
-            color: '#64748b',
-            lineHeight: 1.5,
-          }}>
-            {viewMode === 'newIdea'
-              ? 'Stages 7-9 form an iterative cycle. Issues found in Quality Review are sent back to Feature Development. System agents (purple) handle routing, monitoring, and memory.'
-              : viewMode === 'contextToMvp'
-                ? 'Quality Review routes issues back to Feature Development. Stakeholder Review feeds new context back to Gap Analysis for iterative refinement toward a demo-ready MVP.'
-                : 'Stages 9-10 repeat for each development cycle. System agents (purple) handle routing, monitoring, and memory across the workflow.'
-            }
-          </div>
+              <div style={{
+                marginTop: 8,
+                fontSize: 10,
+                color: '#64748b',
+                lineHeight: 1.5,
+              }}>
+                {viewMode === 'newIdea'
+                  ? 'Stages 8-10 form an iterative cycle. Issues found in Quality Review are sent back to Feature Development. Stage 5 calibrates domain agents for your product vertical. System agents (purple) handle routing, monitoring, and memory.'
+                  : viewMode === 'contextToMvp'
+                    ? 'Quality Review routes issues back to Feature Development. Stakeholder Review feeds new context back to Gap Analysis for iterative refinement toward a demo-ready MVP.'
+                    : 'Stages 10-11 repeat for each development cycle. System agents (purple) handle routing, monitoring, and memory across the workflow.'
+                }
+              </div>
 
-          {/* Prompt framework hint */}
-          <div style={{
-            marginTop: 8,
-            padding: '6px 8px',
-            background: '#0f172a',
-            borderRadius: 6,
-            border: '1px solid #334155',
-          }}>
-            <div style={{ fontSize: 10, color: '#94a3b8', lineHeight: 1.5 }}>
-              Click any stage to see example prompts for invoking agents at that step.
-            </div>
-          </div>
+              <div style={{
+                marginTop: 8,
+                padding: '6px 8px',
+                background: '#0f172a',
+                borderRadius: 6,
+                border: '1px solid #334155',
+              }}>
+                <div style={{ fontSize: 10, color: '#94a3b8', lineHeight: 1.5 }}>
+                  Click any stage to see example prompts for invoking agents at that step.
+                </div>
+              </div>
+            </>
+          )}
+
+          {viewMode === 'domainArchitecture' && (
+            <>
+              <div style={{
+                marginTop: 10,
+                paddingTop: 10,
+                borderTop: '1px solid #334155',
+              }}>
+                <div className="workflow-legend-feedback">
+                  <span className="workflow-legend-dash" />
+                  Dependency (solid) / Consultation (dashed)
+                </div>
+              </div>
+
+              <div style={{
+                marginTop: 8,
+                fontSize: 10,
+                color: '#64748b',
+                lineHeight: 1.5,
+              }}>
+                Tier 2 depends on Tier 1 foundations. Tier 3 consults Tier 2 for craft quality. The Product Orchestrator resolves cross-domain conflicts.
+              </div>
+
+              <div style={{
+                marginTop: 8,
+                padding: '6px 8px',
+                background: '#0f172a',
+                borderRadius: 6,
+                border: '1px solid #334155',
+              }}>
+                <div style={{ fontSize: 10, color: '#94a3b8', lineHeight: 1.5 }}>
+                  Click any domain to see scope, AI applications, dependencies, and monitoring hooks.
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 10 }}>
+                {onShowArchDocs && (
+                  <button
+                    onClick={onShowArchDocs}
+                    style={{
+                      width: '100%',
+                      padding: '7px 10px',
+                      fontSize: 11,
+                      fontWeight: 600,
+                      background: '#172554',
+                      border: '1px solid #3b82f6',
+                      borderRadius: 6,
+                      color: '#93c5fd',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Architecture Guide
+                  </button>
+                )}
+                {onShowCalibration && (
+                  <button
+                    onClick={onShowCalibration}
+                    style={{
+                      width: '100%',
+                      padding: '7px 10px',
+                      fontSize: 11,
+                      fontWeight: 600,
+                      background: hasCalibration ? '#1c1407' : '#0f172a',
+                      border: `1px solid ${hasCalibration ? '#f59e0b' : '#334155'}`,
+                      borderRadius: 6,
+                      color: hasCalibration ? '#fcd34d' : '#94a3b8',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {hasCalibration ? 'Product Calibration Active' : 'Calibrate for Product'}
+                  </button>
+                )}
+              </div>
+            </>
+          )}
         </>
       )}
 

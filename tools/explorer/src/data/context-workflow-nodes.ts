@@ -171,6 +171,48 @@ export const contextWorkflowNodes: WorkflowNode[] = [
     position: P,
     data: {
       stageNumber: 5,
+      title: 'Domain Calibration',
+      description:
+        'Configure the domain micro-agent system for the product\'s business vertical. The calibrator reads the PDB and domain signals extracted during context ingestion, identifies core vs. supporting domains, and generates a domain-config.yml for task generation.',
+      agents: [
+        { name: 'vertical-calibrator', role: 'ideation' },
+        { name: 'product-orchestrator', role: 'system' },
+      ],
+      substeps: [
+        'Read PDB to extract vertical, value prop, and domain signals',
+        'Present 15 domains — classify as core / supporting / not-applicable',
+        'Calibrate AI applications per domain (critical / useful / skip)',
+        'Set implementation priorities and identify AI differentiator',
+        'Generate docs/architecture/domain-config.yml',
+      ],
+      artifact: 'domain-config.yml',
+      artifactPath: 'docs/architecture/domain-config.yml',
+      phase: 'ideate',
+      templateFiles: [
+        'templates/subagents/ideation/vertical-calibrator.md',
+        'templates/subagents/system/product-orchestrator.md',
+      ],
+      handoff:
+        'Domain configuration is saved. Task generation uses this to auto-populate domain_agents.',
+      examplePrompts: [
+        {
+          agent: '@vertical-calibrator',
+          prompt: '@vertical-calibrator Configure domain agents for this product. The PDB is at docs/product_design/app_pdb.md.',
+          context: 'The calibrator reads the PDB to pre-fill domain suggestions based on extracted context signals.',
+        },
+      ],
+      tips: [
+        'Run after PDB generation but before task creation for best results',
+        'Domain signals from context ingestion pre-fill the calibrator suggestions',
+      ],
+    },
+  },
+  {
+    id: 'ctx-pipeline-6',
+    type: 'pipelineNode',
+    position: P,
+    data: {
+      stageNumber: 6,
       title: 'Architecture Setup',
       description:
         'Establish the project foundation: schemas, scaffolding, API contracts, and infrastructure. Complete all Phase 0 tasks before feature development begins.',
@@ -205,11 +247,11 @@ export const contextWorkflowNodes: WorkflowNode[] = [
     },
   },
   {
-    id: 'ctx-pipeline-6',
+    id: 'ctx-pipeline-7',
     type: 'pipelineNode',
     position: P,
     data: {
-      stageNumber: 6,
+      stageNumber: 7,
       title: 'Feature Development',
       description:
         'Implement features following the task files, prioritizing the core demo flow. The Implementation Agent picks tasks in phase order, reads spec_refs, and builds the minimum viable path through the product.',
@@ -246,11 +288,11 @@ export const contextWorkflowNodes: WorkflowNode[] = [
     },
   },
   {
-    id: 'ctx-pipeline-7',
+    id: 'ctx-pipeline-8',
     type: 'pipelineNode',
     position: P,
     data: {
-      stageNumber: 7,
+      stageNumber: 8,
       title: 'Testing',
       description:
         'Write tests that validate the core demo flow works end-to-end. Focus on the happy path and critical error scenarios — exhaustive coverage comes later.',
@@ -286,11 +328,11 @@ export const contextWorkflowNodes: WorkflowNode[] = [
     },
   },
   {
-    id: 'ctx-pipeline-8',
+    id: 'ctx-pipeline-9',
     type: 'pipelineNode',
     position: P,
     data: {
-      stageNumber: 8,
+      stageNumber: 9,
       title: 'Quality Review',
       description:
         'Focused review covering demo readiness: does the core flow work, does it look good, are there any embarrassing bugs? Lighter than production QA — focused on stakeholder impression.',
@@ -334,11 +376,11 @@ export const contextWorkflowNodes: WorkflowNode[] = [
     },
   },
   {
-    id: 'ctx-pipeline-9',
+    id: 'ctx-pipeline-10',
     type: 'pipelineNode',
     position: P,
     data: {
-      stageNumber: 9,
+      stageNumber: 10,
       title: 'Demo Package',
       description:
         'Prepare the final demo artifact: seed data loaded, demo script written, environment configured, known limitations documented. The output is a stakeholder-ready demonstration.',
@@ -378,11 +420,11 @@ export const contextWorkflowNodes: WorkflowNode[] = [
     },
   },
   {
-    id: 'ctx-pipeline-10',
+    id: 'ctx-pipeline-11',
     type: 'pipelineNode',
     position: P,
     data: {
-      stageNumber: 10,
+      stageNumber: 11,
       title: 'Stakeholder Review',
       description:
         'Present the demo to the stakeholder. Capture feedback, new requirements, and scope changes. Route feedback back to Gap Analysis for iteration or mark the MVP as accepted.',

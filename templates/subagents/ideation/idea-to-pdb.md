@@ -79,6 +79,25 @@ Identify:
 - Market/user risks (demand, adoption, competition)
 - Dependencies on external services or decisions
 
+#### 1.6 Domain Landscape
+
+If domain micro-agents are enabled for this project, identify which areas of software craft this idea touches:
+
+- **Geolocation/Maps** — Does the product involve location, mapping, routing, or spatial features?
+- **Messaging** — Does it need real-time chat, channels, or presence?
+- **Search/Discovery** — Does it involve search, filtering, ranking, or recommendations?
+- **Payments/Billing** — Does it involve transactions, subscriptions, or invoicing?
+- **Notifications** — Does it need push, email, SMS, or in-app alerts?
+- **Media/Content** — Does it involve images, video, or file management?
+- **AI Features** — Where is AI the competitive advantage vs. a nice-to-have?
+
+For each relevant area, note:
+- Whether it's CORE (essential to value proposition) or SUPPORTING (needed but not differentiating)
+- Where AI could replace or augment traditional approaches
+- Which domain will be the product's **AI differentiator** — the area where AI is the competitive moat
+
+This informs the PDB's Domain Architecture section and the subsequent vertical calibration step.
+
 ### Output
 
 Produce a concise **Idea Summary** covering:
@@ -188,6 +207,23 @@ Provide request/response schemas in JSON for major endpoints.
 **4.3 Environment Strategy** (deep-dive only)
 
 Detail dev, staging, and production environments.
+
+#### 4.5 Domain Architecture (if domain micro-agents enabled)
+
+Map the product's features to domain micro-agent areas:
+
+| Domain | Relevance | AI Role | Priority |
+|---|---|---|---|
+| maps-geo | core / supporting / n/a | Builder AI / Consumer AI / both | P0-P2 |
+| messaging | core / supporting / n/a | Builder AI / Consumer AI / both | P0-P2 |
+| ... | ... | ... | ... |
+
+For core domains, briefly describe:
+- What the domain owns in this product (e.g. "maps-geo owns fleet tracking, route optimization, geofencing")
+- The primary AI opportunity (e.g. "predictive routing replaces manual dispatch")
+- Dependencies on foundation domains (schema, auth, API)
+
+This section feeds directly into `@vertical-calibrator` for detailed domain configuration.
 
 #### 5. AI Architecture (if applicable)
 
@@ -331,6 +367,9 @@ Once the PDB is saved, guide the user to:
 
 1. Review the PDB quality checklist (see [docs/IDEA_TO_PDB.md](../../../docs/IDEA_TO_PDB.md))
 2. Follow [SETUP_GUIDE.md](../../../SETUP_GUIDE.md) Path B (they now have a PDB)
-3. Set up standard agents (Implementation, QA, Testing)
-4. Create task files with `spec_refs` pointing to the PDB
-5. Begin implementation using the multi-agent workflow
+3. **If domain micro-agents are enabled**: invoke `@vertical-calibrator` to generate `docs/architecture/domain-config.yml` — the PDB's Domain Architecture section (4.5) provides the starting input
+4. Create task files with `@pdb-to-tasks` — if `domain-config.yml` exists, tasks will be auto-populated with `domain_agents`
+5. Set up standard agents (Implementation, QA, Testing)
+6. Begin implementation using the multi-agent workflow
+
+**Recommended pipeline**: `@idea-to-pdb` → `@vertical-calibrator` → `@pdb-to-tasks` → development

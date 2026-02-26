@@ -81,12 +81,15 @@ See `docs/research/agent_runtime_tooling_landscape.md` Section 5 for full evalua
 ## Process
 
 1. **Scope**: Identify which code/features to audit
-2. **Scan**: Run through the checklist systematically
-3. **Classify**: Categorize findings by severity (Critical / High / Medium / Low)
-4. **Remediate**: Provide specific fix guidance for each finding
-5. **Verify**: Confirm fixes resolve the vulnerability
+2. **Validate practices**: Use `parallel-web-search` or Context7 to verify that security recommendations reflect current best practices (e.g., hashing algorithms, token standards, OWASP Top 10 updates, CVEs for dependencies in use). Security guidance stales fast — never rely solely on built-in knowledge.
+3. **Scan**: Run through the checklist systematically
+4. **Classify**: Categorize findings by severity (Critical / High / Medium / Low)
+5. **Remediate**: Provide specific fix guidance for each finding, citing current sources
+6. **Verify**: Confirm fixes resolve the vulnerability
 
 ## Best Practices
+
+> **Validation required.** Security practices evolve with every CVE disclosure and standards update. Before applying these recommendations, verify they reflect current guidance. Document sources.
 
 1. Never trust user input
 2. Use parameterized queries

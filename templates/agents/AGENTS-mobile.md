@@ -159,6 +159,7 @@ This document defines specialized **development agents** for mobile app developm
 - [ ] Offline behavior tested (if applicable)
 - [ ] Performance acceptable (no memory leaks)
 - [ ] Accessibility tested
+- [ ] Relevant MCP tools and skills used where applicable (see `docs/CURSOR_PLUGINS.md`)
 
 **Special Instructions**:
 - Test business logic in domain layer (Clean Architecture features)
@@ -239,6 +240,50 @@ tasks:
     # ... other fields
 ```
 
+### Role Mapping
+
+Task files use short `agent_roles` values. This table maps each value to the role (and checklist) the agent should adopt:
+
+| `agent_roles` value | Role to adopt | Notes |
+|----------------------|---------------|-------|
+| `implementation` | Implementation Agent | Business logic, services, state management |
+| `ui_ux` | UI/UX Agent | Design system, accessibility, visual consistency |
+| `testing` | Testing Agent | Unit, widget, and integration tests |
+| `quality_assurance` | UI/UX Agent | Code review — apply QA lens with UI/UX Agent's design review checklist |
+| `documentation` | Implementation Agent | Documentation — apply docs lens to code and features |
+| `frontend` | UI/UX Agent | Frontend-scoped — use UI/UX Agent checklist |
+| `backend` | Implementation Agent | Backend-scoped — use Implementation Agent checklist |
+| `security` | Implementation Agent | Security focus — apply security lens to auth, data handling |
+
+If a task lists a value not in this table, treat it as Implementation Agent.
+
+---
+
+## 📋 Task Execution Protocol
+
+When you pick up a task with multiple `agent_roles`, follow this protocol:
+
+1. **Read the task** — review `agent_roles`, `spec_refs`, `description`, and `acceptance_criteria`
+2. **Resolve roles** — map each `agent_roles` value to a role using the Role Mapping table above
+3. **Execute in order** — work through the roles in the order they are listed in `agent_roles`
+4. **Per role** — complete that role's checklist, then add a handoff note to the task before moving to the next role
+5. **Final role** — after completing the last role's work, validate all `acceptance_criteria` and propose `status: done`
+6. **Single role** — if only one role is listed, complete its checklist and propose status when done
+
+---
+
+## 🔌 Plugins and MCP Tools
+
+Agents have access to MCP tools and skills provided by installed Cursor plugins. See `docs/CURSOR_PLUGINS.md` for the full list. Use them when relevant to the task.
+
+**Stack-relevant examples**:
+- **Context7**: Look up current docs for {{FRAMEWORK}} and mobile dependencies before implementing unfamiliar APIs
+- **BrowserStack App Automate**: Test on real devices across iOS and Android
+- **Figma skills**: Translate Figma mockups to mobile UI components with 1:1 fidelity
+- **parallel-web-search**: Verify best practices for mobile patterns, accessibility, or platform-specific behavior
+
+Flag gaps: if agents are doing work manually that a plugin, skill, or MCP server could handle, recommend installing or creating one and update `docs/CURSOR_PLUGINS.md`.
+
 ---
 
 ## ✅ Agent-Specific Checklists
@@ -252,6 +297,7 @@ tasks:
 - [ ] Offline behavior handled (if applicable)
 - [ ] Code follows `.cursorrules` standards
 - [ ] No hardcoded secrets or API keys
+- [ ] Relevant MCP tools and skills used where applicable (see `docs/CURSOR_PLUGINS.md`)
 
 ### UI/UX Agent Checklist
 - [ ] All colors, fonts, spacing use theme tokens
@@ -262,6 +308,7 @@ tasks:
 - [ ] All screens provide clear next actions
 - [ ] Platform-appropriate widgets used (Material vs Cupertino)
 - [ ] Animations are subtle and appropriate
+- [ ] Relevant MCP tools and skills used where applicable (see `docs/CURSOR_PLUGINS.md`)
 
 ### Testing Agent Checklist
 - [ ] Unit tests for business logic (services, providers)
@@ -272,6 +319,7 @@ tasks:
 - [ ] Tests are fast (no real network calls)
 - [ ] Edge cases and error scenarios tested
 - [ ] Test coverage meets {{TEST_COVERAGE_TARGET}}% target
+- [ ] Relevant MCP tools and skills used where applicable (see `docs/CURSOR_PLUGINS.md`)
 
 ---
 

@@ -19,6 +19,8 @@ import { existingRepoNodes as rawExistingRepoNodes } from './data/existing-repo-
 import { existingRepoEdges } from './data/existing-repo-edges';
 import { contextWorkflowNodes as rawContextNodes } from './data/context-workflow-nodes';
 import { contextWorkflowEdges } from './data/context-workflow-edges';
+import { domainNodes as rawDomainNodes, type CalibrationState, type DomainNodeData } from './data/domain-nodes';
+import { domainEdges } from './data/domain-edges';
 import { getLayoutedElements } from './data/layout';
 import { parseTranscript, parseTxtTranscript, sessionToNodes, type SessionData, type MonitorNodeData, STATUS_COLORS } from './data/transcript-parser';
 import { DEMO_TRANSCRIPT } from './data/demo-transcript';
@@ -29,13 +31,16 @@ import { ResearchNode } from './components/ResearchNode';
 import { ConfigNode } from './components/ConfigNode';
 import { PipelineNode } from './components/PipelineNode';
 import { MonitorNode } from './components/MonitorNode';
+import { DomainNode } from './components/DomainNode';
 import { DetailPanel } from './components/DetailPanel';
+import { DomainDetailPanel } from './components/DomainDetailPanel';
 import { Legend } from './components/Legend';
+import { ArchitectureDocsPanel } from './components/ArchitectureDocsPanel';
 import { FileDropZone } from './components/FileDropZone';
 import { SessionDetailPanel } from './components/SessionDetailPanel';
 import { Timeline } from './components/Timeline';
 
-export type ViewMode = 'system' | 'newIdea' | 'existingRepo' | 'contextToMvp' | 'monitor';
+export type ViewMode = 'system' | 'newIdea' | 'existingRepo' | 'contextToMvp' | 'domainArchitecture' | 'monitor';
 
 const nodeTypes: NodeTypes = {
   agentNode: AgentNode,
@@ -44,6 +49,7 @@ const nodeTypes: NodeTypes = {
   configNode: ConfigNode,
   pipelineNode: PipelineNode,
   monitorNode: MonitorNode,
+  domainNode: DomainNode,
 };
 
 const { nodes: systemNodes } = getLayoutedElements(rawNodes, allEdges);
@@ -65,6 +71,13 @@ const { nodes: contextMvpLayoutNodes } = getLayoutedElements(rawContextNodes, co
   ranksep: 180,
   nodesep: 50,
 });
+const { nodes: domainLayoutNodes } = getLayoutedElements(rawDomainNodes, domainEdges, {
+  nodeWidth: 240,
+  nodeHeight: 140,
+  direction: 'TB',
+  ranksep: 160,
+  nodesep: 80,
+});
 
 interface LoadedSession {
   session: SessionData;
@@ -78,11 +91,14 @@ export default function App() {
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const [hiddenCategories, setHiddenCategories] = useState<Set<NodeCategory>>(new Set());
   const [searchQuery, setSearchQuery] = useState('');
+  const [showArchDocs, setShowArchDocs] = useState(false);
+  const [calibrationActive, setCalibrationActive] = useState(false);
 
   const [sysNodes, setSysNodes] = useState<Node[]>(systemNodes);
   const [ideaNodes, setIdeaNodes] = useState<Node[]>(newIdeaNodes);
   const [repoNodes, setRepoNodes] = useState<Node[]>(existingRepoLayoutNodes);
   const [contextMvpNodes, setContextMvpNodes] = useState<Node[]>(contextMvpLayoutNodes);
+  const [domainNodes, setDomainNodes] = useState<Node[]>(domainLayoutNodes);
 
   const [sessions, setSessions] = useState<LoadedSession[]>([]);
   const [activeSessionIndex, setActiveSessionIndex] = useState(-1);
@@ -148,6 +164,8 @@ export default function App() {
       setRepoNodes(prev => applyNodeChanges(changes, prev));
     } else if (viewMode === 'contextToMvp') {
       setContextMvpNodes(prev => applyNodeChanges(changes, prev));
+    } else if (viewMode === 'domainArchitecture') {
+      setDomainNodes(prev => applyNodeChanges(changes, prev));
     } else {
       setSessions(prev => {
         if (activeSessionIndex < 0 || activeSessionIndex >= prev.length) return prev;
@@ -181,6 +199,37 @@ export default function App() {
       return next;
     });
   }, []);
+
+  // Demo calibration data — in production, this comes from domain-config.yml
+  const demoCalibration: Record<string, CalibrationState> = {
+    'domain-maps-geo': { relevance: 'core', isAiDifferentiator: true },
+    'domain-messaging': { relevance: 'core' },
+    'domain-search-discovery': { relevance: 'supporting' },
+    'domain-payments-billing': { relevance: 'supporting' },
+    'domain-notifications': { relevance: 'core' },
+    'domain-media-content': { relevance: 'not-applicable' },
+    'domain-schema-data': { relevance: 'core' },
+    'domain-api-connections': { relevance: 'core' },
+    'domain-auth-identity': { relevance: 'core' },
+    'domain-infrastructure': { relevance: 'core' },
+    'domain-animation-motion': { relevance: 'not-applicable' },
+    'domain-accessibility': { relevance: 'supporting' },
+    'domain-internationalization': { relevance: 'not-applicable' },
+    'domain-performance': { relevance: 'supporting' },
+    'domain-analytics-telemetry': { relevance: 'supporting' },
+  };
+
+  const calibratedDomainNodes = useMemo(() => {
+    if (!calibrationActive) return domainNodes;
+    return domainNodes.map(n => {
+      const cal = demoCalibration[n.id];
+      if (!cal) return n;
+      return {
+        ...n,
+        data: { ...n.data as DomainNodeData, calibration: cal },
+      };
+    });
+  }, [domainNodes, calibrationActive]);
 
   const filteredSystemNodes = useMemo(() => {
     const query = searchQuery.toLowerCase();
@@ -234,7 +283,9 @@ export default function App() {
         ? repoNodes
         : viewMode === 'contextToMvp'
           ? contextMvpNodes
-          : filteredMonitorNodes;
+          : viewMode === 'domainArchitecture'
+            ? calibratedDomainNodes
+            : filteredMonitorNodes;
 
   const activeEdges = viewMode === 'system'
     ? filteredSystemEdges
@@ -244,7 +295,9 @@ export default function App() {
         ? existingRepoEdges
         : viewMode === 'contextToMvp'
           ? contextWorkflowEdges
-          : monitorEdges;
+          : viewMode === 'domainArchitecture'
+            ? domainEdges
+            : monitorEdges;
 
   const minimapNodeColor = useCallback((node: Node) => {
     if (viewMode === 'monitor') {
@@ -262,6 +315,10 @@ export default function App() {
         verify: '#f59e0b',
         ship: '#22c55e',
         operate: '#c084fc',
+        foundation: '#f59e0b',
+        feature: '#3b82f6',
+        experience: '#a78bfa',
+        orchestration: '#34d399',
       };
       return phaseColorMap[phase] || '#64748b';
     }
@@ -391,6 +448,13 @@ export default function App() {
           onClick={() => handleViewChange('contextToMvp')}
         >
           Context to MVP
+        </button>
+        <button
+          className={viewMode === 'domainArchitecture' ? 'active' : ''}
+          onClick={() => handleViewChange('domainArchitecture')}
+          style={viewMode === 'domainArchitecture' ? {} : { borderLeft: '1px solid #334155' }}
+        >
+          Domain Agents
         </button>
         <button
           className={viewMode === 'monitor' ? 'active' : ''}
@@ -624,16 +688,32 @@ export default function App() {
             onToggleCategory={toggleCategory}
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
+            onShowArchDocs={viewMode === 'domainArchitecture' ? () => setShowArchDocs(true) : undefined}
+            onShowCalibration={viewMode === 'domainArchitecture' ? () => setCalibrationActive(prev => !prev) : undefined}
+            hasCalibration={calibrationActive}
           />
 
-          <DetailPanel
-            node={selectedNode}
-            viewMode={viewMode}
-            allNodes={activeNodes}
-            allEdges={activeEdges}
-            onClose={() => setSelectedNode(null)}
-          />
+          {viewMode === 'domainArchitecture' && selectedNode && selectedNode.type === 'domainNode' ? (
+            <DomainDetailPanel
+              node={selectedNode}
+              allNodes={activeNodes}
+              allEdges={activeEdges}
+              onClose={() => setSelectedNode(null)}
+            />
+          ) : (
+            <DetailPanel
+              node={selectedNode}
+              viewMode={viewMode}
+              allNodes={activeNodes}
+              allEdges={activeEdges}
+              onClose={() => setSelectedNode(null)}
+            />
+          )}
         </>
+      )}
+
+      {showArchDocs && viewMode === 'domainArchitecture' && (
+        <ArchitectureDocsPanel onClose={() => setShowArchDocs(false)} />
       )}
 
       {viewMode === 'monitor' && monitorSession && (selectedNode || showSessionOverview) && (

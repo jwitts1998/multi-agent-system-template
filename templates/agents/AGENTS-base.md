@@ -177,6 +177,63 @@ This document defines specialized **development agents** for the {{PROJECT_NAME}
 
 ---
 
+## 🧩 Domain Micro-Agents
+
+Domain micro-agents are **development agents organized by area of software craft** rather than by workflow phase. Each one owns a vertical slice of the system, brings deep expertise, and always evaluates where AI can enhance its domain — both for building the product and for the end user.
+
+For full architecture details, see [vertical-micro-agents-exploration.md](docs/architecture/vertical-micro-agents-exploration.md).
+
+### Three Mandates
+
+Every domain agent has three ongoing responsibilities:
+1. **Create** — design and implement using modern best practices for its domain
+2. **Monitor** — define metrics, alerts, and observability hooks
+3. **Maintain** — evolve the domain over time (upgrades, refactors, deprecations)
+
+### Tier Model
+
+| Tier | Purpose | Agents |
+|------|---------|--------|
+| **1 — Foundation** | Shared primitives | `@schema-data`, `@api-connections`, `@auth-identity`, `@infrastructure` |
+| **2 — Feature** | User-facing capabilities | `@maps-geo`, `@messaging`, `@search-discovery`, `@payments-billing`, `@notifications`, `@media-content` |
+| **3 — Experience** | Cross-cutting craft quality | `@animation-motion`, `@accessibility`, `@internationalization`, `@performance`, `@analytics-telemetry` |
+
+### How They Compose with Role-Based Agents
+
+Domain agents define **what expertise** is applied. Role-based agents (Implementation, QA, Testing, Documentation) define **how work gets done**. They compose on tasks:
+
+```yaml
+- id: MAPS_T1_location_search
+  agent_roles: [implementation, testing]
+  domain_agents: [maps-geo, search-discovery]
+```
+
+### Orchestration
+
+- `@product-orchestrator` — resolves cross-domain conflicts, sets AI strategy, manages domain lifecycle
+- `@domain-router` — determines which domain agent(s) a task touches, populates `domain_agents`
+
+### Agent Prompts
+
+Domain agent definitions are in `.cursor/agents/domains/`. Each contains scope, modern practices, AI applications (builder + consumer), dependencies, monitoring hooks, and maintenance triggers.
+
+### Pipeline Integration
+
+Domain agents are wired into the full ideation-to-development pipeline:
+
+```
+@idea-to-pdb → @vertical-calibrator → @pdb-to-tasks → development
+```
+
+1. **`@idea-to-pdb`** (or `@context-to-pdb`) generates a PDB with a Domain Architecture section (4.5) that identifies which domains are relevant.
+2. **`@vertical-calibrator`** reads the PDB, walks through a 5-step calibration (discover vertical, identify domains, calibrate AI, set priorities, generate config), and outputs `docs/architecture/domain-config.yml`.
+3. **`@pdb-to-tasks`** reads `domain-config.yml` and auto-populates `domain_agents` on generated tasks based on domain relevance and signal matching.
+4. **During development**, domain agents bring craft expertise. The `domain-routing` rule auto-suggests `domain_agents` when editing task files. The `domain-consultation` rule pulls in Tier 3 lenses during code review.
+
+Use the `full-pipeline` skill to orchestrate all steps in sequence, or run each agent individually.
+
+---
+
 ## 🔄 Agent Collaboration Patterns
 
 ### Pattern 1: Sequential Feature Implementation (Recommended)
@@ -278,12 +335,24 @@ tasks:
     # ... other fields
 ```
 
-### Agent Role Values
+### Role Mapping
 
-- `implementation` - Implementation Agent should work on this task
-- `quality_assurance` - Quality Assurance Agent should review this task
-- `testing` - Testing Agent should write tests
-- `documentation` - Documentation Agent should document this task
+Task files use short `agent_roles` values. This table maps each value to the role (and checklist) the agent should adopt:
+
+| `agent_roles` value | Role to adopt | Notes |
+|----------------------|---------------|-------|
+| `implementation` | Implementation Agent | Core development work |
+| `quality_assurance` | Quality Assurance Agent | Code review and quality enforcement |
+| `testing` | Testing Agent | Test creation and coverage |
+| `documentation` | Documentation Agent | Docs and API reference |
+| `ui_ux` | Implementation Agent | UI/UX focus — use Implementation checklist plus design system review |
+| `security` | Quality Assurance Agent | Security focus — use QA checklist with emphasis on security items |
+| `frontend` | Implementation Agent | Frontend-scoped implementation |
+| `backend` | Implementation Agent | Backend-scoped implementation |
+| `database` | Implementation Agent | Database-scoped implementation |
+| `api` | Implementation Agent | API-scoped implementation |
+
+If a task lists a value not in this table, treat it as Implementation Agent unless the project's AGENTS.md defines a different mapping. Stack-specific AGENTS templates (full-stack, web, mobile, backend) override this table with their own role definitions.
 
 **Multiple roles** can be specified for collaborative tasks:
 - Sequential workflow: `[implementation, quality_assurance, testing]`
@@ -294,15 +363,25 @@ tasks:
 
 ---
 
-## 📊 Task Selection Process
+## 📊 Task Execution Protocol
+
+When you pick up a task with multiple `agent_roles`, follow this protocol:
+
+1. **Read the task** — review `agent_roles`, `spec_refs`, `description`, and `acceptance_criteria`
+2. **Resolve roles** — map each `agent_roles` value to a role using the Role Mapping table above
+3. **Execute in order** — work through the roles in the order they are listed in `agent_roles`
+4. **Per role** — complete that role's checklist, then add a handoff note to the task (see Handoff Protocol below) before moving to the next role
+5. **Final role** — after completing the last role's work, validate all `acceptance_criteria` and propose `status: done`
+6. **Single role** — if only one role is listed, complete its checklist and propose status when done
+
+### Task Selection
 
 1. **Open relevant task file**: `tasks/*.yml` for the feature you're working on
 2. **Find a task**: Look for `status: todo` with `priority: high` (preferred)
-3. **Check agent_roles**: If specified, verify your agent type matches
+3. **Map agent_roles**: Use the Role Mapping table to identify which role(s) to adopt
 4. **Read context**: Review `spec_refs`, `description`, `acceptance_criteria`
-5. **Propose status change**: Suggest `status: in_progress` before starting
-6. **Work on task**: Follow agent-specific responsibilities
-7. **Update task**: Propose `status: done` when acceptance criteria are met
+5. **Execute**: Follow the Task Execution Protocol — work through roles in order, complete each checklist, leave handoff notes
+6. **Update**: Final role validates acceptance criteria and proposes `status: done`
 
 ---
 
@@ -338,6 +417,8 @@ When multiple agents work on the same task:
 - [ ] Code is maintainable and performant
 - [ ] Related task acceptance criteria met
 - [ ] Tooling gaps flagged (missing skills, plugins, or MCP servers that would help)
+- [ ] Practices validated against current sources where required (see Practice Validation Protocol)
+- [ ] Validation sources documented in task notes
 
 ### Quality Assurance Agent Checklist
 - [ ] Code quality meets standards
@@ -347,6 +428,8 @@ When multiple agents work on the same task:
 - [ ] Performance considerations addressed
 - [ ] Documentation adequate
 - [ ] Plugin/skill/MCP coverage reviewed — gaps identified and recommendations made
+- [ ] Practice validation verified — new patterns and libraries cite current sources
+- [ ] Outdated built-in practices flagged for template update if found
 
 ### Testing Agent Checklist
 - [ ] Unit tests for business logic
@@ -363,6 +446,76 @@ When multiple agents work on the same task:
 - [ ] README updated if needed
 - [ ] Examples provided for complex functionality
 - [ ] Documentation follows standards from `.cursorrules`
+
+---
+
+## 🔍 Practice Validation Protocol
+
+Agents carry built-in knowledge of best practices, but that knowledge has a training cutoff. Before relying on it for implementation decisions, agents must validate their practices against current sources. This creates a structured checks-and-balances loop between agents.
+
+### When Validation Is Required
+
+Validation is **mandatory** when:
+- Introducing a new library, framework, or significant dependency
+- Making architecture or infrastructure decisions (database choice, auth strategy, deployment model)
+- Implementing security-sensitive code (authentication, encryption, data handling, API keys)
+- Working in a domain where practices evolve rapidly (payments/PCI, accessibility/WCAG, performance, AI/ML)
+
+Validation is **recommended** when:
+- Implementing patterns in a domain the agent hasn't validated in this session
+- A domain agent's "Modern Practices" section is driving implementation choices
+- Choosing between multiple valid approaches with meaningful tradeoffs
+- Upgrading or migrating existing patterns
+
+Validation can be **skipped** when:
+- Making minor changes within an established, previously-validated pattern
+- Following patterns already present and validated in the codebase
+- The task is purely mechanical (renaming, moving files, formatting)
+
+### Validation Process
+
+**Step 1 — Research.** Use `parallel-web-search` or Context7 to check current best practices for the domain. Frame queries specifically: "{{FRAMEWORK}} authentication best practices 2025-2026" not "how to do auth."
+
+**Step 2 — Compare.** Evaluate findings against:
+- The agent's built-in practices (e.g., domain agent "Modern Practices" sections)
+- The project's existing patterns and `.cursorrules`
+- The specific constraints of the task
+
+**Step 3 — Document.** Record in task notes or PR description:
+- What was validated (topic, domain)
+- Source(s) consulted (URLs, library docs, official guides)
+- Whether built-in practices are still current or need updating
+- Any deviations from standard recommendations and why
+
+**Step 4 — Flag drift.** If research reveals that a domain agent's "Modern Practices" or the project's `.cursorrules` contain outdated guidance, flag it explicitly:
+- Note the specific outdated practice
+- Cite the current recommendation with source
+- Recommend a template or rules update
+
+### Checks and Balances
+
+| Role | Responsibility |
+|------|----------------|
+| **Implementation Agent** | Validate practices *before* implementing new patterns. Record sources in task notes. |
+| **Quality Assurance Agent** | Verify that validation occurred. Check task notes for sources. Challenge unsourced pattern choices. |
+| **Code Reviewer** | Confirm that new libraries, patterns, and security-sensitive code cite current sources. Flag if missing. |
+| **Domain Agents** | Validate their own "Modern Practices" against current sources when those practices drive implementation decisions. |
+| **Testing Agent** | Validate testing strategies and tools against current best practices for the framework and test type. |
+
+### What "Validated" Looks Like
+
+A validated implementation includes:
+1. **Source citation** — at least one authoritative source (official docs, framework guide, or well-regarded reference) consulted and noted
+2. **Currency check** — confirmation that the approach reflects practices from the last 12-18 months, not legacy patterns
+3. **Tradeoff awareness** — if multiple valid approaches exist, brief note on why this one was chosen
+4. **Drift flag** — if built-in practices are outdated, explicit note to update templates
+
+### Anti-Patterns
+
+- **Cargo-culting**: copying patterns from training data without checking if they're still recommended
+- **Skipping validation because it "seems obvious"**: obvious practices are the ones most likely to have quietly changed
+- **Validating once, applying forever**: validation is per-session, not permanent. Practices evolve.
+- **Citing a blog post over official docs**: prefer official documentation, then well-maintained community guides, then blog posts
 
 ---
 
@@ -437,15 +590,11 @@ All agents should actively identify gaps in available tooling — not just use w
 
 ### As a Development Agent
 
-1. **Identify your role**: Determine if you're acting as Implementation, QA, Testing, or Documentation Agent
-2. **Select a task**: Open relevant `tasks/*.yml` file and pick a task with `status: todo`
-3. **Read context**:
-   - Read the task description and `spec_refs`
-   - Review related documentation
-   - Check existing similar code for patterns
-4. **Check agent_roles**: If task specifies `agent_roles`, verify your role matches
-5. **Work on task**: Follow your agent's responsibilities and best practices
-6. **Update task**: Propose status change (todo → in_progress → done) when appropriate
+1. **Select a task**: Open relevant `tasks/*.yml` file and pick a task with `status: todo`
+2. **Map agent_roles**: Use the Role Mapping table to identify which role(s) to adopt
+3. **Read context**: Review `spec_refs`, `description`, `acceptance_criteria`, and related documentation
+4. **Execute**: Follow the Task Execution Protocol — work through roles in order, complete each checklist, leave handoff notes
+5. **Update**: Final role validates acceptance criteria and proposes `status: done`
 
 ### As a Human Developer
 

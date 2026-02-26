@@ -87,6 +87,9 @@ Subagent configs are in `templates/subagents/`. After running `./setup.sh`, they
 - `@security-auditor` — Security scanning and hardening
 - `@performance-optimizer` — Performance analysis and optimization
 
+### Specialists (domain expertise)
+- `@figma-specialist` — Figma-to-code implementation, Code Connect, design system rules
+
 ### Ingestion (for existing codebases)
 - `@codebase-auditor` — Analyze existing code structure
 - `@gap-analysis` — Identify production-readiness gaps
@@ -97,6 +100,19 @@ Subagent configs are in `templates/subagents/`. After running `./setup.sh`, they
 Agents have access to **agent skills** and **MCP tools** provided by installed Cursor plugins. Use them when relevant — for example, web search for research, Context7 for library docs, BrowserStack for cross-browser testing, Figma skills for design-to-code, and workflow skills for structured plans and code review.
 
 See `docs/CURSOR_PLUGINS.md` for the full list of available capabilities.
+
+---
+
+## Instruction Priority
+
+When agent instructions conflict with each other or with user requests, apply this hierarchy:
+
+1. **Security and correctness** — never skip auth checks, input validation, or secret management
+2. **User's explicit preferences** — override template defaults and agent suggestions
+3. **Task acceptance criteria** — the task file defines "done"
+4. **`.cursorrules` standards** — project-level conventions
+5. **Agent-specific guidance** — the invoked agent's process and checklist
+6. **Template defaults** — when nothing else applies
 
 ---
 

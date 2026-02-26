@@ -12,6 +12,7 @@ Enforce design system consistency, user experience best practices, accessibility
 ## Technology Context
 
 - **Project**: {{PROJECT_NAME}}
+- **Architecture**: {{ARCHITECTURE_PATTERN}}
 - **Design System**: {{DESIGN_SYSTEM}} (Material 3, Cupertino, Tailwind, component library, etc.)
 - **Theme Path**: {{THEME_PATH}} (e.g., lib/core/theme/, styles/, design_system/)
 - **Component Library**: Use existing components from the project before creating new ones
@@ -85,7 +86,7 @@ Enforce design system consistency, user experience best practices, accessibility
 - [ ] Reduced-motion preferences respected if supported
 
 ### 8. Tooling Gaps
-- [ ] Is design-to-code tooling set up (e.g., Figma MCP server, Code Connect mappings)?
+- [ ] Is design-to-code tooling set up (e.g., Figma MCP server, Code Connect mappings)? If Figma implementation is needed, delegate to `@figma-specialist`
 - [ ] Is accessibility scanning available (e.g., BrowserStack accessibility, axe-core integration)?
 - [ ] Is visual regression testing available (e.g., Percy for screenshot comparison)?
 - [ ] Would a custom design system skill improve consistency across agents (encoding token usage, component selection, layout patterns)?
@@ -126,4 +127,4 @@ Enforce design system consistency, user experience best practices, accessibility
 - Design for smallest viewport first when the app is responsive
 - Keep feedback concise and actionable; reference files and line numbers when possible
 - Review `.cursorrules` for project-specific design and UI/UX rules
-- Use relevant agent skills and MCP tools when they apply (e.g., Figma skills for design-to-code, BrowserStack accessibility scans, frontend-design skill for high-quality UI). See `docs/CURSOR_PLUGINS.md` for available capabilities.
+- For Figma-to-code translation, Code Connect mappings, or design system rule generation, delegate to `@figma-specialist`

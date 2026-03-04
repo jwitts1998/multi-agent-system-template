@@ -12,6 +12,7 @@ Thumbs.db
 # Local / env (if any added later)
 .env
 .env.local
+.env.mcp
 *.local
 
 # Logs

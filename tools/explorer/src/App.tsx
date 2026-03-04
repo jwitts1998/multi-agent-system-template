@@ -42,11 +42,12 @@ import { MonitorLegend } from './components/MonitorLegend';
 import { ViewToggle } from './components/ViewToggle';
 import { Timeline } from './components/Timeline';
 import { EmptyState } from './components/shared/EmptyState';
+import { CommandCenter } from './components/CommandCenter';
 import { useDebounce } from './hooks/useDebounce';
 
-export type ViewMode = 'system' | 'newIdea' | 'existingRepo' | 'contextToMvp' | 'domainArchitecture' | 'monitor';
+export type ViewMode = 'system' | 'newIdea' | 'existingRepo' | 'contextToMvp' | 'domainArchitecture' | 'monitor' | 'commandCenter';
 
-const VALID_VIEWS = new Set<ViewMode>(['system', 'newIdea', 'existingRepo', 'contextToMvp', 'domainArchitecture', 'monitor']);
+const VALID_VIEWS = new Set<ViewMode>(['system', 'newIdea', 'existingRepo', 'contextToMvp', 'domainArchitecture', 'monitor', 'commandCenter']);
 
 function getInitialView(): ViewMode {
   const hash = window.location.hash.replace('#', '');
@@ -123,6 +124,11 @@ export default function App() {
   const [selectedModel, setSelectedModel] = useState<ModelId>('claude-sonnet-4');
   const [monitorSearchQuery, setMonitorSearchQuery] = useState('');
   const [sessionsRestored, setSessionsRestored] = useState(false);
+
+  // Command Center state
+  const [logContent, setLogContent] = useState('');
+  const [autoRefreshLog, setAutoRefreshLog] = useState(false);
+  const logRefreshIntervalRef = useRef<number | null>(null);
 
   const activeLoadedSession = activeSessionIndex >= 0 ? sessions[activeSessionIndex] ?? null : null;
   const monitorSession = activeLoadedSession?.session ?? null;
@@ -218,6 +224,66 @@ export default function App() {
     setShowSessionOverview(false);
   }, [persistSessions]);
 
+  // --- Command Center log loading ---
+
+  const [logFilename, setLogFilename] = useState<string | null>(null);
+
+  const loadLogFromFile = useCallback((content: string, filename: string) => {
+    setLogContent(content);
+    setLogFilename(filename);
+  }, []);
+
+  const clearLog = useCallback(() => {
+    setLogContent('');
+    setLogFilename(null);
+  }, []);
+
+  const loadLogFile = useCallback(async () => {
+    try {
+      // Try to fetch from the expected log location
+      // In development, we need to serve this via the dev server or use file input
+      const response = await fetch('/.claude/logs/current.jsonl');
+      if (response.ok) {
+        const content = await response.text();
+        setLogContent(content);
+      }
+    } catch {
+      // File not found or fetch failed - this is expected if no session is active
+      console.debug('No log file available');
+    }
+  }, []);
+
+  const handleLogRefresh = useCallback(() => {
+    loadLogFile();
+  }, [loadLogFile]);
+
+  const toggleAutoRefresh = useCallback(() => {
+    setAutoRefreshLog(prev => !prev);
+  }, []);
+
+  // Auto-refresh effect for command center logs
+  useEffect(() => {
+    if (autoRefreshLog && viewMode === 'commandCenter') {
+      loadLogFile(); // Initial load
+      logRefreshIntervalRef.current = window.setInterval(loadLogFile, 2000);
+    } else if (logRefreshIntervalRef.current) {
+      window.clearInterval(logRefreshIntervalRef.current);
+      logRefreshIntervalRef.current = null;
+    }
+    return () => {
+      if (logRefreshIntervalRef.current) {
+        window.clearInterval(logRefreshIntervalRef.current);
+      }
+    };
+  }, [autoRefreshLog, viewMode, loadLogFile]);
+
+  // Load log when entering command center view
+  useEffect(() => {
+    if (viewMode === 'commandCenter') {
+      loadLogFile();
+    }
+  }, [viewMode, loadLogFile]);
+
   // --- Node interaction ---
 
   const onNodesChange = useCallback((changes: NodeChange[]) => {
@@ -291,7 +357,7 @@ export default function App() {
 
       const viewKeys: Record<string, ViewMode> = {
         '1': 'system', '2': 'newIdea', '3': 'existingRepo',
-        '4': 'contextToMvp', '5': 'domainArchitecture', '6': 'monitor',
+        '4': 'contextToMvp', '5': 'domainArchitecture', '6': 'monitor', '7': 'commandCenter',
       };
       if (viewKeys[e.key]) {
         handleViewChange(viewKeys[e.key]);
@@ -402,12 +468,20 @@ export default function App() {
   }, [viewMode]);
 
   const showMonitorDropZone = viewMode === 'monitor' && sessions.length === 0;
+  const showCommandCenter = viewMode === 'commandCenter';
 
   // --- Render ---
 
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
-      {showMonitorDropZone ? (
+      {showCommandCenter ? (
+        <CommandCenter
+          logContent={logContent}
+          logFilename={logFilename}
+          onLoadLogFile={loadLogFromFile}
+          onClearLog={clearLog}
+        />
+      ) : showMonitorDropZone ? (
         <div style={{ width: '100%', height: '100%', background: '#0f172a', position: 'relative' }}>
           <FileDropZone onFileLoaded={loadSession} />
           <button
@@ -455,7 +529,7 @@ export default function App() {
       )}
 
       {/* Empty state when filters hide everything */}
-      {!showMonitorDropZone && activeNodes.length === 0 && (
+      {!showMonitorDropZone && !showCommandCenter && activeNodes.length === 0 && (
         <EmptyState
           title="No nodes visible"
           description={viewMode === 'system'
@@ -505,7 +579,7 @@ export default function App() {
       )}
 
       {/* Non-monitor legend and detail panels */}
-      {viewMode !== 'monitor' && (
+      {viewMode !== 'monitor' && viewMode !== 'commandCenter' && (
         <>
           <Legend
             viewMode={viewMode}

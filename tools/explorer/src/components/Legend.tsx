@@ -58,6 +58,7 @@ const viewTitles: Record<ViewMode, string> = {
   contextToMvp: 'Context to MVP Workflow',
   domainArchitecture: 'Domain Micro-Agents',
   monitor: 'Session Monitor',
+  commandCenter: 'Command Center',
 };
 
 const viewDescriptions: Record<ViewMode, string> = {
@@ -67,6 +68,7 @@ const viewDescriptions: Record<ViewMode, string> = {
   contextToMvp: 'Ingest stakeholder context, fill gaps, generate a PDB, build a demo, and iterate with feedback',
   domainArchitecture: 'Domain-expertise agents organized by software craft area. Each owns a vertical, applies modern practices, and evaluates where AI fits.',
   monitor: 'Visualize agent session transcripts — see agent flow, tool usage, and token consumption',
+  commandCenter: 'Real-time session logs, task management, and agent control',
 };
 
 export function Legend({ viewMode, hiddenCategories, onToggleCategory, searchQuery, onSearchChange, onShowArchDocs, onShowCalibration, hasCalibration }: LegendProps) {

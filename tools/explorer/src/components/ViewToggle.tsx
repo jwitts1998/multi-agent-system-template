@@ -14,6 +14,7 @@ const VIEW_TABS: { mode: ViewMode; label: string; title: string; separated?: boo
   { mode: 'contextToMvp', label: 'Context to MVP', title: 'Workflow for converting stakeholder context into an MVP' },
   { mode: 'domainArchitecture', label: 'Domain Agents', title: 'Domain-expertise agents organized by software craft area', separated: true },
   { mode: 'monitor', label: 'Session Monitor', title: 'Visualize agent session transcripts and token usage', separated: true },
+  { mode: 'commandCenter', label: 'Command Center', title: 'Real-time session logs, task management, and agent control' },
 ];
 
 export function ViewToggle({ viewMode, onViewChange }: ViewToggleProps) {

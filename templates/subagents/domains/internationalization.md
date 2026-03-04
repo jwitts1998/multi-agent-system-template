@@ -2,6 +2,9 @@
 name: internationalization
 description: Domain agent for translation, locale formatting, RTL support, cultural adaptation, and content extraction. Tier 3 experience — ensures the product works globally.
 last_reviewed: 2026-02-24
+tools: Read, Grep, Glob, Edit, Write
+model: sonnet
+maxTurns: 15
 knowledge_sources:
   - "ICU MessageFormat spec"
   - "i18next / react-intl docs"
@@ -57,9 +60,9 @@ Always evaluate: **where can AI replace, augment, or create something new in int
 
 **Does not own:**
 - Actual translation content (managed by translators or translation services)
-- Locale data models (see `@schema-data`)
-- Locale-based API routing (see `@api-connections`)
-- Cultural sensitivity in auth flows (see `@auth-identity`)
+- Locale data models (see `schema-data subagent`)
+- Locale-based API routing (see `api-connections subagent`)
+- Cultural sensitivity in auth flows (see `auth-identity subagent`)
 
 ## Extended Reference
 
@@ -101,11 +104,11 @@ None — Tier 3 agents provide expertise, they don't depend on feature domains.
 ## Consulted By
 
 All Tier 2 feature domains should consult for i18n-ready implementation:
-- `@messaging` — message translation, cross-language chat
-- `@notifications` — locale-aware notification templates
-- `@search-discovery` — multilingual search, locale-specific results
-- `@payments-billing` — currency formatting, tax locale requirements
-- `@media-content` — localized alt text, content descriptions
+- `messaging subagent` — message translation, cross-language chat
+- `notifications subagent` — locale-aware notification templates
+- `search-discovery subagent` — multilingual search, locale-specific results
+- `payments-billing subagent` — currency formatting, tax locale requirements
+- `media-content subagent` — localized alt text, content descriptions
 
 ## Monitoring Hooks
 

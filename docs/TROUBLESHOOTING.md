@@ -7,16 +7,16 @@
 
 ### Issue: Agents Not Following Project Standards
 
-**Symptoms**: AI gives generic advice, doesn't follow `.cursorrules`
+**Symptoms**: AI gives generic advice, doesn't follow `CLAUDE.md`
 
 **Causes**:
-- `.cursorrules` too generic or incomplete
+- `CLAUDE.md` too generic or incomplete
 - Variables not replaced
 - No project-specific examples
 
 **Solutions**:
-1. Search for `{{` in `.cursorrules` - replace all variables
-2. Add project-specific examples to `.cursorrules`
+1. Search for `{{` in `CLAUDE.md` - replace all variables
+2. Add project-specific examples to `CLAUDE.md`
 3. Make architecture section more specific
 4. Add code examples showing patterns
 
@@ -32,7 +32,7 @@
 **Solutions**:
 1. Check YAML frontmatter is valid
 2. Ensure description mentions when to activate
-3. Verify file in `.cursor/agents/` directory
+3. Verify file in `.claude/agents/` directory
 4. Try manual invocation first
 
 ### Issue: Agents Giving Conflicting Advice
@@ -42,12 +42,12 @@
 **Causes**:
 - Agent roles overlap
 - Priorities unclear
-- Missing guidelines in `.cursorrules`
+- Missing guidelines in `CLAUDE.md`
 
 **Solutions**:
 1. Clarify agent roles in `AGENTS.md`
 2. Establish priority (specialist > generic)
-3. Add decision rules to `.cursorrules`
+3. Add decision rules to `CLAUDE.md`
 4. Use sequential workflow instead of parallel
 
 ### Issue: Task Files Not Being Read
@@ -55,12 +55,12 @@
 **Symptoms**: Agents don't reference task context
 
 **Causes**:
-- `.cursorrules` doesn't mention tasks
+- `CLAUDE.md` doesn't mention tasks
 - Task schema invalid
 - File naming wrong
 
 **Solutions**:
-1. Check `.cursorrules` has task workflow section
+1. Check `CLAUDE.md` has task workflow section
 2. Validate YAML syntax
 3. Ensure tasks in `tasks/*.yml` location
 4. Explicitly reference task: "Review task FEATURE_T1"
@@ -92,10 +92,10 @@
 
 ```bash
 # Check all required files exist
-ls .cursorrules                  # Should exist
+ls CLAUDE.md                  # Should exist
 ls AGENTS.md                     # Should exist
 ls tasks.yml                     # Should exist
-ls -la .cursor/agents/           # Should have subagent configs
+ls -la .claude/agents/           # Should have subagent configs
 ls -la docs/workflow/            # Should have workflow docs
 ```
 
@@ -103,7 +103,7 @@ ls -la docs/workflow/            # Should have workflow docs
 
 ```bash
 # Check for remaining variables
-grep -r "{{" .cursorrules AGENTS.md tasks.yml
+grep -r "{{" CLAUDE.md AGENTS.md tasks.yml
 
 # Should return nothing - if it does, replace those variables
 
@@ -126,7 +126,7 @@ grep -r "{{" .cursorrules AGENTS.md tasks.yml
 
 ### Fix: Generic Advice from Agents
 
-Add to `.cursorrules`:
+Add to `CLAUDE.md`:
 ```markdown
 ## Project-Specific Patterns
 
@@ -144,7 +144,7 @@ description: [Description]. Use proactively when [specific scenario].
 
 ### Fix: Task Context Ignored
 
-Add to `.cursorrules`:
+Add to `CLAUDE.md`:
 ```markdown
 ### Task Files and Task-Driven Development
 

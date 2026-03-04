@@ -9,14 +9,14 @@
 
 ## Executive Summary
 
-This repository is a comprehensive multi-agent development system template originally designed for Cursor IDE. It contains:
-- 5 project-type-specific .cursorrules templates
+This repository is a comprehensive multi-agent development system template originally designed for Claude Code CLI. It contains:
+- 5 project-type-specific CLAUDE.md templates
 - 5 AGENTS.md templates for different project types
 - 40+ subagent configuration files
 - Extensive documentation (16 MD files in docs/)
 - 5 example projects
 - Interactive setup and validation scripts
-- Cursor-specific features: skills system, .mdc rules, MCP integrations
+- Cursor-specific features: skills system, .md rules, MCP integrations
 
 **Scope**: Complete replacement of all Cursor-specific components with Claude Code equivalents.
 
@@ -28,8 +28,8 @@ This repository is a comprehensive multi-agent development system template origi
 
 #### Current Cursor-Specific Structure
 ```
-.cursorrules                    # Cursor workspace rules
-.cursor/
+CLAUDE.md                    # Cursor workspace rules
+.claude/
   ├── agents/                   # Subagent configs (YAML frontmatter + markdown)
   │   ├── generic/              # 8 generic agents
   │   ├── ideation/             # 4 ideation agents
@@ -44,13 +44,13 @@ This repository is a comprehensive multi-agent development system template origi
   │   ├── domain-routing/
   │   ├── feature-audit/
   │   └── descript-inspired-captions/
-  ├── rules/                    # File-scoped rules (.mdc format)
-  │   ├── domain-routing.mdc
-  │   ├── domain-consultation.mdc
-  │   ├── domain-knowledge-freshness.mdc
-  │   ├── domain-agent-loading.mdc
-  │   ├── docs-editing.mdc
-  │   └── template-editing.mdc
+  ├── rules/                    # File-scoped rules (.md format)
+  │   ├── domain-routing.md
+  │   ├── domain-consultation.md
+  │   ├── domain-knowledge-freshness.md
+  │   ├── domain-agent-loading.md
+  │   ├── docs-editing.md
+  │   └── template-editing.md
   └── mcp.json                  # MCP server configs
 ```
 
@@ -67,17 +67,17 @@ This repository is a comprehensive multi-agent development system template origi
 ### 2. Files Containing "Cursor" References
 
 **Core Configuration**:
-- `.cursorrules` (1 file)
-- `templates/cursorrules/*.cursorrules` (5 files)
+- `CLAUDE.md` (1 file)
+- `templates/claude-config/*CLAUDE.md` (5 files)
 
 **Scripts**:
 - `setup.sh` - 18 mentions of Cursor
-- `validate.sh` - References .cursorrules
+- `validate.sh` - References CLAUDE.md
 
 **Documentation** (grep found 20+ files):
 - `README.md` - Multiple Cursor workflow references
-- `AGENTS.md` - Cursor plugin references
-- `docs/CURSOR_PLUGINS.md` - Entire file dedicated to Cursor
+- `AGENTS.md` - Claude Code skill references
+- `docs/CLAUDE_CODE_CAPABILITIES.md` - Entire file dedicated to Cursor
 - `docs/CUSTOMIZATION_GUIDE.md`
 - `docs/INTEGRATION_GUIDE.md`
 - `docs/TROUBLESHOOTING.md`
@@ -85,7 +85,7 @@ This repository is a comprehensive multi-agent development system template origi
 - `docs/IDEA_TO_PDB.md`
 
 **Skills**:
-- `.cursor/skills/*/SKILL.md` (7 skill files)
+- `.claude/skills/*/SKILL.md` (7 skill files)
 
 **Templates**:
 - `templates/subagents/**/*.md` (40+ agent files)
@@ -100,7 +100,7 @@ This repository is a comprehensive multi-agent development system template origi
 - `@idea-to-pdb`
 - `@pdb-to-tasks`
 - `@code-reviewer`
-- `@test-writer`
+- `test-writer subagent`
 - etc.
 
 **Claude Code Pattern**: Research needed
@@ -110,7 +110,7 @@ This repository is a comprehensive multi-agent development system template origi
 
 ### 4. Features Requiring Mapping
 
-#### .cursorrules → Claude Code Config
+#### CLAUDE.md → Claude Code Config
 - Project standards and conventions
 - Agent behavior rules
 - Task workflow integration
@@ -136,14 +136,14 @@ description: What it does
 # Skill content
 ```
 
-#### Cursor .mdc Rules → Claude Code Equivalent
+#### Cursor .md Rules → Claude Code Equivalent
 File-scoped rules for context-aware behavior:
-- `domain-routing.mdc` - Auto-suggest domains in task files
-- `domain-consultation.mdc` - Multi-agent consultation
-- `domain-knowledge-freshness.mdc` - Practice validation
-- `domain-agent-loading.mdc` - Efficient agent loading
-- `docs-editing.mdc` - Documentation standards
-- `template-editing.mdc` - Template modification rules
+- `domain-routing.md` - Auto-suggest domains in task files
+- `domain-consultation.md` - Multi-agent consultation
+- `domain-knowledge-freshness.md` - Practice validation
+- `domain-agent-loading.md` - Efficient agent loading
+- `docs-editing.md` - Documentation standards
+- `template-editing.md` - Template modification rules
 
 **Format**: MDC (Markdown Context) with YAML frontmatter
 ```yaml
@@ -172,7 +172,7 @@ description: Agent purpose
 
 ### 5. MCP Integration
 
-**Current**: `.cursor/mcp.json`
+**Current**: `.claude/mcp.json`
 ```json
 {
   "mcpServers": {
@@ -199,16 +199,16 @@ Used throughout all templates:
 - `{{TEST_FRAMEWORK}}`
 - And more...
 
-**Status**: Should remain compatible - just needs to populate Claude Code config files instead of .cursorrules.
+**Status**: Should remain compatible - just needs to populate Claude Code config files instead of CLAUDE.md.
 
 ### 7. Documentation References
 
 Files heavily referencing Cursor workflows:
 1. `README.md` - 487 lines, setup instructions, Cursor-specific workflow
-2. `SETUP_GUIDE.md` - Cursor IDE setup steps
-3. `docs/CURSOR_PLUGINS.md` - Entire file dedicated to Cursor plugins
-4. `docs/INTEGRATION_GUIDE.md` - How components work in Cursor
-5. `docs/IDEA_TO_PDB.md` - Workflow using Cursor agents
+2. `SETUP_GUIDE.md` - Claude Code CLI setup steps
+3. `docs/CLAUDE_CODE_CAPABILITIES.md` - Entire file dedicated to Claude Code skills
+4. `docs/INTEGRATION_GUIDE.md` - How components work in Claude Code
+5. `docs/IDEA_TO_PDB.md` - Workflow using Claude Code agents
 6. `docs/CUSTOMIZATION_GUIDE.md` - Customizing Cursor templates
 7. `docs/TROUBLESHOOTING.md` - Cursor-specific issues
 
@@ -216,14 +216,14 @@ Files heavily referencing Cursor workflows:
 
 **setup.sh** (368 lines):
 - Prompts for project configuration
-- Copies `.cursorrules` templates
-- Creates `.cursor/` directory structure
-- Installs subagents to `.cursor/agents/`
+- Copies `CLAUDE.md` templates
+- Creates `.claude/` directory structure
+- Installs subagents to `.claude/agents/`
 - Offers Antigravity Skills installation
-- References Cursor IDE in output
+- References Claude Code CLI in output
 
 **validate.sh**:
-- Checks for template variables in `.cursorrules`, `AGENTS.md`, `.cursor/`
+- Checks for template variables in `CLAUDE.md`, `AGENTS.md`, `.claude/`
 
 ### 9. Example Projects
 
@@ -235,7 +235,7 @@ Files heavily referencing Cursor workflows:
 - `examples/existing-project-example/`
 
 Each contains:
-- Configured `.cursorrules`
+- Configured `CLAUDE.md`
 - `AGENTS.md`
 - Task files
 - PDB (Product Design Blueprint)
@@ -246,7 +246,7 @@ Each contains:
 ## Critical Questions for Claude Code Compatibility
 
 ### Configuration System
-1. What is Claude Code's equivalent to `.cursorrules`?
+1. What is Claude Code's equivalent to `CLAUDE.md`?
 2. Does Claude Code have a project configuration file format?
 3. How does Claude Code define workspace-level AI behavior?
 
@@ -262,15 +262,15 @@ Each contains:
 10. How are skills invoked and managed?
 
 ### Context Rules
-11. Does Claude Code support file-scoped or pattern-based rules (like .mdc)?
+11. Does Claude Code support file-scoped or pattern-based rules (like .md)?
 12. How does Claude Code handle context-aware behavior?
 
 ### MCP Integration
-13. Is Claude Code's MCP configuration compatible with Cursor's format?
+13. Is Claude Code's MCP configuration compatible with Claude Code's format?
 14. Are there any differences in how MCP servers are configured?
 
 ### CLI vs IDE
-15. Since Claude Code is CLI-based, how does the workflow differ from Cursor IDE?
+15. Since Claude Code is CLI-based, how does the workflow differ from Claude Code CLI?
 16. Are there terminal-specific considerations for agent invocation?
 17. How does the setup process differ for CLI usage?
 
@@ -286,7 +286,7 @@ Each contains:
 - [ ] Verify MCP compatibility
 
 ### Phase 2: Core Template Conversion
-- [ ] Convert `.cursorrules` templates to Claude Code config
+- [ ] Convert `CLAUDE.md` templates to Claude Code config
 - [ ] Migrate agent definitions (40+ files)
 - [ ] Convert skills (7 skills)
 - [ ] Adapt or remove file-scoped rules
@@ -326,7 +326,7 @@ Each contains:
 ### High Risk
 - **Unknown Claude Code API**: If agent/config system differs significantly, major redesign needed
 - **Skills compatibility**: Skills system may not exist or may be incompatible
-- **File-scoped rules**: .mdc pattern may have no Claude Code equivalent
+- **File-scoped rules**: .md pattern may have no Claude Code equivalent
 
 ### Medium Risk
 - **Workflow differences**: CLI vs IDE may require different invocation patterns
@@ -354,10 +354,10 @@ Each contains:
 ## Files Inventory
 
 **Total file count by category**:
-- Configuration: 7 files (.cursorrules templates + mcp.json)
+- Configuration: 7 files (CLAUDE.md templates + mcp.json)
 - Agent definitions: 40+ .md files
 - Skills: 7 SKILL.md files
-- Rules: 6 .mdc files
+- Rules: 6 .md files
 - Documentation: 16 .md files in docs/
 - Examples: 5 complete example projects
 - Scripts: 2 major scripts (setup.sh, validate.sh)

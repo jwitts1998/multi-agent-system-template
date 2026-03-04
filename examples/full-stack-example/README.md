@@ -39,7 +39,7 @@ Verify setup:
 ## Step 2: Flush the Idea
 
 ```
-@idea-to-pdb
+idea-to-pdb subagent
 
 I want to build TaskManager — a task management app like a simplified Trello.
 
@@ -59,7 +59,7 @@ Output: `docs/product_design/taskmanager_pdb.md`
 ## Step 3: Create Tasks from the PDB
 
 ```
-@pdb-to-tasks
+pdb-to-tasks subagent
 
 Read docs/product_design/taskmanager_pdb.md and decompose it into epics and task files.
 ```
@@ -163,9 +163,9 @@ Clone repo
     ↓
 ./setup.sh (full-stack, Next.js, TypeScript)
     ↓
-@idea-to-pdb → docs/product_design/taskmanager_pdb.md
+idea-to-pdb subagent → docs/product_design/taskmanager_pdb.md
     ↓
-@pdb-to-tasks → tasks/00-06_*.yml
+pdb-to-tasks subagent → tasks/00-06_*.yml
     ↓
 Pick first task → implement → review → test → done
 ```

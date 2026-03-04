@@ -1,5 +1,10 @@
 import { categoryMeta, type NodeCategory } from '../data/nodes';
 import type { ViewMode } from '../App';
+import { Card, CardContent, CardHeader } from './ui/card';
+import { Input } from './ui/input';
+import { Button } from './ui/button';
+import { Separator } from './ui/separator';
+import { cn } from '@/lib/utils';
 
 interface LegendProps {
   viewMode: ViewMode;
@@ -76,238 +81,137 @@ export function Legend({ viewMode, hiddenCategories, onToggleCategory, searchQue
         : existingRepoPhases;
 
   return (
-    <div style={{
-      position: 'absolute',
-      top: 12,
-      left: 12,
-      zIndex: 10,
-      background: '#1e293b',
-      border: '1px solid #334155',
-      borderRadius: 10,
-      padding: 16,
-      maxWidth: 220,
-      boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
-    }}>
-      {/* Title */}
-      <div style={{
-        fontSize: 13,
-        fontWeight: 700,
-        color: '#f1f5f9',
-        marginBottom: isPipeline ? 6 : 12,
-        letterSpacing: '0.3px',
-      }}>
-        {viewTitles[viewMode]}
-      </div>
-
-      {viewMode === 'system' ? (
-        <>
-          {/* Search */}
-          <input
+    <nav
+      role="region"
+      aria-label={`${viewTitles[viewMode]} legend and controls`}
+      className="legend-panel absolute top-3 left-3 z-10 max-w-[220px]"
+    >
+      <Card className="border-slate-600 bg-slate-800 shadow-lg">
+        <CardHeader className="p-4 pb-2">
+          <div className={cn("text-sm font-bold text-slate-100 tracking-wide", isPipeline ? "mb-1.5" : "mb-3")}>
+            {viewTitles[viewMode]}
+          </div>
+        </CardHeader>
+        <CardContent className="p-4 pt-0 space-y-3">
+          <Input
             type="text"
             placeholder="Search nodes..."
             value={searchQuery}
             onChange={e => onSearchChange(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '6px 10px',
-              fontSize: 12,
-              background: '#0f172a',
-              border: '1px solid #334155',
-              borderRadius: 6,
-              color: '#e2e8f0',
-              outline: 'none',
-              marginBottom: 12,
-              boxSizing: 'border-box',
-            }}
+            aria-label={`Search ${viewTitles[viewMode]} nodes`}
+            className="h-8 text-xs bg-slate-900 border-slate-600 placeholder:text-slate-500"
           />
 
-          {/* Category toggles */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            {categories.map(([key, meta]) => {
-              const hidden = hiddenCategories.has(key);
-              return (
-                <button
-                  key={key}
-                  onClick={() => onToggleCategory(key)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 8,
-                    padding: '4px 8px',
-                    fontSize: 12,
-                    background: 'none',
-                    border: 'none',
-                    borderRadius: 4,
-                    cursor: 'pointer',
-                    color: hidden ? '#475569' : '#cbd5e1',
-                    textDecoration: hidden ? 'line-through' : 'none',
-                    textAlign: 'left',
-                  }}
-                >
-                  <span
-                    className="category-dot"
-                    style={{
-                      backgroundColor: meta.color,
-                      opacity: hidden ? 0.3 : 1,
-                    }}
-                  />
-                  {meta.label}
-                </button>
-              );
-            })}
-          </div>
-        </>
-      ) : (
-        <>
-          {/* Workflow description */}
-          <div style={{
-            fontSize: 11,
-            color: '#94a3b8',
-            marginBottom: 10,
-            lineHeight: 1.5,
-          }}>
-            {viewDescriptions[viewMode]}
-          </div>
-
-          {/* Phase legend */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            {phases.map((phase) => (
-              <div key={phase.label} className="workflow-legend-phase">
-                <span className="workflow-legend-dot" style={{ backgroundColor: phase.color }} />
-                {phase.label}
-              </div>
-            ))}
-          </div>
-
-          {viewMode !== 'domainArchitecture' && (
+          {viewMode === 'system' ? (
+            <div className="flex flex-col gap-1">
+              {categories.map(([key, meta]) => {
+                const hidden = hiddenCategories.has(key);
+                return (
+                  <button
+                    key={key}
+                    onClick={() => onToggleCategory(key)}
+                    className={cn(
+                      "flex items-center gap-2 px-2 py-1 text-xs rounded border-none cursor-pointer text-left bg-transparent",
+                      hidden ? "text-slate-500 line-through" : "text-slate-300",
+                    )}
+                  >
+                    <span
+                      className="category-dot h-2.5 w-2.5 rounded-full shrink-0"
+                      style={{ backgroundColor: meta.color, opacity: hidden ? 0.3 : 1 }}
+                    />
+                    {meta.label}
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
             <>
-              <div style={{
-                marginTop: 10,
-                paddingTop: 10,
-                borderTop: '1px solid #334155',
-              }}>
-                <div className="workflow-legend-feedback">
-                  <span className="workflow-legend-dash" />
-                  {viewMode === 'contextToMvp' ? 'Feedback loops' : viewMode === 'newIdea' ? 'Feedback loop' : 'Iterative cycle'}
-                </div>
+              <div className="text-[11px] text-slate-400 leading-snug">
+                {viewDescriptions[viewMode]}
+              </div>
+              <div className="flex flex-col gap-1">
+                {phases.map((phase) => (
+                  <div key={phase.label} className="flex items-center gap-2 px-2 py-1 text-xs text-slate-300">
+                    <span className="h-2.5 w-2.5 rounded-full shrink-0" style={{ backgroundColor: phase.color }} />
+                    {phase.label}
+                  </div>
+                ))}
               </div>
 
-              <div style={{
-                marginTop: 8,
-                fontSize: 10,
-                color: '#64748b',
-                lineHeight: 1.5,
-              }}>
-                {viewMode === 'newIdea'
-                  ? 'Stages 8-10 form an iterative cycle. Issues found in Quality Review are sent back to Feature Development. Stage 5 calibrates domain agents for your product vertical. System agents (purple) handle routing, monitoring, and memory.'
-                  : viewMode === 'contextToMvp'
-                    ? 'Quality Review routes issues back to Feature Development. Stakeholder Review feeds new context back to Gap Analysis for iterative refinement toward a demo-ready MVP.'
-                    : 'Stages 10-11 repeat for each development cycle. System agents (purple) handle routing, monitoring, and memory across the workflow.'
-                }
-              </div>
+              {viewMode !== 'domainArchitecture' && (
+                <>
+                  <Separator className="bg-slate-600 my-2" />
+                  <div className="flex items-center gap-2 px-2 py-1 text-xs text-amber-400">
+                    <span className="w-4 h-0.5 bg-amber-500 rounded shrink-0" />
+                    {viewMode === 'contextToMvp' ? 'Feedback loops' : viewMode === 'newIdea' ? 'Feedback loop' : 'Iterative cycle'}
+                  </div>
+                  <div className="text-[10px] text-slate-500 leading-snug">
+                    {viewMode === 'newIdea'
+                      ? 'Stages 8-10 form an iterative cycle. Issues found in Quality Review are sent back to Feature Development. Stage 5 calibrates domain agents for your product vertical. System agents (purple) handle routing, monitoring, and memory.'
+                      : viewMode === 'contextToMvp'
+                        ? 'Quality Review routes issues back to Feature Development. Stakeholder Review feeds new context back to Gap Analysis for iterative refinement toward a demo-ready MVP.'
+                        : 'Stages 10-11 repeat for each development cycle. System agents (purple) handle routing, monitoring, and memory across the workflow.'
+                    }
+                  </div>
+                  <div className="p-2 rounded-md bg-slate-900 border border-slate-600">
+                    <div className="text-[10px] text-slate-400 leading-snug">
+                      Click any stage to see example prompts for invoking agents at that step.
+                    </div>
+                  </div>
+                </>
+              )}
 
-              <div style={{
-                marginTop: 8,
-                padding: '6px 8px',
-                background: '#0f172a',
-                borderRadius: 6,
-                border: '1px solid #334155',
-              }}>
-                <div style={{ fontSize: 10, color: '#94a3b8', lineHeight: 1.5 }}>
-                  Click any stage to see example prompts for invoking agents at that step.
-                </div>
-              </div>
+              {viewMode === 'domainArchitecture' && (
+                <>
+                  <Separator className="bg-slate-600 my-2" />
+                  <div className="flex items-center gap-2 px-2 py-1 text-xs text-amber-400">
+                    <span className="w-4 h-0.5 bg-amber-500 rounded shrink-0" />
+                    Dependency (solid) / Consultation (dashed)
+                  </div>
+                  <div className="text-[10px] text-slate-500 leading-snug">
+                    Tier 2 depends on Tier 1 foundations. Tier 3 consults Tier 2 for craft quality. The Product Orchestrator resolves cross-domain conflicts.
+                  </div>
+                  <div className="p-2 rounded-md bg-slate-900 border border-slate-600">
+                    <div className="text-[10px] text-slate-400 leading-snug">
+                      Click any domain to see scope, AI applications, dependencies, and monitoring hooks.
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    {onShowArchDocs && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full h-8 text-[11px] font-semibold bg-blue-950 border-blue-500 text-blue-200 hover:bg-blue-900/50"
+                        onClick={onShowArchDocs}
+                      >
+                        Architecture Guide
+                      </Button>
+                    )}
+                    {onShowCalibration && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className={cn(
+                          "w-full h-8 text-[11px] font-semibold",
+                          hasCalibration ? "bg-amber-950/50 border-amber-500 text-amber-200" : "bg-slate-900 border-slate-600 text-slate-400",
+                        )}
+                        onClick={onShowCalibration}
+                      >
+                        {hasCalibration ? 'Product Calibration Active' : 'Calibrate for Product'}
+                      </Button>
+                    )}
+                  </div>
+                </>
+              )}
             </>
           )}
 
-          {viewMode === 'domainArchitecture' && (
-            <>
-              <div style={{
-                marginTop: 10,
-                paddingTop: 10,
-                borderTop: '1px solid #334155',
-              }}>
-                <div className="workflow-legend-feedback">
-                  <span className="workflow-legend-dash" />
-                  Dependency (solid) / Consultation (dashed)
-                </div>
-              </div>
-
-              <div style={{
-                marginTop: 8,
-                fontSize: 10,
-                color: '#64748b',
-                lineHeight: 1.5,
-              }}>
-                Tier 2 depends on Tier 1 foundations. Tier 3 consults Tier 2 for craft quality. The Product Orchestrator resolves cross-domain conflicts.
-              </div>
-
-              <div style={{
-                marginTop: 8,
-                padding: '6px 8px',
-                background: '#0f172a',
-                borderRadius: 6,
-                border: '1px solid #334155',
-              }}>
-                <div style={{ fontSize: 10, color: '#94a3b8', lineHeight: 1.5 }}>
-                  Click any domain to see scope, AI applications, dependencies, and monitoring hooks.
-                </div>
-              </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 10 }}>
-                {onShowArchDocs && (
-                  <button
-                    onClick={onShowArchDocs}
-                    style={{
-                      width: '100%',
-                      padding: '7px 10px',
-                      fontSize: 11,
-                      fontWeight: 600,
-                      background: '#172554',
-                      border: '1px solid #3b82f6',
-                      borderRadius: 6,
-                      color: '#93c5fd',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    Architecture Guide
-                  </button>
-                )}
-                {onShowCalibration && (
-                  <button
-                    onClick={onShowCalibration}
-                    style={{
-                      width: '100%',
-                      padding: '7px 10px',
-                      fontSize: 11,
-                      fontWeight: 600,
-                      background: hasCalibration ? '#1c1407' : '#0f172a',
-                      border: `1px solid ${hasCalibration ? '#f59e0b' : '#334155'}`,
-                      borderRadius: 6,
-                      color: hasCalibration ? '#fcd34d' : '#94a3b8',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    {hasCalibration ? 'Product Calibration Active' : 'Calibrate for Product'}
-                  </button>
-                )}
-              </div>
-            </>
-          )}
-        </>
-      )}
-
-      {/* Help text */}
-      <div style={{
-        marginTop: 12,
-        paddingTop: 12,
-        borderTop: '1px solid #334155',
-        fontSize: 10,
-        color: '#64748b',
-        lineHeight: 1.5,
-      }}>
-        Click a node for details. Drag to pan. Scroll to zoom.{viewMode === 'system' ? ' Click categories to toggle.' : ''}
-      </div>
-    </div>
+          <Separator className="bg-slate-600 my-2" />
+          <div className="text-[10px] text-slate-500 leading-snug pt-1">
+            Click a node for details. Drag to pan. Scroll to zoom.{viewMode === 'system' ? ' Click categories to toggle.' : ''}
+          </div>
+        </CardContent>
+      </Card>
+    </nav>
   );
 }

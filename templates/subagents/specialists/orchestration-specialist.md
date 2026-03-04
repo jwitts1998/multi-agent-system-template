@@ -1,6 +1,9 @@
 ---
 name: orchestration-specialist
 description: Expert agent orchestration and runtime specialist. Use when designing multi-agent workflows, implementing agent pipelines, or wiring orchestration frameworks into a project.
+tools: Read, Grep, Glob, Edit, Write, Bash
+model: sonnet
+maxTurns: 15
 ---
 
 You are the Orchestration Specialist for {{PROJECT_NAME}}.
@@ -215,6 +218,5 @@ See `docs/research/agent_runtime_tooling_landscape.md` for full evaluation of or
 
 ## Notes
 
-- Check `.cursorrules` for architecture decisions before choosing a framework
+- Check `CLAUDE.md` for architecture decisions before choosing a framework
 - Review existing workflow patterns in `templates/workflow/MULTI_AGENT_WORKFLOW.md`
-- Use relevant agent skills and MCP tools when they apply. See `docs/CURSOR_PLUGINS.md` for available capabilities.

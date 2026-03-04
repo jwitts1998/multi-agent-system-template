@@ -123,7 +123,11 @@ When you pick up a task with multiple `agent_roles`, follow this protocol:
 
 ## 🔌 Plugins and MCP Tools
 
-Agents have access to MCP tools and skills provided by installed Cursor plugins. See `docs/CURSOR_PLUGINS.md` for the full list. Use them when relevant to the task.
+Agents have access to MCP tools and skills provided by installed Claude Code skills. See `docs/CLAUDE_CODE_CAPABILITIES.md` for the full list. Use them when relevant to the task.
+
+**Permissions**: Agents may leverage existing skills and create new ones at any time. Use `/skill-name` when a task would benefit. Use the `create-skill` workflow to author project-specific skills. Update `docs/CLAUDE_CODE_CAPABILITIES.md` after adding capabilities.
+
+**Antigravity Awesome Skills**: If installed (`./scripts/install-antigravity-skills.sh`), 946+ skills are in `.claude/skills/`. Project config agents can run the install script during setup or when requested.
 
 **Stack-relevant examples**:
 - **Context7**: Look up current docs for {{FRONTEND_FRAMEWORK}}, {{BACKEND_FRAMEWORK}}, or any dependency before implementing unfamiliar APIs
@@ -132,7 +136,7 @@ Agents have access to MCP tools and skills provided by installed Cursor plugins.
 - **Supabase Postgres**: Database optimization guidance for {{DATABASE_TYPE}} queries
 - **parallel-web-search**: Verify best practices when introducing new patterns, libraries, or security-sensitive code
 
-Flag gaps: if agents are doing work manually that a plugin, skill, or MCP server could handle, recommend installing or creating one and update `docs/CURSOR_PLUGINS.md`.
+Flag gaps: if agents are doing work manually that a plugin, skill, or MCP server could handle, recommend installing or creating one and update `docs/CLAUDE_CODE_CAPABILITIES.md`.
 
 ---
 
@@ -142,31 +146,31 @@ Flag gaps: if agents are doing work manually that a plugin, skill, or MCP server
 - [ ] Types defined in `shared/types/`
 - [ ] Request/response shapes documented
 - [ ] Types shared between client and server
-- [ ] Relevant MCP tools and skills used where applicable (see `docs/CURSOR_PLUGINS.md`)
+- [ ] Relevant MCP tools and skills used where applicable (see `docs/CLAUDE_CODE_CAPABILITIES.md`)
 
 ### Backend Checklist
 - [ ] Endpoint follows REST conventions
 - [ ] Validation implemented
 - [ ] Error handling consistent
-- [ ] Relevant MCP tools and skills used where applicable (see `docs/CURSOR_PLUGINS.md`)
+- [ ] Relevant MCP tools and skills used where applicable (see `docs/CLAUDE_CODE_CAPABILITIES.md`)
 
 ### Database Checklist
 - [ ] Schema designed
 - [ ] Migration created
 - [ ] Repository implemented
-- [ ] Relevant MCP tools and skills used where applicable (see `docs/CURSOR_PLUGINS.md`)
+- [ ] Relevant MCP tools and skills used where applicable (see `docs/CLAUDE_CODE_CAPABILITIES.md`)
 
 ### Frontend Checklist
 - [ ] API client created
 - [ ] UI components built
 - [ ] State management integrated
-- [ ] Relevant MCP tools and skills used where applicable (see `docs/CURSOR_PLUGINS.md`)
+- [ ] Relevant MCP tools and skills used where applicable (see `docs/CLAUDE_CODE_CAPABILITIES.md`)
 
 ### Testing Checklist
 - [ ] Backend tests (unit, integration)
 - [ ] Frontend tests (component, integration)
 - [ ] E2E test for critical flow
-- [ ] Relevant MCP tools and skills used where applicable (see `docs/CURSOR_PLUGINS.md`)
+- [ ] Relevant MCP tools and skills used where applicable (see `docs/CLAUDE_CODE_CAPABILITIES.md`)
 
 ---
 

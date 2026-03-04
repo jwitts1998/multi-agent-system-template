@@ -48,8 +48,8 @@ source ~/.zshrc
 ```bash
 cd ~/dev/shopfront
 
-# Copy .cursorrules (choose your project type)
-cp $TEMPLATE_DIR/templates/cursorrules/full-stack.cursorrules .cursorrules
+# Copy CLAUDE.md (choose your project type)
+cp $TEMPLATE_DIR/templates/claude-config/full-stackCLAUDE.md CLAUDE.md
 
 # Copy AGENTS.md
 cp $TEMPLATE_DIR/templates/agents/AGENTS-full-stack.md AGENTS.md
@@ -58,14 +58,14 @@ cp $TEMPLATE_DIR/templates/agents/AGENTS-full-stack.md AGENTS.md
 cp $TEMPLATE_DIR/templates/tasks/tasks-schema.yml tasks.yml
 
 # Create directories
-mkdir -p tasks docs/product_design docs/architecture docs/workflow .cursor/agents/generic .cursor/agents/ingestion .cursor/agents/ideation
+mkdir -p tasks docs/product_design docs/architecture docs/workflow .claude/agents/generic .claude/agents/ingestion .claude/agents/ideation
 
 # Copy subagents
-cp $TEMPLATE_DIR/templates/subagents/generic/*.md .cursor/agents/generic/
-cp $TEMPLATE_DIR/templates/subagents/ideation/*.md .cursor/agents/ideation/
+cp $TEMPLATE_DIR/templates/subagents/generic/*.md .claude/agents/generic/
+cp $TEMPLATE_DIR/templates/subagents/ideation/*.md .claude/agents/ideation/
 
 # Copy ingestion agents (you'll need these to generate a PDB from existing code)
-cp $TEMPLATE_DIR/templates/subagents/ingestion/*.md .cursor/agents/ingestion/
+cp $TEMPLATE_DIR/templates/subagents/ingestion/*.md .claude/agents/ingestion/
 
 # Copy workflow docs
 cp $TEMPLATE_DIR/templates/workflow/MULTI_AGENT_WORKFLOW.md docs/workflow/
@@ -86,10 +86,10 @@ Replace the core variables in your copied files:
 ```bash
 cd ~/dev/shopfront
 
-# Replace in .cursorrules, AGENTS.md, and subagents
-FILES=$(find .cursorrules AGENTS.md tasks.yml .cursor/agents tasks -name "*.md" -o -name "*.yml" 2>/dev/null)
+# Replace in CLAUDE.md, AGENTS.md, and subagents
+FILES=$(find CLAUDE.md AGENTS.md tasks.yml .claude/agents tasks -name "*.md" -o -name "*.yml" 2>/dev/null)
 
-for f in $FILES .cursorrules AGENTS.md tasks.yml; do
+for f in $FILES CLAUDE.md AGENTS.md tasks.yml; do
   [ -f "$f" ] || continue
   sed -i '' "s/{{PROJECT_NAME}}/ShopFront/g" "$f"
   sed -i '' "s/{{PRIMARY_LANGUAGE}}/TypeScript/g" "$f"
@@ -116,7 +116,7 @@ Since you have code but no PDB, use the **ingestion agents** to reverse-engineer
 
 ### 4a. Run Codebase Auditor
 
-Open the project in Cursor:
+Open the project in Claude Code:
 
 ```
 @codebase-auditor
@@ -151,7 +151,7 @@ confidence levels and add validation checklists.
 ```
 
 Output:
-- `docs/product_design/generated_pdb.md`
+- `docs/product_design/{{PROJECT_NAME}}_pdb.md`
 - `docs/architecture/technical_architecture.md`
 
 ### 4d. Validate the Generated PDB
@@ -167,18 +167,14 @@ The generated PDB will have `[INFERRED]` and `[ASSUMPTION]` tags. Review it:
 - [ ] Correct any wrong inferences
 - [ ] Mark as validated when complete
 
-Rename after validation:
-
-```bash
-mv docs/product_design/generated_pdb.md docs/product_design/shopfront_pdb.md
-```
+The PDB is saved directly as `docs/product_design/shopfront_pdb.md` (using your project name).
 
 ## Step 5: Create Tasks from the PDB
 
 Now that you have a validated PDB, create task files:
 
 ```
-@pdb-to-tasks
+pdb-to-tasks subagent
 
 Read docs/product_design/shopfront_pdb.md and decompose it into epics and task files.
 Focus on:
@@ -268,10 +264,10 @@ You now have the same multi-agent workflow as a net-new project:
 
 ```bash
 cd ~/dev/shopfront
-git add .cursorrules AGENTS.md tasks.yml tasks/ docs/ .cursor/agents/ validate.sh
+git add CLAUDE.md AGENTS.md tasks.yml tasks/ docs/ .claude/agents/ validate.sh
 git commit -m "Add multi-agent development system
 
-- .cursorrules configured for Next.js full-stack
+- CLAUDE.md configured for Next.js full-stack
 - Agent roles defined (Implementation, QA, Testing, Documentation)
 - Ingestion agents generated PDB and gap analysis
 - Task files created from PDB with gap fixes as Phase 0
@@ -284,7 +280,7 @@ git commit -m "Add multi-agent development system
 
 ```
 shopfront/
-├── .cursorrules                       # AI agent rules (configured for Next.js)
+├── CLAUDE.md                       # AI agent rules (configured for Next.js)
 ├── AGENTS.md                          # Agent role definitions
 ├── tasks.yml                          # Portfolio-level milestones
 ├── validate.sh                        # Variable validation
@@ -303,7 +299,7 @@ shopfront/
 │   └── workflow/
 │       ├── MULTI_AGENT_WORKFLOW.md
 │       └── DEVELOPMENT_WORKFLOW.md
-├── .cursor/
+├── .claude/
 │   └── agents/
 │       ├── generic/                   # code-reviewer, test-writer, etc.
 │       ├── ideation/                  # idea-to-pdb, pdb-to-tasks
@@ -322,7 +318,7 @@ shopfront/
 | Aspect | Net-New (Clone) | Existing Project (Copy-From) |
 |--------|----------------|------------------------------|
 | **Starting point** | Clone the template repo | Copy files into your existing repo |
-| **PDB source** | `@idea-to-pdb` agent | `@documentation-backfill` agent (from code) |
+| **PDB source** | `idea-to-pdb subagent` agent | `@documentation-backfill` agent (from code) |
 | **First tasks** | Phase 0 build prep | Phase 0 gap fixes (from gap analysis) |
 | **Agent focus** | Ideation → implementation | Ingestion → hardening → implementation |
 | **Template files** | Template IS the project | Template stays separate, files copied in |

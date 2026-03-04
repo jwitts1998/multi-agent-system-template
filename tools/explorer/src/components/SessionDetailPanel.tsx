@@ -2,6 +2,19 @@ import type { Node } from '@xyflow/react';
 import type { MonitorNodeData, SessionData } from '../data/transcript-parser';
 import { STATUS_COLORS } from '../data/transcript-parser';
 import { MODELS, MODEL_IDS, calculateCost, type ModelId } from '../data/model-pricing';
+import { Section } from './shared/Section';
+import { StatCard } from './shared/StatCard';
+import { DetailPanelWrapper } from './shared/DetailPanelWrapper';
+import { Badge } from './ui/badge';
+import { Button } from './ui/button';
+import { ScrollArea } from './ui/scroll-area';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from './ui/select';
 
 interface SessionDetailPanelProps {
   node: Node | null;
@@ -9,24 +22,6 @@ interface SessionDetailPanelProps {
   selectedModel: ModelId;
   onModelChange: (model: ModelId) => void;
   onClose: () => void;
-}
-
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div style={{ marginBottom: 20 }}>
-      <h3 style={{
-        margin: '0 0 8px',
-        fontSize: 11,
-        fontWeight: 600,
-        textTransform: 'uppercase',
-        letterSpacing: '0.5px',
-        color: '#64748b',
-      }}>
-        {title}
-      </h3>
-      {children}
-    </div>
-  );
 }
 
 function generateMarkdownExport(session: SessionData, model: ModelId): string {
@@ -120,26 +115,18 @@ function SessionOverview({ session, selectedModel, onModelChange }: {
   return (
     <>
       <Section title="Model">
-        <select
-          value={selectedModel}
-          onChange={e => onModelChange(e.target.value as ModelId)}
-          style={{
-            width: '100%',
-            padding: '6px 10px',
-            fontSize: 12,
-            fontWeight: 500,
-            background: '#0f172a',
-            border: '1px solid #334155',
-            borderRadius: 6,
-            color: '#e2e8f0',
-            cursor: 'pointer',
-            outline: 'none',
-          }}
-        >
-          {MODEL_IDS.map(id => (
-            <option key={id} value={id}>{MODELS[id].label}</option>
-          ))}
-        </select>
+        <Select value={selectedModel} onValueChange={v => onModelChange(v as ModelId)}>
+          <SelectTrigger size="sm" className="w-full h-8 text-xs bg-slate-900 border-slate-600">
+            <SelectValue placeholder="Select model" />
+          </SelectTrigger>
+          <SelectContent>
+            {MODEL_IDS.map(id => (
+              <SelectItem key={id} value={id} className="text-xs">
+                {MODELS[id].label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </Section>
 
       <Section title="Session Stats">
@@ -186,45 +173,32 @@ function SessionOverview({ session, selectedModel, onModelChange }: {
 
       {session.agentTypes.length > 0 && (
         <Section title="Subagent Types Used">
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+          <div className="flex flex-wrap gap-1">
             {session.agentTypes.map(type => (
-              <span key={type} style={{
-                padding: '2px 8px',
-                borderRadius: 9999,
-                fontSize: 11,
-                fontWeight: 500,
-                border: '1px solid #a78bfa',
-                color: '#a78bfa',
-                background: 'rgba(0,0,0,0.2)',
-              }}>
+              <Badge
+                key={type}
+                variant="outline"
+                className="border-violet-400/60 text-violet-400 bg-violet-500/10 text-[11px]"
+              >
                 {type}
-              </span>
+              </Badge>
             ))}
           </div>
         </Section>
       )}
 
       <Section title="Export">
-        <button
+        <Button
+          variant="outline"
+          className="w-full h-9 text-xs bg-slate-900 border-slate-600 hover:bg-slate-800"
           onClick={() => {
             const md = generateMarkdownExport(session, selectedModel);
             const filename = `session-analysis-${new Date().toISOString().slice(0, 10)}.md`;
             downloadMarkdown(md, filename);
           }}
-          style={{
-            width: '100%',
-            padding: '8px 12px',
-            fontSize: 12,
-            fontWeight: 500,
-            background: '#0f172a',
-            border: '1px solid #334155',
-            borderRadius: 6,
-            color: '#e2e8f0',
-            cursor: 'pointer',
-          }}
         >
           Download Session Analysis (.md)
-        </button>
+        </Button>
       </Section>
     </>
   );
@@ -237,27 +211,16 @@ function TurnDetail({ node }: { node: Node }) {
   return (
     <>
       <Section title="Content">
-        <div style={{
-          maxHeight: 300,
-          overflow: 'auto',
-          padding: '10px 12px',
-          background: '#0f172a',
-          borderRadius: 8,
-          border: '1px solid #334155',
-          fontSize: 12,
-          lineHeight: 1.7,
-          color: '#cbd5e1',
-          fontFamily: "'SF Mono', 'Fira Code', monospace",
-          whiteSpace: 'pre-wrap',
-          wordBreak: 'break-word',
-        }}>
-          {d.turn.text.slice(0, 2000)}
-          {d.turn.text.length > 2000 && (
-            <span style={{ color: '#64748b' }}>
-              {'\n\n'}[... {(d.turn.text.length - 2000).toLocaleString()} more characters]
-            </span>
-          )}
-        </div>
+        <ScrollArea className="h-[300px] rounded-lg border border-slate-600 bg-slate-900 p-3">
+          <pre className="text-xs leading-relaxed text-slate-300 font-mono whitespace-pre-wrap break-words">
+            {d.turn.text.slice(0, 2000)}
+            {d.turn.text.length > 2000 && (
+              <span className="text-slate-500">
+                {'\n\n'}[... {(d.turn.text.length - 2000).toLocaleString()} more characters]
+              </span>
+            )}
+          </pre>
+        </ScrollArea>
       </Section>
 
       <Section title="Metrics">
@@ -348,105 +311,46 @@ export function SessionDetailPanel({ node, session, selectedModel, onModelChange
     ? STATUS_COLORS[d.nodeType === 'tool-cluster' ? 'toolCluster' : d.nodeType]
     : { border: '#3b82f6', text: '#bfdbfe' };
 
-  return (
-    <div style={{
-      position: 'absolute',
-      top: 0,
-      right: 0,
-      width: 420,
-      height: '100%',
-      background: '#1e293b',
-      borderLeft: '1px solid #334155',
-      overflow: 'auto',
-      zIndex: 10,
-      display: 'flex',
-      flexDirection: 'column',
-    }}>
-      {/* Header */}
-      <div style={{
-        padding: '16px 20px',
-        borderBottom: '1px solid #334155',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
-      }}>
-        <div>
-          {isOverview ? (
-            <>
-              <div style={{ fontSize: 11, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 4 }}>
-                Session Overview
-              </div>
-              <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: '#f1f5f9' }}>
-                {session!.turns.length} Turns
-              </h2>
-            </>
-          ) : (
-            <>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                <span style={{
-                  width: 8, height: 8, borderRadius: '50%',
-                  background: colors.border, display: 'inline-block',
-                }} />
-                <span style={{
-                  fontSize: 11, color: '#94a3b8',
-                  textTransform: 'uppercase', letterSpacing: '0.5px',
-                }}>
-                  {d!.nodeType === 'tool-cluster' ? 'Tool Cluster' : d!.turn.role} — Turn #{d!.turn.index + 1}
-                </span>
-              </div>
-              <h2 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: colors.text }}>
-                {d!.turn.summary}
-              </h2>
-            </>
-          )}
-        </div>
-        <button
-          onClick={onClose}
-          style={{
-            background: 'none',
-            border: '1px solid #475569',
-            borderRadius: 6,
-            color: '#94a3b8',
-            cursor: 'pointer',
-            padding: '4px 8px',
-            fontSize: 14,
-          }}
-        >
-          &times;
-        </button>
+  const header = isOverview ? (
+    <>
+      <div style={{ fontSize: 11, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 4 }}>
+        Session Overview
       </div>
-
-      {/* Body */}
-      <div style={{ padding: '16px 20px', flex: 1, overflow: 'auto' }}>
-        {isOverview ? (
-          <SessionOverview session={session!} selectedModel={selectedModel} onModelChange={onModelChange} />
-        ) : (
-          <TurnDetail node={node!} />
-        )}
+      <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: '#f1f5f9' }}>
+        {session!.turns.length} Turns
+      </h2>
+    </>
+  ) : (
+    <>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+        <span style={{
+          width: 8, height: 8, borderRadius: '50%',
+          background: colors.border, display: 'inline-block',
+        }} />
+        <span style={{
+          fontSize: 11, color: '#94a3b8',
+          textTransform: 'uppercase', letterSpacing: '0.5px',
+        }}>
+          {d!.nodeType === 'tool-cluster' ? 'Tool Cluster' : d!.turn.role} — Turn #{d!.turn.index + 1}
+        </span>
       </div>
-    </div>
+      <h2 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: colors.text }}>
+        {d!.turn.summary}
+      </h2>
+    </>
   );
-}
 
-function StatCard({ label, value, color }: { label: string; value: string | number; color: string }) {
+  const ariaLabel = isOverview
+    ? 'Session overview'
+    : `Turn ${d!.turn.index + 1}: ${d!.turn.summary}`;
+
   return (
-    <div style={{
-      padding: '8px 10px',
-      background: '#0f172a',
-      borderRadius: 6,
-      borderLeft: `3px solid ${color}`,
-    }}>
-      <div style={{
-        fontSize: 18,
-        fontWeight: 700,
-        color: '#f1f5f9',
-        fontFamily: "'SF Mono', 'Fira Code', monospace",
-      }}>
-        {value}
-      </div>
-      <div style={{ fontSize: 10, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.3px' }}>
-        {label}
-      </div>
-    </div>
+    <DetailPanelWrapper onClose={onClose} header={header} ariaLabel={ariaLabel}>
+      {isOverview ? (
+        <SessionOverview session={session!} selectedModel={selectedModel} onModelChange={onModelChange} />
+      ) : (
+        <TurnDetail node={node!} />
+      )}
+    </DetailPanelWrapper>
   );
 }

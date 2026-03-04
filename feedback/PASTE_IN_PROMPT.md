@@ -4,7 +4,7 @@ Copy everything below the line into a Cursor (or other AI assistant) session **i
 
 ---
 
-I need you to draft a feedback document for the **Multi-Agent Development System Template** based on how it was applied in this project. Look at the template-derived files in this repo — including `.cursorrules`, `AGENTS.md`, any task schema or task YAML files, workflow docs, and subagent configurations — to understand which template components were used and how they were customized.
+I need you to draft a feedback document for the **Multi-Agent Development System Template** based on how it was applied in this project. Look at the template-derived files in this repo — including `CLAUDE.md`, `AGENTS.md`, any task schema or task YAML files, workflow docs, and subagent configurations — to understand which template components were used and how they were customized.
 
 Write the feedback as a single markdown document using the structure below. Be specific and cite concrete examples from this project where possible. If a section doesn't apply, say so briefly and move on.
 
@@ -21,7 +21,7 @@ Write the feedback as a single markdown document using the structure below. Be s
 
 Which parts of the template were applied? Check all that apply.
 
-- [ ] `.cursorrules`
+- [ ] `CLAUDE.md`
 - [ ] `AGENTS.md`
 - [ ] Task schema / task files
 - [ ] Workflow docs (multi-agent workflow, development workflow)
@@ -53,8 +53,8 @@ Which parts of the template were applied? Check all that apply.
 
 To fill this out:
 
-1. Read the `.cursorrules` file at the project root to see which base template was used and what customizations were made.
-2. Read `AGENTS.md` (or `.cursor/agents/AGENTS.md` or similar) to see which agent roles are defined and how they differ from the base template.
+1. Read the `CLAUDE.md` file at the project root to see which base template was used and what customizations were made.
+2. Read `AGENTS.md` (or `.claude/agents/AGENTS.md` or similar) to see which agent roles are defined and how they differ from the base template.
 3. Look for any task schema files (e.g. `tasks/`, `.yml` task files) to see if the task system was adopted.
 4. Check for workflow docs or subagent configs that came from the template.
 5. Based on what you find, fill in each section with honest, specific feedback — both positive and constructive.

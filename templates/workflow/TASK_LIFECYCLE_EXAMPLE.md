@@ -93,11 +93,22 @@ The Implementation Agent:
 - id: PROFILE_T2_edit_profile
   status: in_progress
   # ... other fields unchanged ...
-  notes: >
-    Implementation Agent: PUT /api/v1/users/:id/profile endpoint created.
-    Avatar upload via multipart form (5MB limit). Name validation (1-100 chars),
-    bio validation (max 500 chars). Error handling for invalid input and
-    upload failures. Ready for Testing Agent.
+  notes:
+    - agent: implementation
+      status: complete
+      summary: >
+        PUT /api/v1/users/:id/profile endpoint created. Avatar upload via
+        multipart form (5MB limit). Name validation (1-100 chars), bio
+        validation (max 500 chars). Error handling for invalid input and
+        upload failures.
+      files_changed:
+        - src/api/controllers/profileController.ts
+        - src/services/profileService.ts
+      decisions:
+        - "5MB avatar limit based on S3 storage constraints"
+        - "Multipart form upload (not base64) for efficiency"
+      open_questions: []
+      next: testing
 ```
 
 ---
@@ -118,14 +129,24 @@ The Testing Agent reviews the implementation and writes tests:
 - id: PROFILE_T2_edit_profile
   status: in_progress
   # ... other fields unchanged ...
-  notes: >
-    Implementation Agent: PUT /api/v1/users/:id/profile endpoint created.
-    Avatar upload via multipart form (5MB limit). Name validation (1-100 chars),
-    bio validation (max 500 chars). Ready for Testing Agent.
-
-    Testing Agent: 12 unit tests and 6 integration tests added. All passing.
-    Covered: valid edit, name/bio validation, avatar upload/rejection,
-    unauthorized access, user not found. Ready for QA Agent.
+  notes:
+    - agent: implementation
+      status: complete
+      summary: "PUT /api/v1/users/:id/profile endpoint created. [...]"
+      # ... (previous note unchanged) ...
+      next: testing
+    - agent: testing
+      status: complete
+      summary: >
+        12 unit tests and 6 integration tests added. All passing. Covered:
+        valid edit, name/bio validation, avatar upload/rejection, unauthorized
+        access, user not found.
+      files_changed:
+        - tests/unit/profileService.test.ts
+        - tests/integration/profile.test.ts
+      decisions: []
+      open_questions: []
+      next: quality_assurance
 ```
 
 ---
@@ -144,15 +165,19 @@ The QA Agent reviews the code and tests from a quality and security perspective:
 ```yaml
 - id: PROFILE_T2_edit_profile
   status: in_progress
-  notes: >
-    Implementation Agent: PUT /api/v1/users/:id/profile endpoint created. [...]
-
-    Testing Agent: 12 unit tests and 6 integration tests added. All passing. [...]
-
-    QA Agent: Code follows architecture patterns. Error handling is solid.
-    ISSUE: Avatar upload endpoint missing rate limiting — could allow
-    storage abuse. Recommend adding rate limit (e.g., 10 uploads/hour/user).
-    Sending back to Implementation Agent.
+  notes:
+    # ... (previous implementation and testing notes unchanged) ...
+    - agent: quality_assurance
+      status: escalated
+      summary: >
+        Code follows architecture patterns. Error handling is solid.
+        ISSUE: Avatar upload endpoint missing rate limiting — could allow
+        storage abuse.
+      files_changed: []
+      decisions: []
+      open_questions:
+        - "Rate limiting needed on upload endpoint (recommend 10 uploads/hour/user)"
+      next: implementation
 ```
 
 ---
@@ -168,15 +193,27 @@ The Implementation Agent addresses the QA feedback:
 **Task YAML after fix:**
 
 ```yaml
-  notes: >
-    [... previous notes ...]
-
-    Implementation Agent: Rate limiting added (10 uploads/hour/user).
-    Returns 429 when exceeded. Test added for rate limit scenario.
-    Ready for QA re-review.
-
-    QA Agent: Rate limiting confirmed. All checks pass. Code approved.
-    Ready for Documentation Agent.
+  notes:
+    # ... (previous notes unchanged) ...
+    - agent: implementation
+      status: complete
+      summary: >
+        Rate limiting added (10 uploads/hour/user). Returns 429 when
+        exceeded. Test added for rate limit scenario.
+      files_changed:
+        - src/api/controllers/profileController.ts
+        - tests/unit/profileService.test.ts
+      decisions:
+        - "10 uploads/hour/user based on QA recommendation"
+      open_questions: []
+      next: quality_assurance
+    - agent: quality_assurance
+      status: complete
+      summary: "Rate limiting confirmed. All checks pass. Code approved."
+      files_changed: []
+      decisions: []
+      open_questions: []
+      next: documentation
 ```
 
 ---
@@ -228,24 +265,71 @@ The Documentation Agent validates all acceptance criteria are met and proposes t
   blocked_by:
     - PROFILE_T1_view_profile
   blocks: []
-  notes: >
-    Implementation Agent: PUT /api/v1/users/:id/profile endpoint created.
-    Avatar upload via multipart form (5MB limit). Name validation (1-100 chars),
-    bio validation (max 500 chars). Error handling for invalid input and
-    upload failures.
-
-    Testing Agent: 12 unit tests and 6 integration tests added. All passing.
-    Covered: valid edit, name/bio validation, avatar upload/rejection,
-    unauthorized access, user not found.
-
-    QA Agent: Architecture compliance verified. Rate limiting issue identified
-    and resolved. All checks pass.
-
-    Implementation Agent: Rate limiting added (10 uploads/hour/user).
-
-    Documentation Agent: API docs updated with endpoint details, validation
-    rules, error responses, and rate limiting. All acceptance criteria met.
-    Proposing status: done.
+  notes:
+    - agent: implementation
+      status: complete
+      summary: >
+        PUT /api/v1/users/:id/profile endpoint created. Avatar upload via
+        multipart form (5MB limit). Name validation (1-100 chars), bio
+        validation (max 500 chars). Error handling for invalid input and
+        upload failures.
+      files_changed:
+        - src/api/controllers/profileController.ts
+        - src/services/profileService.ts
+      decisions:
+        - "5MB avatar limit based on S3 storage constraints"
+        - "Multipart form upload (not base64) for efficiency"
+      open_questions: []
+      next: testing
+    - agent: testing
+      status: complete
+      summary: >
+        12 unit tests and 6 integration tests added. All passing. Covered:
+        valid edit, name/bio validation, avatar upload/rejection, unauthorized
+        access, user not found.
+      files_changed:
+        - tests/unit/profileService.test.ts
+        - tests/integration/profile.test.ts
+      decisions: []
+      open_questions: []
+      next: quality_assurance
+    - agent: quality_assurance
+      status: escalated
+      summary: >
+        Architecture compliance verified. Rate limiting issue identified —
+        avatar upload endpoint missing rate limiting.
+      files_changed: []
+      decisions: []
+      open_questions:
+        - "Rate limiting needed on upload endpoint"
+      next: implementation
+    - agent: implementation
+      status: complete
+      summary: "Rate limiting added (10 uploads/hour/user). Returns 429 when exceeded."
+      files_changed:
+        - src/api/controllers/profileController.ts
+        - tests/unit/profileService.test.ts
+      decisions:
+        - "10 uploads/hour/user based on QA recommendation"
+      open_questions: []
+      next: quality_assurance
+    - agent: quality_assurance
+      status: complete
+      summary: "Rate limiting confirmed. All checks pass. Code approved."
+      files_changed: []
+      decisions: []
+      open_questions: []
+      next: documentation
+    - agent: documentation
+      status: complete
+      summary: >
+        API docs updated with endpoint details, validation rules, error
+        responses, and rate limiting. All acceptance criteria met.
+        Proposing status: done.
+      files_changed:
+        - docs/api/profile.md
+      decisions: []
+      open_questions: []
 ```
 
 ---
@@ -253,10 +337,10 @@ The Documentation Agent validates all acceptance criteria are met and proposes t
 ## Key Takeaways
 
 1. **Status transitions are explicit**: Each agent proposes status changes rather than silently applying them.
-2. **Handoff notes are concrete**: Each note says what was done, what files were touched, and who should go next.
-3. **Issues flow back**: When QA flags a problem, the task goes back to the responsible agent without resetting progress.
+2. **Handoff notes are structured**: Each note uses a consistent YAML format with `agent`, `status`, `summary`, `files_changed`, `decisions`, `open_questions`, and `next` — making it easy for subsequent agents to parse context quickly.
+3. **Issues flow back**: When QA flags a problem (`status: escalated`), the task goes back to the responsible agent without resetting progress.
 4. **Final validation**: The last agent checks all acceptance criteria before proposing `done`.
-5. **Notes accumulate**: The task's `notes` field becomes a complete history of how the feature was built.
+5. **Notes accumulate**: The task's `notes` list becomes a complete, machine-parseable history of how the feature was built.
 
 ---
 

@@ -46,7 +46,7 @@ Domain agents define **what expertise is applied**. Role-based agents (Implement
   domain_agents: [maps-geo, search-discovery]
 ```
 
-When a task touches maps, invoke `@maps-geo` alongside the Implementation Agent. The domain agent brings best practices and AI-awareness; the role agent brings process discipline.
+When a task touches maps, invoke `maps-geo subagent` alongside the Implementation Agent. The domain agent brings best practices and AI-awareness; the role agent brings process discipline.
 
 ## Creating a New Domain Agent
 

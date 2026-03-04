@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react';
+import { useState, useEffect, useRef, useCallback, type ReactNode } from 'react';
 
 interface ArchitectureDocsPanelProps {
   onClose: () => void;
@@ -20,8 +20,12 @@ function SectionHeader({
   onClick: () => void;
 }) {
   return (
-    <button className="arch-docs-section-header" onClick={onClick}>
-      <span className="arch-docs-chevron">{expanded ? '\u25BC' : '\u25B6'}</span>
+    <button
+      className="arch-docs-section-header"
+      onClick={onClick}
+      aria-expanded={expanded}
+    >
+      <span className="arch-docs-chevron" aria-hidden="true">{expanded ? '\u25BC' : '\u25B6'}</span>
       {title}
     </button>
   );
@@ -396,6 +400,8 @@ export function ArchitectureDocsPanel({ onClose }: ArchitectureDocsPanelProps) {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
     new Set(sections.map(s => s.id))
   );
+  const panelRef = useRef<HTMLDivElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
 
   const toggleSection = (id: string) => {
     setExpandedSections(prev => {
@@ -412,9 +418,47 @@ export function ArchitectureDocsPanel({ onClose }: ArchitectureDocsPanelProps) {
   const expandAll = () => setExpandedSections(new Set(sections.map(s => s.id)));
   const collapseAll = () => setExpandedSections(new Set());
 
+  // Focus trapping and Escape handling
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      onClose();
+      return;
+    }
+
+    if (e.key !== 'Tab' || !panelRef.current) return;
+
+    const focusable = panelRef.current.querySelectorAll<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    if (focusable.length === 0) return;
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  }, [onClose]);
+
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyDown);
+    closeRef.current?.focus();
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [handleKeyDown]);
+
   return (
-    <div className="arch-docs-overlay" onClick={onClose}>
-      <div className="arch-docs-panel" onClick={e => e.stopPropagation()}>
+    <div
+      className="arch-docs-overlay"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Domain Micro-Agent Architecture Guide"
+    >
+      <div className="arch-docs-panel" onClick={e => e.stopPropagation()} ref={panelRef}>
         <div className="arch-docs-header">
           <div>
             <h2 className="arch-docs-title">Domain Micro-Agent Architecture</h2>
@@ -429,7 +473,12 @@ export function ArchitectureDocsPanel({ onClose }: ArchitectureDocsPanelProps) {
             <button className="arch-docs-toggle-btn" onClick={collapseAll}>
               Collapse All
             </button>
-            <button className="arch-docs-close-btn" onClick={onClose}>
+            <button
+              ref={closeRef}
+              className="arch-docs-close-btn"
+              onClick={onClose}
+              aria-label="Close architecture guide"
+            >
               &times;
             </button>
           </div>

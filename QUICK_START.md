@@ -17,16 +17,16 @@ export TEMPLATE_DIR=~/dev/multi-agent-system-template
 cd /path/to/your/project
 
 # Copy templates
-cp $TEMPLATE_DIR/templates/cursorrules/{PROJECT_TYPE}.cursorrules .cursorrules
+cp $TEMPLATE_DIR/templates/claude-config/{PROJECT_TYPE}CLAUDE.md CLAUDE.md
 cp $TEMPLATE_DIR/templates/agents/AGENTS-{PROJECT_TYPE}.md AGENTS.md
 cp $TEMPLATE_DIR/templates/tasks/tasks-schema.yml tasks.yml
 
 # Set up directories
-mkdir -p tasks docs/workflow .cursor/agents
+mkdir -p tasks docs/workflow .claude/agents
 
 # Copy subagents
-cp $TEMPLATE_DIR/templates/subagents/generic/*.md .cursor/agents/
-cp $TEMPLATE_DIR/templates/subagents/specialists/{SPECIALIST}.md .cursor/agents/
+cp $TEMPLATE_DIR/templates/subagents/generic/*.md .claude/agents/
+cp $TEMPLATE_DIR/templates/subagents/specialists/{SPECIALIST}.md .claude/agents/
 ```
 
 Where `{PROJECT_TYPE}` is one of:
@@ -48,7 +48,7 @@ Search and replace all `{{VARIABLES}}`:
 
 ```bash
 # Find remaining variables
-grep -r "{{" .cursorrules AGENTS.md
+grep -r "{{" CLAUDE.md AGENTS.md
 
 # Replace with your values
 # {{PROJECT_NAME}} → YourProjectName
@@ -59,11 +59,11 @@ grep -r "{{" .cursorrules AGENTS.md
 ## 4. Commit and Start Using
 
 ```bash
-git add .cursorrules AGENTS.md tasks.yml .cursor/
+git add CLAUDE.md AGENTS.md tasks.yml .claude/
 git commit -m "Add multi-agent development system"
 ```
 
-Now AI agents in Cursor will follow your project's patterns!
+Now AI agents in Claude Code will follow your project's patterns!
 
 ---
 

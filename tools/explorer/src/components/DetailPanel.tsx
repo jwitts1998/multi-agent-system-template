@@ -3,6 +3,10 @@ import type { ExplorerNodeData } from '../data/nodes';
 import type { PipelineNodeData } from '../data/workflow-nodes';
 import { categoryMeta } from '../data/nodes';
 import type { ViewMode } from '../App';
+import { Section } from './shared/Section';
+import { DetailPanelWrapper } from './shared/DetailPanelWrapper';
+import { CopyButton } from './shared/CopyButton';
+import { Badge } from './ui/badge';
 
 interface DetailPanelProps {
   node: Node | null;
@@ -89,322 +93,278 @@ function PipelineDetail({
   const prevNode = incomingEdge ? allNodes.find(n => n.id === incomingEdge.source) : null;
   const nextNode = outgoingEdge ? allNodes.find(n => n.id === outgoingEdge.target) : null;
 
-  return (
-    <div style={{
-      position: 'absolute',
-      top: 0,
-      right: 0,
-      width: 420,
-      height: '100%',
-      background: '#1e293b',
-      borderLeft: '1px solid #334155',
-      overflow: 'auto',
-      zIndex: 10,
-      display: 'flex',
-      flexDirection: 'column',
-    }}>
-      {/* Header */}
-      <div style={{
-        padding: '16px 20px',
-        borderBottom: '1px solid #334155',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
-      }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-            <span style={{
-              width: 26,
-              height: 26,
-              borderRadius: '50%',
-              background: phase.color,
-              color: '#fff',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: 13,
-              fontWeight: 700,
-              flexShrink: 0,
-            }}>
-              {d.stageNumber}
-            </span>
-            <span style={{
-              fontSize: 10,
-              color: phase.color,
-              textTransform: 'uppercase',
-              letterSpacing: '0.5px',
-              fontWeight: 600,
-            }}>
-              {phase.label} Phase
-            </span>
-          </div>
-          <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: '#f1f5f9' }}>
-            {d.title}
-          </h2>
-        </div>
-        <button
-          onClick={onClose}
-          style={{
-            background: 'none',
-            border: '1px solid #475569',
-            borderRadius: 6,
-            color: '#94a3b8',
-            cursor: 'pointer',
-            padding: '4px 8px',
-            fontSize: 14,
-          }}
-        >
-          &times;
-        </button>
+  const header = (
+    <>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+        <span style={{
+          width: 26,
+          height: 26,
+          borderRadius: '50%',
+          background: phase.color,
+          color: '#fff',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: 13,
+          fontWeight: 700,
+          flexShrink: 0,
+        }}>
+          {d.stageNumber}
+        </span>
+        <span style={{
+          fontSize: 10,
+          color: phase.color,
+          textTransform: 'uppercase',
+          letterSpacing: '0.5px',
+          fontWeight: 600,
+        }}>
+          {phase.label} Phase
+        </span>
       </div>
+      <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: '#f1f5f9' }}>
+        {d.title}
+      </h2>
+    </>
+  );
 
-      {/* Body */}
-      <div style={{ padding: '16px 20px', flex: 1, overflow: 'auto' }}>
-        <Section title="What Happens">
-          <p style={{ margin: 0, fontSize: 13, lineHeight: 1.7, color: '#cbd5e1' }}>
-            {d.description}
-          </p>
-        </Section>
+  return (
+    <DetailPanelWrapper onClose={onClose} header={header} ariaLabel={`Pipeline stage: ${d.title}`}>
+      <Section title="What Happens">
+        <p style={{ margin: 0, fontSize: 13, lineHeight: 1.7, color: '#cbd5e1' }}>
+          {d.description}
+        </p>
+      </Section>
 
-        {d.agents.length > 0 && (
-          <Section title={`Agents Involved (${d.agents.length})`}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              {d.agents.map((agent, i) => (
-                <div key={i} style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  fontSize: 12,
-                  padding: '5px 8px',
-                  background: '#0f172a',
-                  borderRadius: 6,
-                  borderLeft: `3px solid ${agentRoleColors[agent.role] || '#64748b'}`,
-                }}>
-                  <span style={{ color: '#e2e8f0', fontWeight: 500 }}>{agent.name}</span>
-                  <span style={{ color: '#64748b', marginLeft: 'auto', fontSize: 10, textTransform: 'uppercase' }}>
-                    {agent.role}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </Section>
-        )}
-
-        <Section title="Sub-Steps">
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            {d.substeps.map((step, i) => (
+      {d.agents.length > 0 && (
+        <Section title={`Agents Involved (${d.agents.length})`}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {d.agents.map((agent, i) => (
               <div key={i} style={{
                 display: 'flex',
-                alignItems: 'baseline',
-                gap: 10,
-                fontSize: 13,
-                color: '#cbd5e1',
-                lineHeight: 1.6,
+                alignItems: 'center',
+                gap: 8,
+                fontSize: 12,
+                padding: '5px 8px',
+                background: '#0f172a',
+                borderRadius: 6,
+                borderLeft: `3px solid ${agentRoleColors[agent.role] || '#64748b'}`,
               }}>
-                <span style={{
-                  color: phase.color,
-                  fontWeight: 700,
-                  fontSize: 11,
-                  width: 16,
-                  textAlign: 'right',
-                  flexShrink: 0,
-                }}>
-                  {i + 1}
+                <span style={{ color: '#e2e8f0', fontWeight: 500 }}>{agent.name}</span>
+                <span style={{ color: '#64748b', marginLeft: 'auto', fontSize: 10, textTransform: 'uppercase' }}>
+                  {agent.role}
                 </span>
-                {step}
               </div>
             ))}
           </div>
         </Section>
+      )}
 
-        {/* Terminal Commands */}
-        {d.commands && d.commands.length > 0 && (
-          <Section title="Terminal Commands">
-            <div className="command-block">
-              {d.commands.map((cmd, i) => (
-                <div key={i} className="command-line">
-                  <span className="command-prompt">$</span>
-                  <code>{cmd}</code>
-                </div>
-              ))}
-            </div>
-          </Section>
-        )}
-
-        {/* Example Prompts */}
-        {d.examplePrompts && d.examplePrompts.length > 0 && (
-          <Section title={`Example Prompts (${d.examplePrompts.length})`}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {d.examplePrompts.map((ep, i) => (
-                <div key={i} className="prompt-card">
-                  <div className="prompt-card-header">
-                    <span
-                      className="prompt-agent-pill"
-                      style={{
-                        borderColor: agentPillColors[ep.agent] || '#64748b',
-                        color: agentPillColors[ep.agent] || '#94a3b8',
-                      }}
-                    >
-                      {ep.agent}
-                    </span>
-                  </div>
-                  <div className="prompt-text">
-                    {ep.prompt}
-                  </div>
-                  {ep.context && (
-                    <div className="prompt-context">
-                      {ep.context}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </Section>
-        )}
-
-        {/* Tips */}
-        {d.tips && d.tips.length > 0 && (
-          <Section title="Tips">
-            <div className="tips-list">
-              {d.tips.map((tip, i) => (
-                <div key={i} className="tip-item">
-                  {tip}
-                </div>
-              ))}
-            </div>
-          </Section>
-        )}
-
-        <Section title="Output Artifact">
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 4,
-            padding: '8px 10px',
-            background: '#0f172a',
-            borderRadius: 6,
-          }}>
-            <span style={{
-              fontSize: 14,
-              fontWeight: 600,
-              color: '#f1f5f9',
-              fontFamily: "'SF Mono', 'Fira Code', monospace",
+      <Section title="Sub-Steps">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          {d.substeps.map((step, i) => (
+            <div key={i} style={{
+              display: 'flex',
+              alignItems: 'baseline',
+              gap: 10,
+              fontSize: 13,
+              color: '#cbd5e1',
+              lineHeight: 1.6,
             }}>
-              {d.artifact}
-            </span>
-            {d.artifactPath && (
-              <code style={{ fontSize: 11, color: '#7dd3fc' }}>
-                {d.artifactPath}
-              </code>
-            )}
-          </div>
-        </Section>
-
-        {d.templateFiles.length > 0 && (
-          <Section title="Template Files">
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-              {d.templateFiles.map((file, i) => (
-                <code key={i} style={{
-                  fontSize: 11,
-                  background: '#0f172a',
-                  padding: '4px 8px',
-                  borderRadius: 4,
-                  color: '#7dd3fc',
-                  display: 'block',
-                  wordBreak: 'break-all',
-                }}>
-                  {file}
-                </code>
-              ))}
+              <span style={{
+                color: phase.color,
+                fontWeight: 700,
+                fontSize: 11,
+                width: 16,
+                textAlign: 'right',
+                flexShrink: 0,
+              }}>
+                {i + 1}
+              </span>
+              {step}
             </div>
-          </Section>
-        )}
+          ))}
+        </div>
+      </Section>
 
-        <Section title="Handoff">
-          <p style={{ margin: 0, fontSize: 12, lineHeight: 1.6, color: '#94a3b8' }}>
-            {d.handoff}
-          </p>
-        </Section>
-
-        {/* Flow context */}
-        <Section title="Pipeline Position">
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {prevNode && (
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-                fontSize: 12,
-                padding: '4px 8px',
-                background: '#0f172a',
-                borderRadius: 4,
-              }}>
-                <span style={{ color: '#64748b' }}>{'\u2190'}</span>
-                <span style={{ color: '#e2e8f0' }}>
-                  {(prevNode.data as PipelineNodeData).title}
-                </span>
-                <span style={{ color: '#64748b', marginLeft: 'auto', fontSize: 10 }}>
-                  {incomingEdge?.label?.toString() || ''}
-                </span>
+      {d.commands && d.commands.length > 0 && (
+        <Section title="Terminal Commands">
+          <div className="command-block">
+            {d.commands.map((cmd, i) => (
+              <div key={i} className="command-line">
+                <span className="command-prompt">$</span>
+                <code>{cmd}</code>
+                <CopyButton text={cmd} label={`Copy command: ${cmd}`} />
               </div>
-            )}
-            {nextNode && (
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-                fontSize: 12,
-                padding: '4px 8px',
-                background: '#0f172a',
-                borderRadius: 4,
-              }}>
-                <span style={{ color: '#64748b' }}>{'\u2192'}</span>
-                <span style={{ color: '#e2e8f0' }}>
-                  {(nextNode.data as PipelineNodeData).title}
-                </span>
-                <span style={{ color: '#64748b', marginLeft: 'auto', fontSize: 10 }}>
-                  {outgoingEdge?.label?.toString() || ''}
-                </span>
-              </div>
-            )}
-            {hasFeedbackIn && (
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-                fontSize: 12,
-                padding: '4px 8px',
-                background: '#1a1200',
-                borderRadius: 4,
-                borderLeft: '3px solid #f97316',
-              }}>
-                <span style={{ color: '#fb923c' }}>{'\u21A9'}</span>
-                <span style={{ color: '#fb923c' }}>
-                  {viewMode === 'newIdea' ? 'Receives feedback from Quality Review' : 'Receives next cycle from Quality & Ship'}
-                </span>
-              </div>
-            )}
-            {hasFeedbackOut && (
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-                fontSize: 12,
-                padding: '4px 8px',
-                background: '#1a1200',
-                borderRadius: 4,
-                borderLeft: '3px solid #f97316',
-              }}>
-                <span style={{ color: '#fb923c' }}>{'\u21AA'}</span>
-                <span style={{ color: '#fb923c' }}>
-                  {viewMode === 'newIdea' ? 'Sends issues back to Development' : 'Starts next development cycle'}
-                </span>
-              </div>
-            )}
+            ))}
           </div>
         </Section>
-      </div>
-    </div>
+      )}
+
+      {d.examplePrompts && d.examplePrompts.length > 0 && (
+        <Section title={`Example Prompts (${d.examplePrompts.length})`}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {d.examplePrompts.map((ep, i) => (
+              <div key={i} className="prompt-card">
+                <div className="prompt-card-header">
+                  <Badge
+                    variant="outline"
+                    className="font-mono text-[11px] font-semibold"
+                    style={{
+                      borderColor: agentPillColors[ep.agent] || '#64748b',
+                      color: agentPillColors[ep.agent] || '#94a3b8',
+                      backgroundColor: 'rgba(0,0,0,0.2)',
+                    }}
+                  >
+                    {ep.agent}
+                  </Badge>
+                </div>
+                <div className="prompt-text">
+                  {ep.prompt}
+                </div>
+                {ep.context && (
+                  <div className="prompt-context">
+                    {ep.context}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </Section>
+      )}
+
+      {d.tips && d.tips.length > 0 && (
+        <Section title="Tips">
+          <div className="tips-list">
+            {d.tips.map((tip, i) => (
+              <div key={i} className="tip-item">
+                {tip}
+              </div>
+            ))}
+          </div>
+        </Section>
+      )}
+
+      <Section title="Output Artifact">
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 4,
+          padding: '8px 10px',
+          background: '#0f172a',
+          borderRadius: 6,
+        }}>
+          <span style={{
+            fontSize: 14,
+            fontWeight: 600,
+            color: '#f1f5f9',
+            fontFamily: "'SF Mono', 'Fira Code', monospace",
+          }}>
+            {d.artifact}
+          </span>
+          {d.artifactPath && (
+            <code style={{ fontSize: 11, color: '#7dd3fc' }}>
+              {d.artifactPath}
+            </code>
+          )}
+        </div>
+      </Section>
+
+      {d.templateFiles.length > 0 && (
+        <Section title="Template Files">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            {d.templateFiles.map((file, i) => (
+              <div key={i} className="copyable-code">
+                <code style={{ fontSize: 11 }}>{file}</code>
+                <CopyButton text={file} label={`Copy path: ${file}`} />
+              </div>
+            ))}
+          </div>
+        </Section>
+      )}
+
+      <Section title="Handoff">
+        <p style={{ margin: 0, fontSize: 12, lineHeight: 1.6, color: '#94a3b8' }}>
+          {d.handoff}
+        </p>
+      </Section>
+
+      <Section title="Pipeline Position">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {prevNode && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              fontSize: 12,
+              padding: '4px 8px',
+              background: '#0f172a',
+              borderRadius: 4,
+            }}>
+              <span style={{ color: '#64748b' }}>{'\u2190'}</span>
+              <span style={{ color: '#e2e8f0' }}>
+                {(prevNode.data as PipelineNodeData).title}
+              </span>
+              <span style={{ color: '#64748b', marginLeft: 'auto', fontSize: 10 }}>
+                {incomingEdge?.label?.toString() || ''}
+              </span>
+            </div>
+          )}
+          {nextNode && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              fontSize: 12,
+              padding: '4px 8px',
+              background: '#0f172a',
+              borderRadius: 4,
+            }}>
+              <span style={{ color: '#64748b' }}>{'\u2192'}</span>
+              <span style={{ color: '#e2e8f0' }}>
+                {(nextNode.data as PipelineNodeData).title}
+              </span>
+              <span style={{ color: '#64748b', marginLeft: 'auto', fontSize: 10 }}>
+                {outgoingEdge?.label?.toString() || ''}
+              </span>
+            </div>
+          )}
+          {hasFeedbackIn && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              fontSize: 12,
+              padding: '4px 8px',
+              background: '#1a1200',
+              borderRadius: 4,
+              borderLeft: '3px solid #f97316',
+            }}>
+              <span style={{ color: '#fb923c' }}>{'\u21A9'}</span>
+              <span style={{ color: '#fb923c' }}>
+                {viewMode === 'newIdea' ? 'Receives feedback from Quality Review' : 'Receives next cycle from Quality & Ship'}
+              </span>
+            </div>
+          )}
+          {hasFeedbackOut && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              fontSize: 12,
+              padding: '4px 8px',
+              background: '#1a1200',
+              borderRadius: 4,
+              borderLeft: '3px solid #f97316',
+            }}>
+              <span style={{ color: '#fb923c' }}>{'\u21AA'}</span>
+              <span style={{ color: '#fb923c' }}>
+                {viewMode === 'newIdea' ? 'Sends issues back to Development' : 'Starts next development cycle'}
+              </span>
+            </div>
+          )}
+        </div>
+      </Section>
+    </DetailPanelWrapper>
   );
 }
 
@@ -428,165 +388,104 @@ function SystemDetail({
   );
   const connectedNodes = allNodes.filter(n => connectedNodeIds.has(n.id));
 
-  return (
-    <div style={{
-      position: 'absolute',
-      top: 0,
-      right: 0,
-      width: 360,
-      height: '100%',
-      background: '#1e293b',
-      borderLeft: '1px solid #334155',
-      overflow: 'auto',
-      zIndex: 10,
-      display: 'flex',
-      flexDirection: 'column',
-    }}>
-      {/* Header */}
-      <div style={{
-        padding: '16px 20px',
-        borderBottom: '1px solid #334155',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
-      }}>
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-            <span className="category-dot" style={{ backgroundColor: meta?.color }} />
-            <span style={{ fontSize: 11, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              {meta?.label}
-            </span>
-          </div>
-          <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: '#f1f5f9' }}>
-            {d.name}
-          </h2>
-        </div>
-        <button
-          onClick={onClose}
-          style={{
-            background: 'none',
-            border: '1px solid #475569',
-            borderRadius: 6,
-            color: '#94a3b8',
-            cursor: 'pointer',
-            padding: '4px 8px',
-            fontSize: 14,
-          }}
-        >
-          &times;
-        </button>
+  const header = (
+    <>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+        <span className="category-dot" style={{ backgroundColor: meta?.color }} />
+        <span style={{ fontSize: 11, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+          {meta?.label}
+        </span>
       </div>
+      <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: '#f1f5f9' }}>
+        {d.name}
+      </h2>
+    </>
+  );
 
-      {/* Body */}
-      <div style={{ padding: '16px 20px', flex: 1, overflow: 'auto' }}>
-        <Section title="Description">
-          <p style={{ margin: 0, fontSize: 13, lineHeight: 1.6, color: '#cbd5e1' }}>
-            {d.description}
-          </p>
+  return (
+    <DetailPanelWrapper width={360} onClose={onClose} header={header} ariaLabel={`Node details: ${d.name}`}>
+      <Section title="Description">
+        <p style={{ margin: 0, fontSize: 13, lineHeight: 1.6, color: '#cbd5e1' }}>
+          {d.description}
+        </p>
+      </Section>
+
+      {d.filePath && (
+        <Section title="File Path">
+          <div className="copyable-code">
+            <code>{d.filePath}</code>
+            <CopyButton text={d.filePath} label="Copy file path" />
+          </div>
         </Section>
+      )}
 
-        {d.filePath && (
-          <Section title="File Path">
-            <code style={{
-              fontSize: 12,
-              background: '#0f172a',
-              padding: '4px 8px',
-              borderRadius: 4,
-              color: '#7dd3fc',
-              display: 'block',
-              wordBreak: 'break-all',
-            }}>
-              {d.filePath}
-            </code>
-          </Section>
-        )}
+      {d.category === 'research' && (
+        <>
+          {d.tier && (
+            <Section title="Recommendation Tier">
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <span className={`tier-badge tier-${d.tier}`}>
+                  {d.tier === 1 ? 'Tier 1 -- Primary' : d.tier === 2 ? 'Tier 2 -- Alternative' : 'Tier 3 -- Reference'}
+                </span>
+              </div>
+            </Section>
+          )}
+          {d.license && (
+            <Section title="License">
+              <span className="license-badge" style={{ fontSize: 12 }}>{d.license}</span>
+            </Section>
+          )}
+          {d.repoUrl && (
+            <Section title="Repository">
+              <a
+                href={d.repoUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: '#60a5fa', fontSize: 13, wordBreak: 'break-all' }}
+              >
+                {d.repoUrl}
+              </a>
+            </Section>
+          )}
+          {d.subcategory && (
+            <Section title="Research Category">
+              <span style={{ fontSize: 13, color: '#94a3b8' }}>{d.subcategory}</span>
+            </Section>
+          )}
+        </>
+      )}
 
-        {d.category === 'research' && (
-          <>
-            {d.tier && (
-              <Section title="Recommendation Tier">
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                  <span className={`tier-badge tier-${d.tier}`}>
-                    {d.tier === 1 ? 'Tier 1 -- Primary' : d.tier === 2 ? 'Tier 2 -- Alternative' : 'Tier 3 -- Reference'}
+      {connectedNodes.length > 0 && (
+        <Section title={`Connected (${connectedNodes.length})`}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {connectedNodes.map(cn => {
+              const cnData = cn.data as ExplorerNodeData;
+              const cnMeta = categoryMeta[cnData.category];
+              const edge = connectedEdges.find(
+                e => (e.source === node.id && e.target === cn.id) || (e.target === node.id && e.source === cn.id)
+              );
+              const direction = edge && edge.source === node.id ? '\u2192' : '\u2190';
+              return (
+                <div key={cn.id} style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  fontSize: 12,
+                  padding: '4px 8px',
+                  background: '#0f172a',
+                  borderRadius: 4,
+                }}>
+                  <span className="category-dot" style={{ backgroundColor: cnMeta?.color }} />
+                  <span style={{ color: '#e2e8f0' }}>{cnData.name}</span>
+                  <span style={{ color: '#64748b', marginLeft: 'auto', fontSize: 11 }}>
+                    {direction} {edge?.label || ''}
                   </span>
                 </div>
-              </Section>
-            )}
-            {d.license && (
-              <Section title="License">
-                <span className="license-badge" style={{ fontSize: 12 }}>{d.license}</span>
-              </Section>
-            )}
-            {d.repoUrl && (
-              <Section title="Repository">
-                <a
-                  href={d.repoUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ color: '#60a5fa', fontSize: 13, wordBreak: 'break-all' }}
-                >
-                  {d.repoUrl}
-                </a>
-              </Section>
-            )}
-            {d.subcategory && (
-              <Section title="Research Category">
-                <span style={{ fontSize: 13, color: '#94a3b8' }}>{d.subcategory}</span>
-              </Section>
-            )}
-          </>
-        )}
-
-        {connectedNodes.length > 0 && (
-          <Section title={`Connected (${connectedNodes.length})`}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              {connectedNodes.map(cn => {
-                const cnData = cn.data as ExplorerNodeData;
-                const cnMeta = categoryMeta[cnData.category];
-                const edge = connectedEdges.find(
-                  e => (e.source === node.id && e.target === cn.id) || (e.target === node.id && e.source === cn.id)
-                );
-                const direction = edge && edge.source === node.id ? '\u2192' : '\u2190';
-                return (
-                  <div key={cn.id} style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 8,
-                    fontSize: 12,
-                    padding: '4px 8px',
-                    background: '#0f172a',
-                    borderRadius: 4,
-                  }}>
-                    <span className="category-dot" style={{ backgroundColor: cnMeta?.color }} />
-                    <span style={{ color: '#e2e8f0' }}>{cnData.name}</span>
-                    <span style={{ color: '#64748b', marginLeft: 'auto', fontSize: 11 }}>
-                      {direction} {edge?.label || ''}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </Section>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div style={{ marginBottom: 20 }}>
-      <h3 style={{
-        margin: '0 0 8px',
-        fontSize: 11,
-        fontWeight: 600,
-        textTransform: 'uppercase',
-        letterSpacing: '0.5px',
-        color: '#64748b',
-      }}>
-        {title}
-      </h3>
-      {children}
-    </div>
+              );
+            })}
+          </div>
+        </Section>
+      )}
+    </DetailPanelWrapper>
   );
 }

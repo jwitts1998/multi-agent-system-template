@@ -16,7 +16,7 @@ graph TB
     Dev[Developer] --> Quest[Project Questionnaire]
     Quest --> Templates[Select Templates]
     
-    Templates --> CR[.cursorrules]
+    Templates --> CR[CLAUDE.md]
     Templates --> AG[AGENTS.md]
     Templates --> TS[Task Files]
     Templates --> WF[Workflow Docs]
@@ -60,7 +60,7 @@ graph TB
 ### 2. Templates → Project Configuration
 
 **Components**:
-- **`.cursorrules`**: Defines project context for AI agents
+- **`CLAUDE.md`**: Defines project context for AI agents
 - **`AGENTS.md`**: Defines agent roles and responsibilities
 - **`tasks/*.yml`**: Defines implementation tasks
 - **Workflow docs**: Define development processes
@@ -68,7 +68,7 @@ graph TB
 
 **Integration**:
 ```
-.cursorrules (project context)
+CLAUDE.md (project context)
      ↓
   AGENTS.md (agent roles)
      ↓
@@ -79,11 +79,11 @@ Subagent configs (AI assistants)
 
 ---
 
-### 3. .cursorrules ↔ AGENTS.md
+### 3. CLAUDE.md ↔ AGENTS.md
 
 **Relationship**: Complementary
 
-**.cursorrules provides**:
+**CLAUDE.md provides**:
 - Project overview and philosophy
 - Architecture patterns
 - Technology stack
@@ -99,7 +99,7 @@ Subagent configs (AI assistants)
 - Agent collaboration patterns
 - Quality checklists
 
-**Integration**: Agents reference `.cursorrules` as the source of truth for project standards.
+**Integration**: Agents reference `CLAUDE.md` as the source of truth for project standards.
 
 ---
 
@@ -133,7 +133,7 @@ Subagent configs (AI assistants)
 1. Main agent reads task from `tasks/*.yml`
 2. Agent determines work type (implementation, review, testing)
 3. Agent invokes appropriate subagent (code-reviewer, designer, test-writer, etc.)
-4. Subagent uses project context from `.cursorrules`
+4. Subagent uses project context from `CLAUDE.md`
 5. Subagent completes specialized work
 6. Main agent integrates subagent output
 
@@ -145,7 +145,7 @@ Implementation Agent (from AGENTS.md)
     ↓
 Invokes flutter-specialist subagent
     ↓
-flutter-specialist uses .cursorrules context
+flutter-specialist uses CLAUDE.md context
     ↓
 Implements feature following project patterns
 ```
@@ -168,7 +168,7 @@ Implements feature following project patterns
 - Testing requirements
 - Documentation standards
 
-**Integration**: Both reference `.cursorrules` and `AGENTS.md` as authoritative sources.
+**Integration**: Both reference `CLAUDE.md` and `AGENTS.md` as authoritative sources.
 
 ---
 
@@ -192,7 +192,7 @@ Implements feature following project patterns
 
 **Step 2: Task Execution Protocol**
 1. **Read task file**: Understands requirements, resolves `agent_roles` via Role Mapping table in `AGENTS.md`
-2. **Check `.cursorrules`**: Reviews architecture pattern, code style
+2. **Check `CLAUDE.md`**: Reviews architecture pattern, code style
 3. **Check `AGENTS.md`**: Reviews mapped role responsibilities and checklist
 4. **Execute roles in order**: Works through each role per Task Execution Protocol, leaving handoff notes between roles
 5. **Implement feature**: Follows project patterns, invokes relevant subagents
@@ -200,7 +200,7 @@ Implements feature following project patterns
 
 **Step 3: Automatic Code Review**
 - **code-reviewer subagent** automatically activates
-- Reviews against `.cursorrules` standards
+- Reviews against `CLAUDE.md` standards
 - Checks architecture compliance from `AGENTS.md`
 - Provides feedback (Critical / Warnings / Suggestions)
 
@@ -229,7 +229,7 @@ Implements feature following project patterns
 ### 1. Start with Context
 
 Before any work:
-1. Read `.cursorrules` → Understand project standards
+1. Read `CLAUDE.md` → Understand project standards
 2. Read `AGENTS.md` → Understand agent responsibilities
 3. Read task file → Understand specific requirements
 4. Check workflow docs → Understand process
@@ -253,7 +253,7 @@ spec_refs:
 
 ### 4. Maintain Consistency
 
-- **`.cursorrules`**: Single source of truth for standards
+- **`CLAUDE.md`**: Single source of truth for standards
 - **`AGENTS.md`**: Single source of truth for agent roles
 - **Task files**: Single source of truth for work items
 - **Workflow docs**: Single source of truth for processes
@@ -276,10 +276,10 @@ Let subagents handle specialized work:
 
 ### Issue: Agents Not Following Project Standards
 
-**Cause**: `.cursorrules` not comprehensive or up-to-date
+**Cause**: `CLAUDE.md` not comprehensive or up-to-date
 
 **Solution**:
-1. Review `.cursorrules` for completeness
+1. Review `CLAUDE.md` for completeness
 2. Add missing project-specific patterns
 3. Ensure examples are clear and specific
 
@@ -317,7 +317,7 @@ Let subagents handle specialized work:
 
 Your integration is successful when:
 
-✅ Agents automatically follow `.cursorrules` standards
+✅ Agents automatically follow `CLAUDE.md` standards
 ✅ Agent roles from `AGENTS.md` are clear and non-overlapping
 ✅ Tasks have clear `agent_roles` assignments
 ✅ Subagents activate appropriately

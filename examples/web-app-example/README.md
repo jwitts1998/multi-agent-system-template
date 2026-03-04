@@ -38,7 +38,7 @@ Verify setup:
 ## Step 2: Flush the Idea
 
 ```
-@idea-to-pdb
+idea-to-pdb subagent
 
 I want to build CollabDocs — a real-time collaborative document editor for small teams.
 
@@ -60,7 +60,7 @@ Output: `docs/product_design/collabdocs_pdb.md`
 ## Step 3: Create Tasks from the PDB
 
 ```
-@pdb-to-tasks
+pdb-to-tasks subagent
 
 Read docs/product_design/collabdocs_pdb.md and decompose it into epics and task files.
 ```
@@ -145,9 +145,9 @@ Clone repo
     ↓
 ./setup.sh (web-app, React, TypeScript)
     ↓
-@idea-to-pdb → docs/product_design/collabdocs_pdb.md
+idea-to-pdb subagent → docs/product_design/collabdocs_pdb.md
     ↓
-@pdb-to-tasks → tasks/00-05_*.yml
+pdb-to-tasks subagent → tasks/00-05_*.yml
     ↓
 Pick first task → implement → review → test → done
 ```

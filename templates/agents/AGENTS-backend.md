@@ -51,7 +51,7 @@ This document defines specialized **development agents** for backend service dev
 - [ ] Rate limiting configured
 - [ ] API documented (Swagger/OpenAPI)
 - [ ] Authentication/authorization checked
-- [ ] Relevant MCP tools and skills used where applicable (see `docs/CURSOR_PLUGINS.md`)
+- [ ] Relevant MCP tools and skills used where applicable (see `docs/CLAUDE_CODE_CAPABILITIES.md`)
 
 **Special Instructions**:
 - Follow RESTful conventions (GET /resource, POST /resource, etc.)
@@ -59,7 +59,7 @@ This document defines specialized **development agents** for backend service dev
 - Return consistent error format
 - Use proper HTTP status codes
 - Document endpoints with examples
-- Check `.cursorrules` for API patterns
+- Check `CLAUDE.md` for API patterns
 
 ---
 
@@ -103,7 +103,7 @@ This document defines specialized **development agents** for backend service dev
 - [ ] No N+1 query problems
 - [ ] Connection pooling configured
 - [ ] Queries optimized (EXPLAIN analyzed)
-- [ ] Relevant MCP tools and skills used where applicable (see `docs/CURSOR_PLUGINS.md`)
+- [ ] Relevant MCP tools and skills used where applicable (see `docs/CLAUDE_CODE_CAPABILITIES.md`)
 
 **Special Instructions**:
 - Always create reversible migrations
@@ -159,7 +159,7 @@ This document defines specialized **development agents** for backend service dev
 - [ ] Test database setup/teardown working
 - [ ] External services mocked
 - [ ] Tests run in CI/CD
-- [ ] Relevant MCP tools and skills used where applicable (see `docs/CURSOR_PLUGINS.md`)
+- [ ] Relevant MCP tools and skills used where applicable (see `docs/CLAUDE_CODE_CAPABILITIES.md`)
 
 **Special Instructions**:
 - Use test database (not production)
@@ -213,7 +213,7 @@ This document defines specialized **development agents** for backend service dev
 - [ ] Security headers configured
 - [ ] No sensitive data in logs
 - [ ] HTTPS enforced in production
-- [ ] Relevant MCP tools and skills used where applicable (see `docs/CURSOR_PLUGINS.md`)
+- [ ] Relevant MCP tools and skills used where applicable (see `docs/CLAUDE_CODE_CAPABILITIES.md`)
 
 **Special Instructions**:
 - Never store plain-text passwords
@@ -222,7 +222,7 @@ This document defines specialized **development agents** for backend service dev
 - Implement rate limiting on auth endpoints
 - Rotate secrets regularly
 - Add security headers (Helmet.js or equivalent)
-- Review `.cursorrules` security section
+- Review `CLAUDE.md` security section
 
 ---
 
@@ -277,7 +277,11 @@ When you pick up a task with multiple `agent_roles`, follow this protocol:
 
 ## 🔌 Plugins and MCP Tools
 
-Agents have access to MCP tools and skills provided by installed Cursor plugins. See `docs/CURSOR_PLUGINS.md` for the full list. Use them when relevant to the task.
+Agents have access to MCP tools and skills provided by installed Claude Code skills. See `docs/CLAUDE_CODE_CAPABILITIES.md` for the full list. Use them when relevant to the task.
+
+**Permissions**: Agents may leverage existing skills and create new ones at any time. Use `/skill-name` when a task would benefit. Use the `create-skill` workflow to author project-specific skills. Update `docs/CLAUDE_CODE_CAPABILITIES.md` after adding capabilities.
+
+**Antigravity Awesome Skills**: If installed (`./scripts/install-antigravity-skills.sh`), 946+ skills are in `.claude/skills/`. Project config agents can run the install script during setup or when requested.
 
 **Stack-relevant examples**:
 - **Context7**: Look up current docs for {{BACKEND_FRAMEWORK}}, {{ORM_LIBRARY}}, and any dependency before implementing unfamiliar APIs
@@ -285,7 +289,7 @@ Agents have access to MCP tools and skills provided by installed Cursor plugins.
 - **Stripe**: Payment integration best practices (if applicable)
 - **parallel-web-search**: Verify security practices, CVE lookups, and current OWASP guidance
 
-Flag gaps: if agents are doing work manually that a plugin, skill, or MCP server could handle, recommend installing or creating one and update `docs/CURSOR_PLUGINS.md`.
+Flag gaps: if agents are doing work manually that a plugin, skill, or MCP server could handle, recommend installing or creating one and update `docs/CLAUDE_CODE_CAPABILITIES.md`.
 
 ---
 
@@ -298,7 +302,7 @@ Flag gaps: if agents are doing work manually that a plugin, skill, or MCP server
 - [ ] Proper HTTP status codes
 - [ ] API documented
 - [ ] Rate limiting configured
-- [ ] Relevant MCP tools and skills used where applicable (see `docs/CURSOR_PLUGINS.md`)
+- [ ] Relevant MCP tools and skills used where applicable (see `docs/CLAUDE_CODE_CAPABILITIES.md`)
 
 ### Database Agent Checklist
 - [ ] Schema properly designed
@@ -307,7 +311,7 @@ Flag gaps: if agents are doing work manually that a plugin, skill, or MCP server
 - [ ] Transactions used appropriately
 - [ ] No N+1 queries
 - [ ] Connection pooling configured
-- [ ] Relevant MCP tools and skills used where applicable (see `docs/CURSOR_PLUGINS.md`)
+- [ ] Relevant MCP tools and skills used where applicable (see `docs/CLAUDE_CODE_CAPABILITIES.md`)
 
 ### Testing Agent Checklist
 - [ ] Unit tests for business logic
@@ -316,7 +320,7 @@ Flag gaps: if agents are doing work manually that a plugin, skill, or MCP server
 - [ ] Mocks external services
 - [ ] Coverage meets target
 - [ ] Tests are fast
-- [ ] Relevant MCP tools and skills used where applicable (see `docs/CURSOR_PLUGINS.md`)
+- [ ] Relevant MCP tools and skills used where applicable (see `docs/CLAUDE_CODE_CAPABILITIES.md`)
 
 ### Security Agent Checklist
 - [ ] Authentication secure
@@ -325,13 +329,13 @@ Flag gaps: if agents are doing work manually that a plugin, skill, or MCP server
 - [ ] No SQL injection risk
 - [ ] Secrets managed securely
 - [ ] Rate limiting enabled
-- [ ] Relevant MCP tools and skills used where applicable (see `docs/CURSOR_PLUGINS.md`)
+- [ ] Relevant MCP tools and skills used where applicable (see `docs/CLAUDE_CODE_CAPABILITIES.md`)
 
 ---
 
 ## 🔗 Related Documentation
 
-- **`.cursorrules`**: Architecture patterns, security requirements, API conventions
+- **`CLAUDE.md`**: Architecture patterns, security requirements, API conventions
 - **`docs/api/`**: API documentation and schemas
 - **`docs/database/`**: Database schema and migration guides
 

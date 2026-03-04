@@ -174,6 +174,7 @@ acceptance_criteria: [string]  # Definition of done
 tests: [string]                # Test requirements
 blocked_by: [string]           # Task IDs that block this task
 blocks: [string]               # Task IDs that this task blocks
+effort: string                 # Estimated effort: small | medium | large (optional)
 owner: string                  # Task owner (optional)
 envs: [string]                 # Target environments (optional)
 backlog_ref: string            # Link to portfolio backlog item (optional)
@@ -316,17 +317,73 @@ tasks:
 - `medium` - Normal priority
 - `low` - Nice to have, can be deferred
 
-### Effort Values (Portfolio-level only)
+### Effort Values
 
+Effort values apply at both portfolio-level (milestones) and per-feature (tasks) level:
+
+**Portfolio-level** (`milestones`):
 - `small` - < 1 week
 - `medium` - 1-3 weeks
 - `large` - > 3 weeks
+
+**Per-feature** (`tasks`):
+- `small` - Completable in a single focused session (< 1 hour of agent work)
+- `medium` - Requires a dedicated session, may span multiple agent handoffs (1-4 hours)
+- `large` - Spans multiple sessions, likely needs decomposition or dedicated focus (> 4 hours)
+
+The task orchestrator uses `effort` for session planning — batching small tasks together and flagging large tasks that may need decomposition. If omitted, the orchestrator infers effort from acceptance criteria count and `code_areas` breadth.
 
 ### Type Values (Per-feature only)
 
 - `story` - User-facing feature or functionality
 - `chore` - Technical work, refactoring, infrastructure
 - `spike` - Research or exploration task
+
+### Environment Values (`envs`)
+
+The `envs` field tracks which environments a task targets and has been verified in. Valid values:
+
+| Value | Meaning | When to use |
+|-------|---------|-------------|
+| `dev` | Development environment | Default for all tasks. Code is deployed and working in dev. |
+| `staging` | Pre-production / UAT environment | Task has been promoted to staging and verified there. |
+| `prod` | Production environment | Task is deployed to production and confirmed working. |
+
+**How `envs` evolves during a task's lifecycle:**
+
+```yaml
+# Task starts — targeting dev
+envs: [dev]
+status: in_progress
+
+# Feature verified in dev, promoted to staging
+envs: [dev, staging]
+status: in_progress
+
+# Feature verified in all target environments
+envs: [dev, staging, prod]
+status: done
+```
+
+**Rules:**
+
+- `defaults.envs` in the task file header sets the starting target for all tasks in the file — typically `[dev]`
+- A task should not be marked `status: done` until it is verified in **all environments listed in its `envs` field**
+- Environments are cumulative — a task deployed to `staging` should also list `dev` (it was verified there first)
+- Tasks that only need dev verification (e.g., internal tooling, developer utilities) can have `envs: [dev]` and be marked `done` after dev verification alone
+- Tasks targeting production must pass through environments in order: `dev` → `staging` → `prod`
+- The `envs` field is informational by default — enforcement happens through the deployment workflow (see `templates/workflow/DEPLOYMENT_WORKFLOW.md`)
+
+**Interaction with `status`:**
+
+| `status` | `envs` implication |
+|----------|-------------------|
+| `todo` | `envs` indicates target environments (where the task *will* be deployed) |
+| `in_progress` | `envs` indicates environments where the task has been verified so far |
+| `blocked` | `envs` unchanged — task is waiting on a dependency |
+| `done` | `envs` must include all target environments — verification is complete |
+
+See `templates/workflow/DEPLOYMENT_WORKFLOW.md` for the full environment promotion process, deployment gates, and rollback procedures.
 
 ---
 
@@ -493,13 +550,14 @@ Mark task as `done` only when:
 - All `tests` are implemented and passing
 - Code is reviewed (if `quality_assurance` agent involved)
 - Documentation updated (if `documentation` agent involved)
+- Task is verified in all target environments listed in `envs` (see Environment Values above)
 
 ---
 
 ## 📖 Related Documentation
 
 - **AGENTS.md**: Agent role definitions and responsibilities
-- **.cursorrules**: Architecture patterns and code conventions
+- **CLAUDE.md**: Architecture patterns and code conventions
 - **docs/workflow/MULTI_AGENT_WORKFLOW.md**: Workflow patterns and collaboration
 
 ---

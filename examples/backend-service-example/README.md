@@ -38,7 +38,7 @@ Verify setup:
 ## Step 2: Flush the Idea
 
 ```
-@idea-to-pdb
+idea-to-pdb subagent
 
 I want to build PaymentAPI — a payment processing REST API for e-commerce.
 
@@ -59,7 +59,7 @@ Output: `docs/product_design/paymentapi_pdb.md`
 ## Step 3: Create Tasks from the PDB
 
 ```
-@pdb-to-tasks
+pdb-to-tasks subagent
 
 Read docs/product_design/paymentapi_pdb.md and decompose it into epics and task files.
 ```
@@ -146,9 +146,9 @@ Clone repo
     ↓
 ./setup.sh (backend-service, Express, TypeScript)
     ↓
-@idea-to-pdb → docs/product_design/paymentapi_pdb.md
+idea-to-pdb subagent → docs/product_design/paymentapi_pdb.md
     ↓
-@pdb-to-tasks → tasks/00-05_*.yml
+pdb-to-tasks subagent → tasks/00-05_*.yml
     ↓
 Pick first task → implement → security audit → review → test → done
 ```

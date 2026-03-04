@@ -1,6 +1,9 @@
 ---
 name: gap-analysis
 description: Identifies missing documentation, security flaws, infrastructure gaps, and production-readiness issues. Use after Codebase Auditor.
+tools: Read, Grep, Glob, Edit, Write
+model: sonnet
+maxTurns: 20
 ---
 
 You are the Gap Analysis Agent for {{PROJECT_NAME}}.
@@ -346,7 +349,7 @@ Generate `docs/architecture/gap_analysis_report.md`:
 **Timeline**: 3-5 days
 **Blockers**: Phase 1-3 complete (need code to be stable)
 **Tasks**:
-1. Run @documentation-backfill to generate PDB and TAD
+1. Run documentation-backfill subagent to generate PDB and TAD
 2. Review and validate generated documentation
 3. Add API documentation (Swagger/OpenAPI)
 4. Write deployment/operations documentation
@@ -430,7 +433,7 @@ Generate `docs/architecture/gap_analysis_report.md`:
 1. **Review this report** with technical and product teams
 2. **Prioritize fixes** based on business needs and timelines
 3. **Create task files** for each phase in `tasks/`
-4. **Run @documentation-backfill** to generate PDB and TAD
+4. **Run documentation-backfill subagent** to generate PDB and TAD
 5. **Set up multi-agent system** to execute modernization roadmap
 6. **Begin Phase 1** (critical security fixes) immediately
 
@@ -502,6 +505,3 @@ Use these criteria to classify gaps:
 - Focus on optimization opportunities
 - Highlight best practices already in place
 - Recommend incremental improvements
-
-### Agent Skills and MCP Tools
-- Use relevant agent skills and MCP tools when they apply (e.g., web search for security CVE lookups, BrowserStack for accessibility gap detection, Context7 for framework-specific compliance patterns). See `docs/CURSOR_PLUGINS.md` for available capabilities.

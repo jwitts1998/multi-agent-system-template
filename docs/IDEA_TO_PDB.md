@@ -39,7 +39,7 @@ Before locking into a design, spend a session exploring the idea:
 
 **Where to do this**: Use a conversational AI session (Gemini, ChatGPT, Claude, or Cursor itself). The goal is a clear articulation of *what* you're building and *why*, not implementation details.
 
-**In-repo option**: Use the `@idea-to-pdb` agent (see [templates/subagents/ideation/](../templates/subagents/ideation/)) to run this step inside Cursor.
+**In-repo option**: Use the `idea-to-pdb subagent` agent (see [templates/subagents/ideation/](../templates/subagents/ideation/)) to run this step in Claude Code.
 
 ### Phase 2: Generate the PDB
 
@@ -69,7 +69,7 @@ Once the idea is clear, produce a structured Product Design Blueprint. The PDB i
 **Where to do this**:
 
 - **External tool (recommended for deep PDBs)**: Use Gemini Deep Research, ChatGPT, or Claude with a PDB-generation prompt. Paste your idea exploration notes as context.
-- **In Cursor**: Use the `@idea-to-pdb` agent for a lightweight PDB. For a deep-dive, run the agent to produce the initial structure and then expand in an external tool.
+- **In Cursor**: Use the `idea-to-pdb subagent` agent for a lightweight PDB. For a deep-dive, run the agent to produce the initial structure and then expand in an external tool.
 
 ### Phase 3: Save and Integrate the PDB
 
@@ -90,21 +90,21 @@ Once the idea is clear, produce a structured Product Design Blueprint. The PDB i
 
 ## Using the Idea-to-PDB Agent
 
-The template includes an ideation agent at `templates/subagents/ideation/idea-to-pdb.md` that can run the idea exploration and lightweight PDB generation inside Cursor.
+The template includes an ideation agent at `templates/subagents/ideation/idea-to-pdb.md` that can run the idea exploration and lightweight PDB generation in Claude Code.
 
 ### Setup
 
 ```bash
 TEMPLATE_DIR=/path/to/multi-agent-system-template
 
-mkdir -p .cursor/agents/ideation
-cp $TEMPLATE_DIR/templates/subagents/ideation/idea-to-pdb.md .cursor/agents/ideation/
+mkdir -p .claude/agents/ideation
+cp $TEMPLATE_DIR/templates/subagents/ideation/idea-to-pdb.md .claude/agents/ideation/
 ```
 
 ### Invocation
 
 ```
-@idea-to-pdb
+idea-to-pdb subagent
 
 Prompt: "I have a new product idea: [describe your idea]. Help me explore it and produce a Product Design Blueprint."
 ```
@@ -121,7 +121,7 @@ The agent will:
 - **Visual design exploration**: use Figma or design tools alongside the PDB.
 - **Market research**: use deep-research tools (Gemini Deep Research) that can search the web.
 
-The `@idea-to-pdb` agent is best for quick, in-Cursor ideation sessions that produce a working PDB you can immediately reference in task files.
+The `idea-to-pdb subagent` agent is best for quick, in-Claude Code ideation sessions that produce a working PDB you can immediately reference in task files.
 
 ---
 
@@ -147,14 +147,14 @@ Before using a PDB with implementation agents, verify:
 ```
 Idea Exploration ──→ PDB ──→ tasks/*.yml ──→ Implementation
      ↑                ↑           ↑                ↑
-@idea-to-pdb    This guide   TASK_SCHEMA     Standard agents
+idea-to-pdb subagent    This guide   TASK_SCHEMA     Standard agents
 (or external)                 GUIDE.md     (Implementation,
                                             QA, Testing)
 ```
 
 | Starting point | What to use |
 |----------------|-------------|
-| Raw idea, no code or docs | This guide + `@idea-to-pdb` agent |
+| Raw idea, no code or docs | This guide + `idea-to-pdb subagent` agent |
 | Existing code, no PDB | [Ingestion agents](../templates/subagents/ingestion/README.md) (Documentation Backfill) |
 | Have PDB, ready to build | [SETUP_GUIDE.md](../SETUP_GUIDE.md) Path B |
 | Have code + PDB | [SETUP_GUIDE.md](../SETUP_GUIDE.md) Path C |
@@ -164,7 +164,7 @@ Idea Exploration ──→ PDB ──→ tasks/*.yml ──→ Implementation
 ## Tips
 
 - **Start messy**: The first pass doesn't need to be perfect. Capture the idea, then refine.
-- **Iterate**: Run `@idea-to-pdb` multiple times as the idea evolves. Each session can build on the previous PDB.
+- **Iterate**: Run `idea-to-pdb subagent` multiple times as the idea evolves. Each session can build on the previous PDB.
 - **Schema-first**: For any feature involving persistent data or external APIs, define the data model in the PDB before implementation.
 - **Keep it alive**: The PDB is a living document. Update it as you learn from implementation. Use the Doc-Generator agent to keep it in sync.
 

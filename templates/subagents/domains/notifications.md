@@ -2,6 +2,9 @@
 name: notifications
 description: Domain agent for push notifications, email, in-app messages, SMS, scheduling, preference management, and templates. Tier 2 feature — knows how to build notification systems that inform without overwhelming.
 last_reviewed: 2026-02-24
+tools: Read, Grep, Glob, Edit, Write
+model: sonnet
+maxTurns: 15
 knowledge_sources:
   - "Firebase Cloud Messaging docs"
   - "APNs documentation"
@@ -31,7 +34,7 @@ Always evaluate: **where can AI replace, augment, or create something new in not
 - **Scope**: Push, email, SMS, and in-app notification delivery; preference management; templates and scheduling.
 - **Top 3 modern practices**: User controls first (channel, frequency, quiet hours); template-driven content with variable substitution; batching and digests to reduce fatigue.
 - **Top 3 AI applications**: Send-time optimization; smart batching and summarization; auto-generate notification templates from event descriptions.
-- **Dependencies**: `@schema-data`, `@api-connections`, `@auth-identity`
+- **Dependencies**: `schema-data subagent`, `api-connections subagent`, `auth-identity subagent`
 
 ## When to Invoke
 
@@ -56,10 +59,10 @@ Always evaluate: **where can AI replace, augment, or create something new in not
 - Unsubscribe and compliance (CAN-SPAM, GDPR consent)
 
 **Does not own:**
-- Notification data models (see `@schema-data`)
-- Delivery service provider APIs (see `@api-connections`)
-- User notification permission scoping (see `@auth-identity`)
-- Real-time message delivery (see `@messaging`)
+- Notification data models (see `schema-data subagent`)
+- Delivery service provider APIs (see `api-connections subagent`)
+- User notification permission scoping (see `auth-identity subagent`)
+- Real-time message delivery (see `messaging subagent`)
 
 ## Extended Reference
 
@@ -94,14 +97,14 @@ Always evaluate: **where can AI replace, augment, or create something new in not
 
 ## Dependencies
 
-- `@schema-data` — notification models, delivery logs, preference storage
-- `@api-connections` — push service APIs (APNs, FCM), email providers (SendGrid, Postmark, SES), SMS providers (Twilio)
-- `@auth-identity` — notification permission scoping, subscription consent tracking
+- `schema-data subagent` — notification models, delivery logs, preference storage
+- `api-connections subagent` — push service APIs (APNs, FCM), email providers (SendGrid, Postmark, SES), SMS providers (Twilio)
+- `auth-identity subagent` — notification permission scoping, subscription consent tracking
 
 ## Consulted By
 
-- `@payments-billing` — payment receipts, failed payment alerts, subscription reminders
-- `@analytics-telemetry` — notification engagement metrics, A/B test results
+- `payments-billing subagent` — payment receipts, failed payment alerts, subscription reminders
+- `analytics-telemetry subagent` — notification engagement metrics, A/B test results
 
 ## Monitoring Hooks
 

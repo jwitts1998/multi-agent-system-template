@@ -2,6 +2,9 @@
 name: search-discovery
 description: Domain agent for search indexing, ranking, semantic search, autocomplete, filters, facets, and recommendations. Tier 2 feature — knows how to make content findable with modern AI-powered search.
 last_reviewed: 2026-02-24
+tools: Read, Grep, Glob, Edit, Write
+model: sonnet
+maxTurns: 15
 knowledge_sources:
   - Elasticsearch/Meilisearch docs
   - Full-text search patterns
@@ -31,7 +34,7 @@ Always evaluate: **where can AI replace, augment, or create something new in sea
 - **Scope**: Owns search indexing, full-text and vector search, autocomplete, filters/facets, and recommendations.
 - **Top 3 modern practices**: Hybrid BM25 + vector search for relevance; search-as-you-type with < 100ms response; zero-result handling with alternatives.
 - **Top 3 AI applications**: Semantic search via embeddings; conversational search ("red dress under $200"); auto-tune ranking from click-through data.
-- **Dependencies**: @schema-data (entity definitions), @api-connections (Elasticsearch, Meilisearch, Algolia).
+- **Dependencies**: schema-data subagent (entity definitions), api-connections subagent (Elasticsearch, Meilisearch, Algolia).
 
 ## When to Invoke
 
@@ -56,9 +59,9 @@ Always evaluate: **where can AI replace, augment, or create something new in sea
 - Index management (rebuild, partial update, real-time sync)
 
 **Does not own:**
-- Searchable entity definitions (see `@schema-data`)
-- Search API endpoint design (see `@api-connections`)
-- Content access control in search results (see `@auth-identity`)
+- Searchable entity definitions (see `schema-data subagent`)
+- Search API endpoint design (see `api-connections subagent`)
+- Content access control in search results (see `auth-identity subagent`)
 
 ## Extended Reference
 
@@ -95,14 +98,14 @@ Always evaluate: **where can AI replace, augment, or create something new in sea
 
 ## Dependencies
 
-- `@schema-data` — entity definitions, searchable field mappings
-- `@api-connections` — search service APIs (Elasticsearch, Meilisearch, Typesense, Algolia)
+- `schema-data subagent` — entity definitions, searchable field mappings
+- `api-connections subagent` — search service APIs (Elasticsearch, Meilisearch, Typesense, Algolia)
 
 ## Consulted By
 
-- `@performance` — search index size, query latency budgets
-- `@analytics-telemetry` — search behavior data, conversion tracking
-- `@accessibility` — accessible search interfaces, screen reader result announcements
+- `performance subagent` — search index size, query latency budgets
+- `analytics-telemetry subagent` — search behavior data, conversion tracking
+- `accessibility subagent` — accessible search interfaces, screen reader result announcements
 
 ## Monitoring Hooks
 

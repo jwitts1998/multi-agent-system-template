@@ -12,7 +12,7 @@
 ### Q: Do I need to use all the templates?
 
 **A**: No. Use what makes sense for your project:
-- Minimum: `.cursorrules` + `AGENTS.md`
+- Minimum: `CLAUDE.md` + `AGENTS.md`
 - Recommended: Above + task files + subagents
 - Maximum: All templates for complete system
 
@@ -84,7 +84,7 @@ For greenfield (Path A) or design-first (Path B), skip ingestion and use standar
 - When architecture changes
 - Quarterly as maintenance
 
-But prefer incremental updates using @doc-generator for individual files.
+But prefer incremental updates using doc-generator subagent for individual files.
 
 ---
 
@@ -93,10 +93,10 @@ But prefer incremental updates using @doc-generator for individual files.
 ### Q: Which template should I use?
 
 **A**: Based on project type:
-- Mobile app → `mobile-app.cursorrules` + `AGENTS-mobile.md`
-- Web app → `web-app.cursorrules` + `AGENTS-web.md`
-- Backend → `backend-service.cursorrules` + `AGENTS-backend.md`
-- Full-stack → `full-stack.cursorrules` + `AGENTS-full-stack.md`
+- Mobile app → `mobile-appCLAUDE.md` + `AGENTS-mobile.md`
+- Web app → `web-appCLAUDE.md` + `AGENTS-web.md`
+- Backend → `backend-serviceCLAUDE.md` + `AGENTS-backend.md`
+- Full-stack → `full-stack.md` + `AGENTS-full-stack.md`
 
 ### Q: Can I mix templates?
 
@@ -113,7 +113,7 @@ But prefer incremental updates using @doc-generator for individual files.
 ### Q: How do agents know what to do?
 
 **A**: Agents read:
-1. `.cursorrules` - Project context and standards
+1. `CLAUDE.md` - Project context and standards
 2. `AGENTS.md` - Their specific responsibilities
 3. `tasks/*.yml` - Specific work items
 4. Subagent configs - Specialized guidance
@@ -180,7 +180,7 @@ notes: "QA Agent: Review complete. Ready for Testing Agent."
 
 ## 🎨 Customization Questions
 
-### Q: Can I add custom sections to `.cursorrules`?
+### Q: Can I add custom sections to `CLAUDE.md`?
 
 **A**: Yes! Add sections as needed:
 ```markdown
@@ -196,7 +196,7 @@ notes: "QA Agent: Review complete. Ready for Testing Agent."
 - Week 1: Add project-specific patterns
 - Month 1: Refine based on usage
 
-### Q: Can I use this with non-Cursor IDEs?
+### Q: Can I use this with non-Claude Code CLIs?
 
 **A**: Templates are Cursor-optimized but principles apply to any AI assistant. You may need to adapt the format.
 
@@ -247,7 +247,7 @@ The `doc-generator` subagent helps with this.
 **A**: Yes:
 - Never commit secrets or API keys
 - Review `security-auditor` subagent recommendations
-- Follow security section in `.cursorrules`
+- Follow security section in `CLAUDE.md`
 - Regular security audits
 
 ### Q: Will agents expose sensitive data?
@@ -289,7 +289,7 @@ Net result: Faster long-term development.
 **A**: 
 - Weekly: Update task files
 - Monthly: Review agent effectiveness
-- Quarterly: Update `.cursorrules` and `AGENTS.md`
+- Quarterly: Update `CLAUDE.md` and `AGENTS.md`
 - As needed: Add new patterns and subagents
 
 ### Q: What if my project changes significantly?
@@ -308,7 +308,7 @@ Net result: Faster long-term development.
 
 **A**:
 1. **Replace all variables** in templates
-2. **Make `.cursorrules` specific** to your project
+2. **Make `CLAUDE.md` specific** to your project
 3. **Use task files** for context
 4. **Review agent output** - don't blindly accept
 5. **Iterate and refine** based on usage

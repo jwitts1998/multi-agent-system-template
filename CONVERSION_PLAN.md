@@ -9,7 +9,7 @@
 
 ## Overview
 
-This plan converts a comprehensive multi-agent system template from Cursor IDE to Claude Code CLI. Based on research, we now have clear mappings between Cursor and Claude Code architectures.
+This plan converts a comprehensive multi-agent system template from Claude Code CLI to Claude Code CLI. Based on research, we now have clear mappings between Cursor and Claude Code architectures.
 
 ---
 
@@ -19,11 +19,11 @@ This plan converts a comprehensive multi-agent system template from Cursor IDE t
 
 | Cursor | Claude Code | Notes |
 |--------|-------------|-------|
-| `.cursorrules` | `CLAUDE.md` | Main workspace config |
-| `.cursor/agents/` | `.claude/agents/` | Subagent definitions |
-| `.cursor/rules/*.mdc` | `.claude/rules/*.md` | File-scoped rules |
-| `.cursor/skills/` | `.claude/skills/` | Skills system |
-| `.cursor/mcp.json` | `.mcp.json` | MCP config (different format) |
+| `CLAUDE.md` | `CLAUDE.md` | Main workspace config |
+| `.claude/agents/` | `.claude/agents/` | Subagent definitions |
+| `.claude/rules/*.md` | `.claude/rules/*.md` | File-scoped rules |
+| `.claude/skills/` | `.claude/skills/` | Skills system |
+| `.claude/mcp.json` | `.mcp.json` | MCP config (different format) |
 
 ### Format Conversions
 
@@ -44,11 +44,11 @@ This plan converts a comprehensive multi-agent system template from Cursor IDE t
   - `argument-hint` - autocomplete hint
 
 **Rules Files:**
-- **FROM**: `.mdc` files with YAML frontmatter (`globs:`)
+- **FROM**: `.md` files with YAML frontmatter (`globs:`)
 - **TO**: `.md` files with YAML frontmatter (`paths:`)
 
 **MCP Config:**
-- **FROM**: Cursor's mcp.json format
+- **FROM**: Claude Code's mcp.json format
 - **TO**: Claude Code's `.mcp.json`:
   ```json
   {
@@ -91,19 +91,19 @@ mv cursorrules claude-config
 
 # Within templates, rename files
 cd claude-config/
-for f in *.cursorrules; do
-  mv "$f" "${f%.cursorrules}.md"
+for f in *CLAUDE.md; do
+  mv "$f" "${f%CLAUDE.md}.md"
 done
 ```
 
 ### 1.3 Create Root CLAUDE.md Templates
 
-For each project type template, convert `.cursorrules` to `CLAUDE.md`:
-- `templates/claude-config/mobile-app.cursorrules` → `templates/claude-config/mobile-app.md`
-- `templates/claude-config/web-app.cursorrules` → `templates/claude-config/web-app.md`
-- `templates/claude-config/backend-service.cursorrules` → `templates/claude-config/backend-service.md`
-- `templates/claude-config/full-stack.cursorrules` → `templates/claude-config/full-stack.md`
-- `templates/claude-config/base-template.cursorrules` → `templates/claude-config/base-template.md`
+For each project type template, convert `CLAUDE.md` to `CLAUDE.md`:
+- `templates/claude-config/mobile-appCLAUDE.md` → `templates/claude-config/mobile-app.md`
+- `templates/claude-config/web-appCLAUDE.md` → `templates/claude-config/web-app.md`
+- `templates/claude-config/backend-serviceCLAUDE.md` → `templates/claude-config/backend-service.md`
+- `templates/claude-config/full-stack.md` → `templates/claude-config/full-stack.md`
+- `templates/claude-config/base-templateCLAUDE.md` → `templates/claude-config/base-template.md`
 
 ---
 
@@ -158,7 +158,7 @@ maxTurns: 10
 ### 2.2 Update Agent Invocation References
 
 Replace all references to Cursor-style invocation:
-- **FROM**: `@agent-name` or `Invoke @agent-name in Cursor`
+- **FROM**: `@agent-name` or `Invoke @agent-name in Claude Code`
 - **TO**: `Use the agent-name subagent` or `Claude will auto-delegate to agent-name when appropriate`
 
 **Key messaging change**:
@@ -216,13 +216,13 @@ allowed-tools: Bash, Read, Write, Edit
 
 3. Update skill content to reference Claude Code:
 - Replace "Cursor" with "Claude Code"
-- Update file paths (`.cursorrules` → `CLAUDE.md`, `.cursor/` → `.claude/`)
+- Update file paths (`CLAUDE.md` → `CLAUDE.md`, `.claude/` → `.claude/`)
 - Update invocation syntax (from `@skill` to `/skill`)
 
 ### 3.2 Update Skill Invocation References
 
 Throughout documentation:
-- **FROM**: `@skill-name`
+- **FROM**: `/skill-name`
 - **TO**: `/skill-name`
 
 Example:
@@ -233,21 +233,21 @@ Example:
 
 ## Phase 4: Rules Conversion
 
-### 4.1 Convert .mdc Files to .md (6 files)
+### 4.1 Convert .md Files to .md (6 files)
 
 **Location**: `.claude/rules/` (after rename)
 
 **Files to convert**:
-1. `domain-routing.mdc` → `domain-routing.md`
-2. `domain-consultation.mdc` → `domain-consultation.md`
-3. `domain-knowledge-freshness.mdc` → `domain-knowledge-freshness.md`
-4. `domain-agent-loading.mdc` → `domain-agent-loading.md`
-5. `docs-editing.mdc` → `docs-editing.md`
-6. `template-editing.mdc` → `template-editing.md`
+1. `domain-routing.md` → `domain-routing.md`
+2. `domain-consultation.md` → `domain-consultation.md`
+3. `domain-knowledge-freshness.md` → `domain-knowledge-freshness.md`
+4. `domain-agent-loading.md` → `domain-agent-loading.md`
+5. `docs-editing.md` → `docs-editing.md`
+6. `template-editing.md` → `template-editing.md`
 
 **For each file**:
 
-1. Rename `.mdc` → `.md`
+1. Rename `.md` → `.md`
 2. Update YAML frontmatter:
 
 **FROM**:
@@ -317,7 +317,7 @@ paths:
 
 ### 5.2 Update MCP Documentation
 
-In `docs/CURSOR_PLUGINS.md` → `docs/CLAUDE_CODE_CAPABILITIES.md`:
+In `docs/CLAUDE_CODE_CAPABILITIES.md` → `docs/CLAUDE_CODE_CAPABILITIES.md`:
 - Update installation instructions to use `claude mcp add`
 - Update config examples to show `.mcp.json` format
 - Document scopes (local, project, user, managed)
@@ -334,8 +334,8 @@ Throughout ALL markdown files:
 |------|---------|
 | `Cursor` | `Claude Code` |
 | `cursor` | `claude` |
-| `.cursorrules` | `CLAUDE.md` |
-| `.cursor/` | `.claude/` |
+| `CLAUDE.md` | `CLAUDE.md` |
+| `.claude/` | `.claude/` |
 | `@agent-name` | `(agent-name subagent)` or `/skill-name` |
 | `Invoke @` | `Use the` (for agents) |
 
@@ -343,8 +343,8 @@ Throughout ALL markdown files:
 
 **README.md** (487 lines):
 - Update "Quick Start" section → use `claude` command
-- Change Cursor IDE references → Claude Code CLI
-- Update setup flow to create `CLAUDE.md` instead of `.cursorrules`
+- Change Claude Code CLI references → Claude Code CLI
+- Update setup flow to create `CLAUDE.md` instead of `CLAUDE.md`
 - Revise agent invocation examples
 - Update workflow diagrams if any mention Cursor
 
@@ -385,7 +385,7 @@ Throughout ALL markdown files:
 - Revise agent invocation steps
 - Update examples
 
-**docs/CURSOR_PLUGINS.md** → **docs/CLAUDE_CODE_CAPABILITIES.md**:
+**docs/CLAUDE_CODE_CAPABILITIES.md** → **docs/CLAUDE_CODE_CAPABILITIES.md**:
 - Rename file
 - Complete rewrite for Claude Code ecosystem
 - Document subagents, skills, MCP integration
@@ -416,7 +416,7 @@ Replace Cursor references, update file paths, revise agent invocation patterns.
 1. **File creation**:
 ```bash
 # OLD:
-cp "$CURSORRULES_SRC" .cursorrules
+cp "$CURSORRULES_SRC" CLAUDE.md
 
 # NEW:
 cp "$CLAUDE_CONFIG_SRC" CLAUDE.md
@@ -425,7 +425,7 @@ cp "$CLAUDE_CONFIG_SRC" CLAUDE.md
 2. **Directory creation**:
 ```bash
 # OLD:
-mkdir -p .cursor/agents/generic .cursor/agents/ideation
+mkdir -p .claude/agents/generic .claude/agents/ideation
 
 # NEW:
 mkdir -p .claude/agents/generic .claude/agents/ideation
@@ -434,7 +434,7 @@ mkdir -p .claude/agents/generic .claude/agents/ideation
 3. **Subagent installation**:
 ```bash
 # OLD:
-cp templates/subagents/generic/*.md .cursor/agents/generic/
+cp templates/subagents/generic/*.md .claude/agents/generic/
 
 # NEW:
 cp templates/subagents/generic/*.md .claude/agents/generic/
@@ -443,7 +443,7 @@ cp templates/subagents/generic/*.md .claude/agents/generic/
 4. **Output messaging**:
 ```bash
 # OLD:
-echo "Open this project in Cursor"
+echo "Open this project in Claude Code"
 echo "Invoke @idea-to-pdb..."
 
 # NEW:
@@ -455,19 +455,19 @@ echo "Claude will auto-delegate to agents or use /pdb-to-tasks skill..."
 ```bash
 # Update file list to replace variables in:
 files_to_process=(
-  CLAUDE.md        # was .cursorrules
+  CLAUDE.md        # was CLAUDE.md
   AGENTS.md
   tasks.yml
 )
 
-# Also process .claude/ (was .cursor/)
+# Also process .claude/ (was .claude/)
 while IFS= read -r -d '' f; do
   files_to_process+=("$f")
 done < <(find .claude/agents .claude/skills tasks -name "*.md" -o -name "*.yml" 2>/dev/null | tr '\n' '\0')
 ```
 
 6. **Antigravity Skills**:
-- Update path: `.cursor/skills/` → `.claude/skills/`
+- Update path: `.claude/skills/` → `.claude/skills/`
 - Installation command should work the same
 
 ### 7.2 Update validate.sh
@@ -477,7 +477,7 @@ done < <(find .claude/agents .claude/skills tasks -name "*.md" -o -name "*.yml" 
 1. **File paths**:
 ```bash
 # OLD:
-REMAINING=$(grep -roh '{{[^}]*}}' .cursorrules AGENTS.md tasks.yml .cursor/agents/ tasks/ 2>/dev/null | sort -u | wc -l)
+REMAINING=$(grep -roh '{{[^}]*}}' CLAUDE.md AGENTS.md tasks.yml .claude/agents/ tasks/ 2>/dev/null | sort -u | wc -l)
 
 # NEW:
 REMAINING=$(grep -roh '{{[^}]*}}' CLAUDE.md AGENTS.md tasks.yml .claude/agents/ tasks/ 2>/dev/null | sort -u | wc -l)
@@ -501,13 +501,13 @@ echo "Converting Cursor setup to Claude Code..."
 [ -d .cursor ] && mv .cursor .claude
 
 # Rename config
-[ -f .cursorrules ] && mv .cursorrules CLAUDE.md
+[ -f CLAUDE.md ] && mv CLAUDE.md CLAUDE.md
 
 # Rename rule files
 if [ -d .claude/rules ]; then
   cd .claude/rules
-  for f in *.mdc; do
-    [ -f "$f" ] && mv "$f" "${f%.mdc}.md"
+  for f in *.md; do
+    [ -f "$f" ] && mv "$f" "${f%.md}.md"
   done
   cd ../..
 fi
@@ -538,7 +538,7 @@ echo "✓ Basic conversion complete. Run ./validate.sh to check for remaining is
 ```bash
 cd examples/mobile-app-example/
 mv .cursor .claude
-mv .cursorrules CLAUDE.md
+mv CLAUDE.md CLAUDE.md
 ```
 
 2. **Update README.md**:
@@ -582,7 +582,7 @@ Each example has detailed setup instructions. Update:
 ### 9.2 Create New Documentation
 
 **docs/MIGRATION_FROM_CURSOR.md** (new file):
-- Guide for users migrating from Cursor version
+- Guide for users migrating from Claude Code version
 - Step-by-step conversion instructions
 - Common issues during migration
 
@@ -598,9 +598,9 @@ Each example has detailed setup instructions. Update:
 
 ### 10.1 Validation Checklist
 
-- [ ] All `.cursorrules` files converted to `CLAUDE.md`
-- [ ] `.cursor/` renamed to `.claude/`
-- [ ] All `.mdc` files converted to `.md`
+- [ ] All `CLAUDE.md` files converted to `CLAUDE.md`
+- [ ] `.claude/` renamed to `.claude/`
+- [ ] All `.md` files converted to `.md`
 - [ ] MCP config updated to `.mcp.json` format
 - [ ] All agent files have required Claude Code fields
 - [ ] All skill files have Claude Code frontmatter
@@ -716,9 +716,9 @@ Execute phases in order:
 
 Conversion is complete when:
 - [ ] Zero references to "Cursor" (except in migration docs)
-- [ ] All `.cursorrules` → `CLAUDE.md`
-- [ ] All `.cursor/` → `.claude/`
-- [ ] All `.mdc` → `.md` with updated frontmatter
+- [ ] All `CLAUDE.md` → `CLAUDE.md`
+- [ ] All `.claude/` → `.claude/`
+- [ ] All `.md` → `.md` with updated frontmatter
 - [ ] All agents have Claude Code fields
 - [ ] All skills have Claude Code frontmatter
 - [ ] MCP config uses Claude Code format

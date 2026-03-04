@@ -27,24 +27,24 @@ add_if_exists() {
 }
 
 # Single files at project root
-for f in ".cursorrules" "AGENTS.md" "tasks.yml"; do
+for f in "CLAUDE.md" "AGENTS.md" "tasks.yml"; do
   [ -f "$TARGET_DIR/$f" ] && FILES_TO_CHECK+=("$TARGET_DIR/$f")
 done
 
 # Glob patterns
-add_if_exists "*/.cursor/agents/*.md"
-add_if_exists "*/.cursor/rules/*.mdc"
+add_if_exists "*/.claude/agents/*.md"
+add_if_exists "*/.claude/rules/*.md"
 add_if_exists "*/tasks/*.yml"
 add_if_exists "*/docs/workflow/*.md"
 
 # Also check via simple find for nested paths
 while IFS= read -r -d '' f; do
   FILES_TO_CHECK+=("$f")
-done < <(find "$TARGET_DIR/.cursor/agents" -name '*.md' -print0 2>/dev/null || true)
+done < <(find "$TARGET_DIR/.claude/agents" -name '*.md' -print0 2>/dev/null || true)
 
 while IFS= read -r -d '' f; do
   FILES_TO_CHECK+=("$f")
-done < <(find "$TARGET_DIR/.cursor/rules" -name '*.mdc' -print0 2>/dev/null || true)
+done < <(find "$TARGET_DIR/.claude/rules" -name '*.md' -print0 2>/dev/null || true)
 
 while IFS= read -r -d '' f; do
   FILES_TO_CHECK+=("$f")

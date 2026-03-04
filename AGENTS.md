@@ -16,7 +16,7 @@ This document defines specialized development agents for this project. Agents ar
 **Responsibilities**:
 - Write production-ready code following architecture patterns
 - Implement features according to specifications
-- Follow conventions defined in `.cursorrules`
+- Follow conventions defined in `CLAUDE.md`
 - Create and maintain services, business logic, and data models
 - Handle error cases and edge cases
 
@@ -24,7 +24,7 @@ This document defines specialized development agents for this project. Agents ar
 
 **Checklist**:
 - [ ] Architecture pattern followed
-- [ ] Code follows style guidelines from `.cursorrules`
+- [ ] Code follows style guidelines from `CLAUDE.md`
 - [ ] Error handling and edge cases covered
 - [ ] No hardcoded secrets or API keys
 - [ ] Acceptance criteria met
@@ -187,9 +187,9 @@ Agents carry built-in knowledge of best practices, but that knowledge has a trai
 ### Process
 
 1. **Research** — Use `parallel-web-search` or Context7 to check current practices for the domain
-2. **Compare** — Evaluate findings against built-in practices, project patterns, and `.cursorrules`
+2. **Compare** — Evaluate findings against built-in practices, project patterns, and `CLAUDE.md`
 3. **Document** — Record what was validated, source(s) consulted, and any deviations in task notes
-4. **Flag drift** — If research reveals outdated guidance in agent templates or `.cursorrules`, flag explicitly
+4. **Flag drift** — If research reveals outdated guidance in agent templates or `CLAUDE.md`, flag explicitly
 
 ### Checks and Balances
 
@@ -221,7 +221,11 @@ When multiple agents work on the same task:
 
 ## Using Cursor Plugins and Skills
 
-Installed Cursor plugins provide **agent skills** and **MCP tools** that any agent can use when relevant to a task. Prefer these over manual approaches when they apply.
+Installed Claude Code skills provide **agent skills** and **MCP tools** that any agent can use when relevant to a task. Prefer these over manual approaches when they apply.
+
+**Permissions**: Agents have permission to leverage existing skills and create new ones at any time. When a task would benefit from a skill (e.g., brainstorming, TDD, security audit), invoke it or create a custom skill via the `create-skill` workflow. Update `docs/CLAUDE_CODE_CAPABILITIES.md` after adding capabilities.
+
+**Antigravity Awesome Skills**: If installed (see `docs/CLAUDE_CODE_CAPABILITIES.md`), 946+ additional skills are available in `.claude/skills/` — brainstorming, test-driven-development, security-audit, architecture, and more. Use `/skill-name` at any time. Project config agents (e.g., apply-multi-agent-template, calibrate-domains) can run `./scripts/install-antigravity-skills.sh` during setup or when the user requests it.
 
 **Role-specific guidance**:
 - **Implementation Agent**: Use workflow skills (brainstorming, writing-plans, TDD) when starting features. Use Context7 or docs-lookup for library API reference. Use Figma skills when implementing from designs.
@@ -229,7 +233,7 @@ Installed Cursor plugins provide **agent skills** and **MCP tools** that any age
 - **Testing Agent**: Use BrowserStack Automate / App Automate for cross-platform test runs. Use Percy for visual regression testing. Use systematic-debugging when investigating test failures.
 - **Documentation Agent**: Use Context7 docs-lookup for accurate library references. Use web search for current best practices. Use continual-learning to surface recurring patterns from past sessions.
 
-See `docs/CURSOR_PLUGINS.md` for the complete list of available capabilities.
+See `docs/CLAUDE_CODE_CAPABILITIES.md` for the complete list of available capabilities.
 
 ---
 

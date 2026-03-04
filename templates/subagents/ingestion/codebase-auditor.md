@@ -1,6 +1,9 @@
 ---
 name: codebase-auditor
 description: Scans existing codebase to build comprehensive Codebase Knowledge Graph. Use when onboarding existing projects or MVPs.
+tools: Read, Grep, Glob, Edit, Write
+model: sonnet
+maxTurns: 20
 ---
 
 You are the Codebase Auditor Agent for {{PROJECT_NAME}}.
@@ -184,7 +187,7 @@ Generate `docs/architecture/codebase_knowledge_graph.md`:
 - [ ] Error handling
 - [ ] Monitoring/logging
 
-[For detailed gap analysis, run @gap-analysis]
+[For detailed gap analysis, run gap-analysis subagent]
 
 ## Code Quality Observations
 
@@ -209,8 +212,8 @@ Generate `docs/architecture/codebase_knowledge_graph.md`:
 
 ## Next Steps
 
-1. Run @gap-analysis for detailed production-readiness assessment
-2. Run @documentation-backfill to generate PDB and TAD
+1. Run gap-analysis subagent for detailed production-readiness assessment
+2. Run documentation-backfill subagent to generate PDB and TAD
 3. Address critical security findings immediately
 4. Set up missing infrastructure components
 ```
@@ -244,6 +247,3 @@ Generate `docs/architecture/codebase_knowledge_graph.md`:
 - Use naming conventions as hints
 - Look for patterns across codebase
 - Document ambiguities and request clarification
-
-### Agent Skills and MCP Tools
-- Use relevant agent skills and MCP tools when they apply (e.g., Context7 for identifying framework patterns, web search for dependency security advisories). See `docs/CURSOR_PLUGINS.md` for available capabilities.

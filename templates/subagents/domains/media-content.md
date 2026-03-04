@@ -2,6 +2,9 @@
 name: media-content
 description: Domain agent for file uploads, image/video processing, CDN delivery, transcoding, and content lifecycle management. Tier 2 feature — knows how to handle media at scale with AI-powered processing.
 last_reviewed: 2026-02-24
+tools: Read, Grep, Glob, Edit, Write
+model: sonnet
+maxTurns: 15
 knowledge_sources:
   - "FFmpeg documentation"
   - "Cloudinary/Imgix API docs"
@@ -31,7 +34,7 @@ Always evaluate: **where can AI replace, augment, or create something new in med
 - **Scope**: Upload pipelines, image/video processing, CDN delivery, storage lifecycle, and content moderation.
 - **Top 3 modern practices**: Direct-to-storage uploads (presigned URLs); responsive images with modern formats (WebP, AVIF); process asynchronously, show progress.
 - **Top 3 AI applications**: Auto-tagging and categorization; content moderation (NSFW, policy); alt text generation for accessibility.
-- **Dependencies**: `@schema-data`, `@api-connections`, `@auth-identity`
+- **Dependencies**: `schema-data subagent`, `api-connections subagent`, `auth-identity subagent`
 
 ## When to Invoke
 
@@ -56,10 +59,10 @@ Always evaluate: **where can AI replace, augment, or create something new in med
 - Streaming delivery (adaptive bitrate, live streaming)
 
 **Does not own:**
-- Media metadata models (see `@schema-data`)
-- CDN and storage infrastructure provisioning (see `@infrastructure`)
-- Upload permission scoping (see `@auth-identity`)
-- Media-related API endpoints (see `@api-connections`)
+- Media metadata models (see `schema-data subagent`)
+- CDN and storage infrastructure provisioning (see `infrastructure subagent`)
+- Upload permission scoping (see `auth-identity subagent`)
+- Media-related API endpoints (see `api-connections subagent`)
 
 ## Extended Reference
 
@@ -97,15 +100,15 @@ Always evaluate: **where can AI replace, augment, or create something new in med
 
 ## Dependencies
 
-- `@schema-data` — media metadata models, processing status tracking
-- `@api-connections` — CDN APIs, processing service integrations (Cloudinary, imgproxy, FFmpeg services)
-- `@auth-identity` — upload permissions, content access control
+- `schema-data subagent` — media metadata models, processing status tracking
+- `api-connections subagent` — CDN APIs, processing service integrations (Cloudinary, imgproxy, FFmpeg services)
+- `auth-identity subagent` — upload permissions, content access control
 
 ## Consulted By
 
-- `@performance` — media loading performance, lazy loading strategy
-- `@accessibility` — alt text, captions, transcripts for media content
-- `@animation-motion` — media loading transitions, image reveal animations
+- `performance subagent` — media loading performance, lazy loading strategy
+- `accessibility subagent` — alt text, captions, transcripts for media content
+- `animation-motion subagent` — media loading transitions, image reveal animations
 
 ## Monitoring Hooks
 

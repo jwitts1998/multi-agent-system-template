@@ -17,7 +17,7 @@ A tiered memory system helps AI agents maintain context across sessions and accu
 
 ### When to Adopt
 
-- **Skip it** if your project is small, single-developer, or short-lived. The task system and `.cursorrules` provide enough context.
+- **Skip it** if your project is small, single-developer, or short-lived. The task system and `CLAUDE.md` provide enough context.
 - **Adopt working memory** if you find yourself re-explaining context at the start of each session.
 - **Adopt all three tiers** if your project has multiple contributors, spans months, or has complex domain rules that agents need to internalize.
 
@@ -39,7 +39,7 @@ docs/memory/
 
 1. Create `docs/memory/` in your project.
 2. Copy the examples from this directory as starting points.
-3. Reference `docs/memory/` in your `.cursorrules` context rules so agents can read memory files.
+3. Reference `docs/memory/` in your `CLAUDE.md` context rules so agents can read memory files.
 4. At the start of each session, update or create a working memory file with the current task and context.
 5. At the end of each session, archive the working memory as an episodic entry and extract any new validated patterns into semantic memory.
 

@@ -2,6 +2,9 @@
 name: animation-motion
 description: Domain agent for transitions, micro-interactions, loading states, gesture feedback, and motion performance budgets. Tier 3 experience — ensures the product feels alive and responsive.
 last_reviewed: 2026-02-24
+tools: Read, Grep, Glob, Edit, Write
+model: sonnet
+maxTurns: 15
 knowledge_sources:
   - "Framer Motion docs"
   - "CSS animation specs"
@@ -57,8 +60,8 @@ Always evaluate: **where can AI replace, augment, or create something new in ani
 
 **Does not own:**
 - Feature logic (each feature domain owns its own behavior)
-- Rendering infrastructure (see `@performance`)
-- Accessibility beyond motion (see `@accessibility`)
+- Rendering infrastructure (see `performance subagent`)
+- Accessibility beyond motion (see `accessibility subagent`)
 
 ## Extended Reference
 
@@ -97,11 +100,11 @@ None — Tier 3 agents provide expertise, they don't depend on feature domains.
 ## Consulted By
 
 This agent is consulted by Tier 2 feature domains for motion quality:
-- `@maps-geo` — map zoom/pan transitions, marker animations
-- `@messaging` — message send/receive transitions, typing indicator animation
-- `@search-discovery` — search result reveal animations, filter transitions
-- `@media-content` — image loading transitions, gallery navigation
-- `@notifications` — notification toast animations, badge count transitions
+- `maps-geo subagent` — map zoom/pan transitions, marker animations
+- `messaging subagent` — message send/receive transitions, typing indicator animation
+- `search-discovery subagent` — search result reveal animations, filter transitions
+- `media-content subagent` — image loading transitions, gallery navigation
+- `notifications subagent` — notification toast animations, badge count transitions
 
 ## Monitoring Hooks
 

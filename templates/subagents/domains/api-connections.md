@@ -2,6 +2,9 @@
 name: api-connections
 description: Domain agent for API design, external integrations, webhooks, rate limiting, and service contracts. Tier 1 foundation — feature domains expose and consume APIs through this agent.
 last_reviewed: 2026-02-24
+tools: Read, Grep, Glob, Edit, Write
+model: sonnet
+maxTurns: 15
 knowledge_sources:
   - "OpenAPI specification"
   - "REST/GraphQL best practices"
@@ -31,7 +34,7 @@ Always evaluate: **where can AI replace, augment, or create something new in API
 - **Scope**: Owns API design, versioning, webhooks, rate limiting, and third-party integrations. Feature domains expose and consume APIs through this agent.
 - **Top 3 modern practices**: Contract-first design (OpenAPI/GraphQL as source of truth); circuit breakers for all third-party integrations; idempotency keys for mutating endpoints.
 - **Top 3 AI applications**: Auto-generate SDKs from OpenAPI; natural language API queries; intelligent webhook routing.
-- **Dependencies**: `@schema-data` for request/response shapes.
+- **Dependencies**: `schema-data subagent` for request/response shapes.
 
 ## When to Invoke
 
@@ -48,7 +51,7 @@ Always evaluate: **where can AI replace, augment, or create something new in API
 - REST / GraphQL / gRPC endpoint design and conventions
 - API versioning strategy (URL, header, or content negotiation)
 - Request/response schemas and serialization
-- Authentication integration points (delegates auth logic to `@auth-identity`)
+- Authentication integration points (delegates auth logic to `auth-identity subagent`)
 - Rate limiting, throttling, and abuse prevention
 - Webhook management (registration, delivery, retry, signature verification)
 - Third-party API integration patterns (adapters, circuit breakers, fallbacks)
@@ -57,9 +60,9 @@ Always evaluate: **where can AI replace, augment, or create something new in API
 - CORS, content negotiation, and transport-level concerns
 
 **Does not own:**
-- Data model definitions (see `@schema-data`)
-- Authentication/authorization logic (see `@auth-identity`)
-- API infrastructure (load balancers, gateways — see `@infrastructure`)
+- Data model definitions (see `schema-data subagent`)
+- Authentication/authorization logic (see `auth-identity subagent`)
+- API infrastructure (load balancers, gateways — see `infrastructure subagent`)
 
 ## Extended Reference
 
@@ -93,18 +96,18 @@ Always evaluate: **where can AI replace, augment, or create something new in API
 
 ## Dependencies
 
-- `@schema-data` — API request/response shapes derive from data models
+- `schema-data subagent` — API request/response shapes derive from data models
 
 ## Consulted By
 
 All Tier 2 feature domains expose or consume APIs through this agent:
-- `@maps-geo` — map tile provider APIs, geocoding service integrations
-- `@messaging` — real-time connection protocols, message delivery APIs
-- `@search-discovery` — search API design, autocomplete endpoints
-- `@payments-billing` — payment processor integrations, billing APIs
-- `@notifications` — notification delivery service integrations
-- `@media-content` — CDN APIs, transcoding service integrations
-- `@analytics-telemetry` — event ingestion endpoints, analytics platform APIs
+- `maps-geo subagent` — map tile provider APIs, geocoding service integrations
+- `messaging subagent` — real-time connection protocols, message delivery APIs
+- `search-discovery subagent` — search API design, autocomplete endpoints
+- `payments-billing subagent` — payment processor integrations, billing APIs
+- `notifications subagent` — notification delivery service integrations
+- `media-content subagent` — CDN APIs, transcoding service integrations
+- `analytics-telemetry subagent` — event ingestion endpoints, analytics platform APIs
 
 ## Monitoring Hooks
 

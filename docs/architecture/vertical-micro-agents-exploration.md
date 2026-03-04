@@ -201,7 +201,7 @@ When domains disagree:
 
 For the initial version of this architecture, agents should be:
 
-1. **Design-time subagents** — invoked during development sessions, bringing domain expertise to implementation, testing, and review. Implemented as Cursor agent prompts (`.cursor/agents/domains/`) that can be invoked with `@domain-name`.
+1. **Design-time subagents** — invoked during development sessions, bringing domain expertise to implementation, testing, and review. Implemented as Claude Code agent prompts (`.claude/agents/domains/`) that can be invoked with `@domain-name`.
 
 2. **Static hook generators** — as part of their implementation work, each agent is responsible for setting up the monitoring, alerting, and configuration scaffolding appropriate for their domain. This doesn't require runtime AI — it's just good engineering practice codified in the agent's expertise.
 
@@ -335,7 +335,7 @@ Domain micro-agents define **what expertise is applied** during that work. When 
 ### Where domain agents would live
 
 ```
-.cursor/agents/domains/
+.claude/agents/domains/
   maps-geo.md
   messaging.md
   schema.md
@@ -353,7 +353,7 @@ Domain micro-agents define **what expertise is applied** during that work. When 
   infrastructure.md
 ```
 
-Each file is a Cursor agent prompt that encodes the domain's scope, modern practices, AI applications, dependencies, and monitoring hooks — following the template in Section 7.
+Each file is a Claude Code agent prompt that encodes the domain's scope, modern practices, AI applications, dependencies, and monitoring hooks — following the template in Section 7.
 
 ### How they integrate with tasks
 

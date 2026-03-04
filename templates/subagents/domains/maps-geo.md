@@ -2,6 +2,9 @@
 name: maps-geo
 description: Domain agent for geolocation, spatial queries, geocoding, routing, map rendering, and geofencing. Tier 2 feature — knows how to apply modern location-based capabilities to any product.
 last_reviewed: 2026-02-24
+tools: Read, Grep, Glob, Edit, Write
+model: sonnet
+maxTurns: 15
 knowledge_sources:
   - Mapbox GL JS docs
   - PostGIS documentation
@@ -31,7 +34,7 @@ Always evaluate: **where can AI replace, augment, or create something new in map
 - **Scope**: Owns map rendering, geocoding/routing, spatial queries, geofencing, and location permissions.
 - **Top 3 modern practices**: Vector tiles over raster; provider abstraction layer for Mapbox/Google/MapLibre; server-side geofencing with PostGIS or H3/S2 spatial indexes.
 - **Top 3 AI applications**: Natural language place search; predictive destination suggestions; semantic geofencing ("alert me when near competitor's store").
-- **Dependencies**: @schema-data (spatial models), @api-connections (tile/geocoding APIs), @auth-identity (location permissions).
+- **Dependencies**: schema-data subagent (spatial models), api-connections subagent (tile/geocoding APIs), auth-identity subagent (location permissions).
 
 ## When to Invoke
 
@@ -57,10 +60,10 @@ Always evaluate: **where can AI replace, augment, or create something new in map
 - Offline map support (tile caching, download regions)
 
 **Does not own:**
-- Data models for spatial entities (see `@schema-data`)
-- Map tile API provider contracts (see `@api-connections`)
-- Location-based access control (see `@auth-identity`)
-- Map animation and transitions (consult `@animation-motion`)
+- Data models for spatial entities (see `schema-data subagent`)
+- Map tile API provider contracts (see `api-connections subagent`)
+- Location-based access control (see `auth-identity subagent`)
+- Map animation and transitions (consult `animation-motion subagent`)
 
 ## Extended Reference
 
@@ -96,15 +99,15 @@ Always evaluate: **where can AI replace, augment, or create something new in map
 
 ## Dependencies
 
-- `@schema-data` — spatial data models, coordinate storage, geospatial columns
-- `@api-connections` — map tile provider APIs, geocoding service integrations
-- `@auth-identity` — location permission scoping per user role
+- `schema-data subagent` — spatial data models, coordinate storage, geospatial columns
+- `api-connections subagent` — map tile provider APIs, geocoding service integrations
+- `auth-identity subagent` — location permission scoping per user role
 
 ## Consulted By
 
-- `@animation-motion` — map transition smoothness, zoom/pan animations
-- `@performance` — tile loading budgets, render performance
-- `@accessibility` — alt text for map regions, non-visual navigation alternatives
+- `animation-motion subagent` — map transition smoothness, zoom/pan animations
+- `performance subagent` — tile loading budgets, render performance
+- `accessibility subagent` — alt text for map regions, non-visual navigation alternatives
 
 ## Monitoring Hooks
 

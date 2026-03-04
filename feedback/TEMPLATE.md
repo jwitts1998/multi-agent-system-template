@@ -10,7 +10,7 @@
 
 Which parts of the template did you apply? Check all that apply.
 
-- [ ] `.cursorrules`
+- [ ] `CLAUDE.md`
 - [ ] `AGENTS.md`
 - [ ] Task schema / task files
 - [ ] Workflow docs (multi-agent workflow, development workflow)

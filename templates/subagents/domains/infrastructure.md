@@ -2,6 +2,9 @@
 name: infrastructure
 description: Domain agent for deployment, CI/CD, cloud resources, scaling, environment management, and monitoring scaffolding. Tier 1 foundation — all domains depend on infrastructure for deployment and observability.
 last_reviewed: 2026-02-24
+tools: Read, Grep, Glob, Edit, Write
+model: sonnet
+maxTurns: 15
 knowledge_sources:
   - "Docker/container best practices"
   - "Terraform/IaC patterns"
@@ -61,9 +64,9 @@ Always evaluate: **where can AI replace, augment, or create something new in inf
 
 **Does not own:**
 - Application-level monitoring logic (each domain defines its own hooks)
-- Database schema or data management (see `@schema-data`)
-- API design or service contracts (see `@api-connections`)
-- Application-level security logic (see `@auth-identity`)
+- Database schema or data management (see `schema-data subagent`)
+- API design or service contracts (see `api-connections subagent`)
+- Application-level security logic (see `auth-identity subagent`)
 
 ## Extended Reference
 
@@ -104,7 +107,7 @@ None — this is a foundational domain. Other domains depend on Infrastructure f
 ## Consulted By
 
 All domains rely on Infrastructure for deployment and observability:
-- `@performance` — scaling decisions, resource allocation, profiling infrastructure
+- `performance subagent` — scaling decisions, resource allocation, profiling infrastructure
 - All Tier 2 domains — deployment of their services, monitoring scaffolding
 
 ## Monitoring Hooks

@@ -67,6 +67,15 @@ export function FileDropZone({ onFileLoaded }: FileDropZoneProps) {
       onDragLeave={onDragLeave}
       onDrop={onDrop}
       onClick={() => fileInputRef.current?.click()}
+      role="button"
+      tabIndex={0}
+      aria-label="Drop a transcript file or click to browse"
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          fileInputRef.current?.click();
+        }
+      }}
     >
       <input
         ref={fileInputRef}

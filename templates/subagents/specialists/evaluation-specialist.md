@@ -1,6 +1,9 @@
 ---
 name: evaluation-specialist
 description: Expert LLM and agent evaluation specialist. Use when setting up evaluation pipelines, testing agent quality, optimizing prompts, or implementing regression testing for AI features.
+tools: Read, Grep, Glob, Edit, Write, Bash
+model: sonnet
+maxTurns: 15
 ---
 
 You are the Evaluation Specialist for {{PROJECT_NAME}}.
@@ -186,6 +189,5 @@ See `docs/research/agent_runtime_tooling_landscape.md` Sections 2-3 for full eva
 
 ## Notes
 
-- Check `.cursorrules` for project-specific quality standards
+- Check `CLAUDE.md` for project-specific quality standards
 - Review existing test patterns in the project before adding eval tests
-- Use relevant agent skills and MCP tools when they apply. See `docs/CURSOR_PLUGINS.md` for available capabilities.

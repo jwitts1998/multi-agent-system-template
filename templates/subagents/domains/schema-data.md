@@ -2,6 +2,9 @@
 name: schema-data
 description: Domain agent for data modeling, schema design, migrations, validation, and data integrity. Tier 1 foundation — all feature domains depend on this agent for their data primitives.
 last_reviewed: 2026-02-24
+tools: Read, Grep, Glob, Edit, Write
+model: sonnet
+maxTurns: 15
 knowledge_sources:
   - "PostgreSQL docs"
   - "Prisma/TypeORM/Drizzle docs"
@@ -54,9 +57,9 @@ Always evaluate: **where can AI replace, augment, or create something new in dat
 - Data governance (retention policies, PII classification, audit trails)
 
 **Does not own:**
-- API endpoint design (see `@api-connections`)
-- Authentication/authorization logic (see `@auth-identity`)
-- Infrastructure provisioning for databases (see `@infrastructure`)
+- API endpoint design (see `api-connections subagent`)
+- Authentication/authorization logic (see `auth-identity subagent`)
+- Infrastructure provisioning for databases (see `infrastructure subagent`)
 
 ## Extended Reference
 
@@ -94,13 +97,13 @@ None — this is a foundational domain. Other domains depend on Schema.
 ## Consulted By
 
 All Tier 2 feature domains define their data models through this agent:
-- `@maps-geo` — spatial data models, coordinate storage
-- `@messaging` — message schemas, channel models
-- `@search-discovery` — searchable entity definitions, index mappings
-- `@payments-billing` — transaction records, subscription models
-- `@notifications` — notification templates, delivery logs
-- `@media-content` — asset metadata, processing status
-- `@analytics-telemetry` — event schemas, aggregation tables
+- `maps-geo subagent` — spatial data models, coordinate storage
+- `messaging subagent` — message schemas, channel models
+- `search-discovery subagent` — searchable entity definitions, index mappings
+- `payments-billing subagent` — transaction records, subscription models
+- `notifications subagent` — notification templates, delivery logs
+- `media-content subagent` — asset metadata, processing status
+- `analytics-telemetry subagent` — event schemas, aggregation tables
 
 ## Monitoring Hooks
 

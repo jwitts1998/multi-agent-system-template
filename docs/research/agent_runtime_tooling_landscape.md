@@ -724,12 +724,12 @@ Why It Matters:
 * Standard for tool discovery and calling
 * Already used by Cursor, Claude, and many other AI tools
 * MCP Inspector for testing/debugging
-* Already integrated into this template system via Cursor plugins
+* Already integrated into this template system via Claude Code skills
 
 Integration Strategy:
 
 * Document how projects should expose their own tools via MCP servers
-* Reference existing Cursor plugin integration
+* Reference existing Claude Code skill integration
 
 Recommendation:
 Standard for tool access (already in use).

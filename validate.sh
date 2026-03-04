@@ -17,14 +17,14 @@ echo ""
 
 # Files that should be fully resolved after setup
 PROJECT_FILES=(
-  .cursorrules
+  CLAUDE.md
   AGENTS.md
   tasks.yml
 )
 
 # Directories to scan
 PROJECT_DIRS=(
-  .cursor/agents
+  .claude/agents
   tasks
 )
 

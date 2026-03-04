@@ -76,7 +76,7 @@ Once installed, use in any project:
 cd /path/to/your/project
 
 # Copy templates
-cp $TEMPLATE_DIR/templates/cursorrules/mobile-app.cursorrules .cursorrules
+cp $TEMPLATE_DIR/templates/claude-config/mobile-appCLAUDE.md CLAUDE.md
 cp $TEMPLATE_DIR/templates/agents/AGENTS-mobile.md AGENTS.md
 # ... etc
 ```

@@ -29,7 +29,7 @@ This document describes the general development workflow for {{PROJECT_NAME}}, i
 5. {{STEP_5}}
 
 **Architecture Guidelines**:
-- Follow architecture pattern from `.cursorrules`
+- Follow architecture pattern from `CLAUDE.md`
 - {{ARCHITECTURE_GUIDELINE_1}}
 - {{ARCHITECTURE_GUIDELINE_2}}
 
@@ -42,7 +42,7 @@ This document describes the general development workflow for {{PROJECT_NAME}}, i
 
 ### 4. Review Phase
 
-- Self-review against `.cursorrules` standards
+- Self-review against `CLAUDE.md` standards
 - Check acceptance criteria are met
 - Verify no hardcoded secrets
 - Ensure documentation is updated
@@ -60,7 +60,7 @@ This document describes the general development workflow for {{PROJECT_NAME}}, i
 ### Self-Review Checklist
 
 Before requesting review:
-- [ ] Code follows `.cursorrules` style guidelines
+- [ ] Code follows `CLAUDE.md` style guidelines
 - [ ] All acceptance criteria met
 - [ ] Tests written and passing
 - [ ] No console errors or warnings
@@ -135,7 +135,7 @@ Task is complete when all acceptance criteria are met:
 
 ## 🔗 Related Documentation
 
-- **.cursorrules**: Architecture patterns and code standards
+- **CLAUDE.md**: Architecture patterns and code standards
 - **AGENTS.md**: Agent roles and responsibilities
 - **TASK_SCHEMA_GUIDE.md**: Task file schema
 

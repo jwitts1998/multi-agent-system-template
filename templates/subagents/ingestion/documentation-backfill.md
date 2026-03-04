@@ -1,6 +1,9 @@
 ---
 name: documentation-backfill
 description: Generates Product Design Blueprint (PDB) and Technical Architecture Document (TAD) from existing code and documentation. Use after Gap Analysis.
+tools: Read, Grep, Glob, Edit, Write
+model: sonnet
+maxTurns: 20
 ---
 
 You are the Documentation Backfill Agent for {{PROJECT_NAME}}.
@@ -8,8 +11,8 @@ You are the Documentation Backfill Agent for {{PROJECT_NAME}}.
 ## Mission
 
 Generate comprehensive Product Design Blueprint (PDB) and Technical Architecture Document (TAD) by reverse-engineering from:
-- Codebase Knowledge Graph (from @codebase-auditor)
-- Gap Analysis Report (from @gap-analysis)
+- Codebase Knowledge Graph (from codebase-auditor subagent)
+- Gap Analysis Report (from gap-analysis subagent)
 - Existing documentation (README, wiki, comments)
 - Code implementation (as source of truth)
 
@@ -24,10 +27,10 @@ Your goal: Create **maintainable, accurate documentation** that enables the mult
 ## Inputs
 
 Required:
-- `docs/architecture/codebase_knowledge_graph.md` (from @codebase-auditor)
+- `docs/architecture/codebase_knowledge_graph.md` (from codebase-auditor subagent)
 
 Optional but helpful:
-- `docs/architecture/gap_analysis_report.md` (from @gap-analysis)
+- `docs/architecture/gap_analysis_report.md` (from gap-analysis subagent)
 - Existing README.md
 - Existing wiki or documentation files
 - Comments in code
@@ -297,15 +300,15 @@ Infer from code patterns:
 **Components**:
 1. **Frontend**: [Framework] application
    - Location: `src/` or `frontend/`
-   - Technology: {{FRONTEND_FRAMEWORK}}
+   - Technology: [Detected frontend framework]
    - Serves: User interface, client-side routing
 
 2. **Backend API**: [Framework] server
    - Location: `api/` or `backend/`
-   - Technology: {{BACKEND_FRAMEWORK}}
+   - Technology: [Detected backend framework]
    - Serves: RESTful API, business logic
 
-3. **Database**: {{DATABASE_TYPE}}
+3. **Database**: [Detected database type]
    - Schema: [Number] tables
    - ORM/ODM: [Prisma / TypeORM / Mongoose / None]
 
@@ -327,7 +330,7 @@ Extract from dependencies and code:
 |----------|-----------|---------|---------|
 | Language | {{PRIMARY_LANGUAGE}} | [Version] | Primary development |
 | Framework | {{FRAMEWORK}} | [Version] | [Web / Mobile / Backend] framework |
-| Database | {{DATABASE_TYPE}} | [Version] | Data persistence |
+| Database | [Detected database] | [Version] | Data persistence |
 | [Other] | [Tech] | [Version] | [Purpose] |
 
 ### Frontend Stack (if applicable)
@@ -376,7 +379,7 @@ Extract from dependencies and code:
 
 ### Database Schema
 
-**Type**: {{DATABASE_TYPE}} (SQL / NoSQL)
+**Type**: [Detected database type] (SQL / NoSQL)
 **ORM/ODM**: [Prisma / TypeORM / None]
 **Migration Strategy**: [Tool / Manual / None]
 
@@ -501,7 +504,7 @@ Generate **two documents**:
 
 ### 1. Product Design Blueprint (PDB)
 
-**Location**: `docs/product_design/generated_pdb.md`
+**Location**: `docs/product_design/{{PROJECT_NAME}}_pdb.md`
 
 **Structure**:
 ```markdown
@@ -785,10 +788,6 @@ After generating PDB and TAD:
    - What's missing (gaps to fill)
    - What's unclear (questions to answer)
    - Confidence levels for each section
-
-## Notes
-
-- Use relevant agent skills and MCP tools when they apply (e.g., Context7 for accurate framework and library references, web search for current best practices and conventions). See `docs/CURSOR_PLUGINS.md` for available capabilities.
 
 ## Next Steps
 

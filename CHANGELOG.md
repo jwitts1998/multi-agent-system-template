@@ -52,7 +52,7 @@ Second research integration round covering the six biggest gaps identified after
 
 7. **Multi-Agent Workflow** (`templates/workflow/MULTI_AGENT_WORKFLOW.md`)
    - Added "Agent Interoperability Protocols" section
-   - MCP for tool discovery and calling (already in use via Cursor plugins)
+   - MCP for tool discovery and calling (already in use via Claude Code skills)
    - A2A (Agent2Agent Protocol) for cross-framework agent communication
    - MCP vs A2A comparison table: when to use each protocol
 
@@ -170,20 +170,20 @@ Major reframe: the repo is now designed to be cloned and become your project, no
 
 ### Breaking Changes
 
-- Repo now ships with root-level `.cursorrules` and `AGENTS.md` (generic starter versions). These are overwritten by `setup.sh` with project-specific versions.
+- Repo now ships with root-level `CLAUDE.md` and `AGENTS.md` (generic starter versions). These are overwritten by `setup.sh` with project-specific versions.
 - Generic subagents restructured with consistent section ordering.
 
 ### New Content
 
 1. **Interactive Setup Script** (`setup.sh`)
    - Asks project type, language, framework, architecture interactively
-   - Copies correct templates to root (`.cursorrules`, `AGENTS.md`, subagents, task files)
+   - Copies correct templates to root (`CLAUDE.md`, `AGENTS.md`, subagents, task files)
    - Replaces core template variables automatically
    - Prunes unused project-type templates
-   - Creates project directory structure (`tasks/`, `docs/product_design/`, `.cursor/agents/`)
+   - Creates project directory structure (`tasks/`, `docs/product_design/`, `.claude/agents/`)
    - Reports remaining variables that need manual customization
 
-2. **Root `.cursorrules`** (generic starter)
+2. **Root `CLAUDE.md`** (generic starter)
    - Works immediately after cloning — no setup required for basic Cursor functionality
    - Documents the multi-agent system, available agents, task workflow, and session checklist
    - Replaced by project-specific version when `setup.sh` runs
@@ -225,7 +225,7 @@ Major reframe: the repo is now designed to be cloned and become your project, no
 
 - `setup.sh` — Interactive project setup script
 - `validate.sh` — Template variable validation script
-- `.cursorrules` — Generic starter rules (root level)
+- `CLAUDE.md` — Generic starter rules (root level)
 - `AGENTS.md` — Generic starter agent definitions (root level)
 - `templates/subagents/ideation/pdb-to-tasks.md` — PDB decomposition agent
 
@@ -269,7 +269,7 @@ Added first-class support for net-new idea exploration and Product Design Bluepr
 ### Enhancements
 
 3. **SETUP_GUIDE.md** - Path A updated
-   - Path A now references the Idea to PDB Guide and `@idea-to-pdb` agent
+   - Path A now references the Idea to PDB Guide and `idea-to-pdb subagent` agent
    - Added `Idea-to-PDB` to recommended agents for greenfield projects
    - Quick Decision Matrix updated with link to guide
 
@@ -333,15 +333,15 @@ Improvements driven by real-world feedback from the Symposium project (see `feed
    - Helps adopters know what to change vs. preserve
 
 6. **Cursor Profiles Pattern** (in `docs/CUSTOMIZATION_GUIDE.md`)
-   - Documents the optional `.cursor/` profile pattern for domain-focused sessions
+   - Documents the optional `.claude/` profile pattern for domain-focused sessions
    - Originated from Symposium feedback
 
 7. **Agent Invocation in Practice** (in `templates/workflow/MULTI_AGENT_WORKFLOW.md`)
-   - How to invoke agent roles in Cursor sessions
+   - How to invoke agent roles in Claude Code sessions
    - When to switch roles and how to use explicit prompts
    - Optional agent-router pattern for larger projects
 
-8. **Session Checklist** (in all `.cursorrules` templates)
+8. **Session Checklist** (in all `CLAUDE.md` templates)
    - Global checklist added before "Tips for AI Agents" section
    - Base version + project-type-specific items (web, backend, full-stack, mobile)
 
@@ -354,11 +354,11 @@ Improvements driven by real-world feedback from the Symposium project (see `feed
 - `templates/tasks/TASK_SCHEMA_GUIDE.md` -- added `backlog_ref` field and documentation
 - `templates/tasks/feature-task-template.yml` -- added commented `backlog_ref` field
 - `templates/workflow/MULTI_AGENT_WORKFLOW.md` -- added Agent Invocation section and lifecycle example link
-- `templates/cursorrules/base-template.cursorrules` -- added Session Checklist
-- `templates/cursorrules/web-app.cursorrules` -- added Session Checklist
-- `templates/cursorrules/backend-service.cursorrules` -- added Session Checklist
-- `templates/cursorrules/full-stack.cursorrules` -- added Session Checklist
-- `templates/cursorrules/mobile-app.cursorrules` -- added Session Checklist
+- `templates/claude-config/base-templateCLAUDE.md` -- added Session Checklist
+- `templates/claude-config/web-appCLAUDE.md` -- added Session Checklist
+- `templates/claude-config/backend-serviceCLAUDE.md` -- added Session Checklist
+- `templates/claude-config/full-stack.md` -- added Session Checklist
+- `templates/claude-config/mobile-appCLAUDE.md` -- added Session Checklist
 - `docs/CUSTOMIZATION_GUIDE.md` -- added Minimal vs. Full Setup, Customization Checklist, Cursor Profiles, memory link
 - `README.md` -- added links to new content
 
@@ -528,7 +528,7 @@ Potential areas for expansion:
 ### Initial Features
 
 - Universal templates for mobile, web, backend, and full-stack projects
-- `.cursorrules` templates for 5 project types
+- `CLAUDE.md` templates for 5 project types
 - `AGENTS.md` templates for 5 project types
 - Task schema templates (tasks.yml, feature templates, schema guide)
 - Workflow documentation templates

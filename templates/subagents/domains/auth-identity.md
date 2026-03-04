@@ -2,6 +2,9 @@
 name: auth-identity
 description: Domain agent for authentication, authorization, sessions, roles, permissions, and multi-tenancy. Tier 1 foundation — feature domains delegate all identity and access control to this agent.
 last_reviewed: 2026-02-24
+tools: Read, Grep, Glob, Edit, Write
+model: sonnet
+maxTurns: 15
 knowledge_sources:
   - "OWASP authentication guidelines"
   - "OAuth 2.0 / OIDC specs"
@@ -31,7 +34,7 @@ Always evaluate: **where can AI replace, augment, or create something new in aut
 - **Scope**: Owns authentication flows, authorization models, sessions, tokens, and multi-tenancy. Feature domains delegate all identity and access control here.
 - **Top 3 modern practices**: Never roll your own—use battle-tested libraries; short-lived tokens + refresh; MFA by default for privileged accounts.
 - **Top 3 AI applications**: Adaptive auth with risk scoring; auto-generate permission matrices; smart session anomaly detection.
-- **Dependencies**: `@schema-data`, `@api-connections` for identity models and auth middleware.
+- **Dependencies**: `schema-data subagent`, `api-connections subagent` for identity models and auth middleware.
 
 ## When to Invoke
 
@@ -56,9 +59,9 @@ Always evaluate: **where can AI replace, augment, or create something new in aut
 - Audit logging for auth events (logins, permission changes, failed attempts)
 
 **Does not own:**
-- User profile data beyond identity fields (see `@schema-data`)
-- API endpoint design or transport security (see `@api-connections`)
-- Infrastructure-level security (firewalls, WAF — see `@infrastructure`)
+- User profile data beyond identity fields (see `schema-data subagent`)
+- API endpoint design or transport security (see `api-connections subagent`)
+- Infrastructure-level security (firewalls, WAF — see `infrastructure subagent`)
 
 ## Extended Reference
 
@@ -93,18 +96,18 @@ Always evaluate: **where can AI replace, augment, or create something new in aut
 
 ## Dependencies
 
-- `@schema-data` — user identity models, role/permission tables, session storage
-- `@api-connections` — auth middleware integration points, token validation in API layer
+- `schema-data subagent` — user identity models, role/permission tables, session storage
+- `api-connections subagent` — auth middleware integration points, token validation in API layer
 
 ## Consulted By
 
 All Tier 2 feature domains delegate auth to this agent:
-- `@maps-geo` — location permission scoping per user role
-- `@messaging` — channel access control, message-level permissions
-- `@search-discovery` — content visibility based on user permissions
-- `@payments-billing` — payment authorization, billing admin roles
-- `@notifications` — notification preference permissions
-- `@media-content` — upload permissions, content access control
+- `maps-geo subagent` — location permission scoping per user role
+- `messaging subagent` — channel access control, message-level permissions
+- `search-discovery subagent` — content visibility based on user permissions
+- `payments-billing subagent` — payment authorization, billing admin roles
+- `notifications subagent` — notification preference permissions
+- `media-content subagent` — upload permissions, content access control
 
 ## Monitoring Hooks
 

@@ -146,7 +146,7 @@ export const existingRepoNodes: WorkflowNode[] = [
         'Add validation checklists for uncertain sections',
       ],
       artifact: 'Generated PDB + TAD',
-      artifactPath: 'docs/product_design/generated_pdb.md',
+      artifactPath: 'docs/product_design/{{PROJECT_NAME}}_pdb.md',
       phase: 'ingest',
       templateFiles: [
         'templates/subagents/ingestion/documentation-backfill.md',
@@ -175,7 +175,7 @@ export const existingRepoNodes: WorkflowNode[] = [
       stageNumber: 5,
       title: 'Validate PDB',
       description:
-        'Review the generated PDB for accuracy. Correct wrong inferences, add missing business context, validate data models against actual database schema, and verify API contracts match real endpoints. Rename from generated_pdb.md to your project PDB.',
+        'Review the generated PDB for accuracy. Correct wrong inferences, add missing business context, validate data models against actual database schema, and verify API contracts match real endpoints.',
       agents: [],
       substeps: [
         'Review product overview accuracy',
@@ -192,7 +192,7 @@ export const existingRepoNodes: WorkflowNode[] = [
       handoff:
         'Validated PDB is the source of truth for downstream agents. Rename and commit before proceeding to task decomposition.',
       commands: [
-        'mv docs/product_design/generated_pdb.md docs/product_design/yourproject_pdb.md',
+        '# PDB is saved directly as docs/product_design/yourproject_pdb.md',
       ],
       tips: [
         'This is a manual step — you are the domain expert, not the agent',

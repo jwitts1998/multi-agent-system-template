@@ -131,7 +131,7 @@ prompt TEST_COVERAGE_TARGET "Test coverage target (%)" "80"
 
 print_step 3 "Configuring project files"
 
-CURSORRULES_SRC="templates/cursorrules/${PROJECT_TYPE}.cursorrules"
+CURSORRULES_SRC="templates/claude-config/${PROJECT_TYPE}.md"
 AGENTS_SRC="templates/agents/AGENTS-${PROJECT_TYPE%%%-*}.md"
 
 # Map project type to AGENTS template name
@@ -143,10 +143,10 @@ case "$PROJECT_TYPE" in
 esac
 
 if [ -f "$CURSORRULES_SRC" ]; then
-  cp "$CURSORRULES_SRC" .cursorrules
-  print_success "Copied ${PROJECT_TYPE}.cursorrules → .cursorrules"
+  cp "$CURSORRULES_SRC" CLAUDE.md
+  print_success "Copied ${PROJECT_TYPE}CLAUDE.md → CLAUDE.md"
 else
-  print_warning "Template $CURSORRULES_SRC not found, keeping generic .cursorrules"
+  print_warning "Template $CURSORRULES_SRC not found, keeping generic CLAUDE.md"
 fi
 
 if [ -f "$AGENTS_SRC" ]; then
@@ -157,15 +157,15 @@ else
 fi
 
 # Set up directories
-mkdir -p tasks docs/product_design docs/architecture docs/workflow .cursor/agents/generic .cursor/agents/ideation
+mkdir -p tasks docs/product_design docs/architecture docs/workflow .claude/agents/generic .claude/agents/ideation
 
 # Copy subagents
-cp templates/subagents/generic/*.md .cursor/agents/generic/ 2>/dev/null && \
-  print_success "Copied generic subagents → .cursor/agents/generic/" || \
+cp templates/subagents/generic/*.md .claude/agents/generic/ 2>/dev/null && \
+  print_success "Copied generic subagents → .claude/agents/generic/" || \
   print_warning "Could not copy generic subagents"
 
-cp templates/subagents/ideation/*.md .cursor/agents/ideation/ 2>/dev/null && \
-  print_success "Copied ideation subagents → .cursor/agents/ideation/" || \
+cp templates/subagents/ideation/*.md .claude/agents/ideation/ 2>/dev/null && \
+  print_success "Copied ideation subagents → .claude/agents/ideation/" || \
   print_warning "Could not copy ideation subagents"
 
 # Copy domain micro-agents
@@ -173,12 +173,12 @@ echo ""
 printf "  Include domain micro-agents (vertical expertise agents)? [y/N]: "
 read -r INCLUDE_DOMAINS
 if [ "$INCLUDE_DOMAINS" = "y" ] || [ "$INCLUDE_DOMAINS" = "Y" ]; then
-  mkdir -p .cursor/agents/domains .cursor/agents/system
-  cp templates/subagents/domains/*.md .cursor/agents/domains/ 2>/dev/null && \
-    print_success "Copied domain micro-agents → .cursor/agents/domains/"
-  cp templates/subagents/system/product-orchestrator.md .cursor/agents/system/ 2>/dev/null
-  cp templates/subagents/system/domain-router.md .cursor/agents/system/ 2>/dev/null && \
-    print_success "Copied domain orchestration agents → .cursor/agents/system/"
+  mkdir -p .claude/agents/domains .claude/agents/system
+  cp templates/subagents/domains/*.md .claude/agents/domains/ 2>/dev/null && \
+    print_success "Copied domain micro-agents → .claude/agents/domains/"
+  cp templates/subagents/system/product-orchestrator.md .claude/agents/system/ 2>/dev/null
+  cp templates/subagents/system/domain-router.md .claude/agents/system/ 2>/dev/null && \
+    print_success "Copied domain orchestration agents → .claude/agents/system/"
   DOMAINS_ENABLED=true
 else
   DOMAINS_ENABLED=false
@@ -194,23 +194,23 @@ cp templates/tasks/feature-task-template.yml tasks/ 2>/dev/null && \
 case "$PROJECT_TYPE" in
   mobile-app)
     if [ "$FRAMEWORK" = "Flutter" ] || [ "$FRAMEWORK" = "flutter" ]; then
-      mkdir -p .cursor/agents/specialists
-      cp templates/subagents/specialists/flutter-specialist.md .cursor/agents/specialists/ 2>/dev/null && \
-        print_success "Copied flutter-specialist → .cursor/agents/specialists/"
+      mkdir -p .claude/agents/specialists
+      cp templates/subagents/specialists/flutter-specialist.md .claude/agents/specialists/ 2>/dev/null && \
+        print_success "Copied flutter-specialist → .claude/agents/specialists/"
     fi
     ;;
   web-app)
     if [ "$FRAMEWORK" = "React" ] || [ "$FRAMEWORK" = "react" ]; then
-      mkdir -p .cursor/agents/specialists
-      cp templates/subagents/specialists/react-specialist.md .cursor/agents/specialists/ 2>/dev/null && \
-        print_success "Copied react-specialist → .cursor/agents/specialists/"
+      mkdir -p .claude/agents/specialists
+      cp templates/subagents/specialists/react-specialist.md .claude/agents/specialists/ 2>/dev/null && \
+        print_success "Copied react-specialist → .claude/agents/specialists/"
     fi
     ;;
   backend-service)
     if [ "$FRAMEWORK" = "Express" ] || [ "$FRAMEWORK" = "express" ] || [ "$FRAMEWORK" = "Node" ] || [ "$FRAMEWORK" = "Fastify" ]; then
-      mkdir -p .cursor/agents/specialists
-      cp templates/subagents/specialists/node-specialist.md .cursor/agents/specialists/ 2>/dev/null && \
-        print_success "Copied node-specialist → .cursor/agents/specialists/"
+      mkdir -p .claude/agents/specialists
+      cp templates/subagents/specialists/node-specialist.md .claude/agents/specialists/ 2>/dev/null && \
+        print_success "Copied node-specialist → .claude/agents/specialists/"
     fi
     ;;
 esac
@@ -226,15 +226,15 @@ replace_var() {
 
   # Replace in all project config files (not in templates/ directory)
   local files_to_process=(
-    .cursorrules
+    CLAUDE.md
     AGENTS.md
     tasks.yml
   )
 
-  # Also process files in .cursor/agents/ and tasks/
+  # Also process files in .claude/agents/ and tasks/
   while IFS= read -r -d '' f; do
     files_to_process+=("$f")
-  done < <(find .cursor/agents tasks -name "*.md" -o -name "*.yml" 2>/dev/null | tr '\n' '\0')
+  done < <(find .claude/agents tasks -name "*.md" -o -name "*.yml" 2>/dev/null | tr '\n' '\0')
 
   for f in "${files_to_process[@]}"; do
     if [ -f "$f" ]; then
@@ -265,7 +265,7 @@ replace_var "MAINTAINER" "$(git config user.name 2>/dev/null || echo 'Developmen
 print_success "Replaced core template variables in project files"
 
 # Count remaining variables
-REMAINING=$(grep -roh '{{[^}]*}}' .cursorrules AGENTS.md tasks.yml .cursor/agents/ tasks/ 2>/dev/null | sort -u | wc -l | tr -d ' ')
+REMAINING=$(grep -roh '{{[^}]*}}' CLAUDE.md AGENTS.md tasks.yml .claude/agents/ tasks/ 2>/dev/null | sort -u | wc -l | tr -d ' ')
 if [ "$REMAINING" -gt 0 ]; then
   print_warning "$REMAINING unique template variables remain — customize these manually or run ./validate.sh to see them"
 else
@@ -282,12 +282,12 @@ do_prune="${do_prune:-y}"
 
 if [[ "$do_prune" =~ ^[Yy] ]]; then
   # Remove other project type templates (keep the one we used)
-  for type_file in templates/cursorrules/*.cursorrules; do
+  for type_file in templates/claude-config/*.md; do
     if [ "$type_file" != "$CURSORRULES_SRC" ]; then
       rm -f "$type_file"
     fi
   done
-  print_success "Removed unused .cursorrules templates"
+  print_success "Removed unused CLAUDE.md templates"
 
   for agent_file in templates/agents/AGENTS-*.md; do
     if [ "$agent_file" != "$AGENTS_SRC" ]; then
@@ -329,23 +329,37 @@ echo -e "  ${BOLD}Framework${NC}:     $FRAMEWORK"
 echo -e "  ${BOLD}Architecture${NC}:  $ARCHITECTURE_PATTERN"
 echo ""
 echo -e "${BOLD}  Project structure:${NC}"
-echo -e "    .cursorrules          ${DIM}— AI agent rules (configured)${NC}"
+echo -e "    CLAUDE.md          ${DIM}— AI agent rules (configured)${NC}"
 echo -e "    AGENTS.md             ${DIM}— Agent role definitions (configured)${NC}"
 echo -e "    tasks.yml             ${DIM}— Portfolio-level task tracking${NC}"
 echo -e "    tasks/                ${DIM}— Feature task files${NC}"
 echo -e "    docs/product_design/  ${DIM}— Product Design Blueprint (PDB)${NC}"
 echo -e "    docs/architecture/    ${DIM}— Architecture documentation${NC}"
-echo -e "    .cursor/agents/       ${DIM}— Subagent configurations${NC}"
+echo -e "    .claude/agents/       ${DIM}— Subagent configurations${NC}"
+echo ""
+printf "  Install Antigravity Awesome Skills (946+ additional agent skills)? [y/N]: "
+read -r INSTALL_ANTIGRAVITY
+if [ "$INSTALL_ANTIGRAVITY" = "y" ] || [ "$INSTALL_ANTIGRAVITY" = "Y" ]; then
+  if [ -f "scripts/install-antigravity-skills.sh" ]; then
+    chmod +x scripts/install-antigravity-skills.sh
+    ./scripts/install-antigravity-skills.sh || print_warning "Install failed — run manually: ./scripts/install-antigravity-skills.sh"
+  else
+    npx antigravity-awesome-skills --path .claude/skills || npx github:sickn33/antigravity-awesome-skills --path .claude/skills
+  fi
+  print_success "Antigravity skills installed. Use /skill-name in Claude Code (e.g. @brainstorming)"
+else
+  print_info "Skip. Install later with: ./scripts/install-antigravity-skills.sh"
+fi
 echo ""
 echo -e "${BOLD}  Next steps:${NC}"
-echo -e "    1. ${CYAN}Open this project in Cursor${NC}"
-echo -e "    2. ${CYAN}Invoke @idea-to-pdb to explore your idea and generate a PDB${NC}"
+echo -e "    1. ${CYAN}Open this project in Claude Code${NC}"
+echo -e "    2. ${CYAN}Invoke idea-to-pdb subagent to explore your idea and generate a PDB${NC}"
 if [ "$DOMAINS_ENABLED" = true ]; then
-echo -e "    3. ${CYAN}Invoke @vertical-calibrator to configure domain agents for your vertical${NC}"
-echo -e "    4. ${CYAN}Invoke @pdb-to-tasks to create domain-aware task files${NC}"
+echo -e "    3. ${CYAN}Invoke vertical-calibrator subagent to configure domain agents for your vertical${NC}"
+echo -e "    4. ${CYAN}Invoke pdb-to-tasks subagent to create domain-aware task files${NC}"
 echo -e "    5. ${CYAN}Start developing with domain expertise active${NC}"
 else
-echo -e "    3. ${CYAN}Invoke @pdb-to-tasks to create task files from the PDB${NC}"
+echo -e "    3. ${CYAN}Invoke pdb-to-tasks subagent to create task files from the PDB${NC}"
 echo -e "    4. ${CYAN}Start developing — agents will follow your project conventions${NC}"
 fi
 echo ""

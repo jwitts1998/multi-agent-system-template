@@ -4,7 +4,7 @@
 
 This document defines specialized **development agents** for the {{PROJECT_NAME}} project. These agents represent distinct roles with specialized knowledge and responsibilities, enabling focused, quality-driven development work.
 
-**Key Philosophy**: Specialized agents work on distinct aspects of development while maintaining consistency through shared context (`.cursorrules`, `AGENTS.md`, and task files).
+**Key Philosophy**: Specialized agents work on distinct aspects of development while maintaining consistency through shared context (`CLAUDE.md`, `AGENTS.md`, and task files).
 
 ---
 
@@ -16,7 +16,7 @@ This document defines specialized **development agents** for the {{PROJECT_NAME}
 **Responsibilities**:
 - Write production-ready {{PRIMARY_LANGUAGE}} code
 - Implement features according to specifications
-- Follow architecture patterns defined in `.cursorrules`
+- Follow architecture patterns defined in `CLAUDE.md`
 - Create and maintain services, business logic, and data models
 - Ensure code follows style guidelines and naming conventions
 - Implement error handling and edge cases
@@ -39,7 +39,7 @@ This document defines specialized **development agents** for the {{PROJECT_NAME}
 - Testing strategies
 
 **Special Instructions**:
-- Always consult `.cursorrules` for architecture decisions
+- Always consult `CLAUDE.md` for architecture decisions
 - Check task files (`tasks/*.yml`) for task context and acceptance criteria
 - Review existing similar features for patterns
 - Follow the project's naming conventions and file organization
@@ -57,7 +57,7 @@ This document defines specialized **development agents** for the {{PROJECT_NAME}
 - Ensure tests cover main functionality
 - Verify documentation is updated
 - Check for code duplication and anti-patterns
-- Validate adherence to `.cursorrules` standards
+- Validate adherence to `CLAUDE.md` standards
 - Evaluate whether available skills, plugins, and MCP tools are being used effectively, and flag missing capabilities
 
 **When to Use**:
@@ -86,7 +86,7 @@ This document defines specialized **development agents** for the {{PROJECT_NAME}
 - [ ] All acceptance criteria met
 
 **Special Instructions**:
-- Use `.cursorrules` as the quality standard reference
+- Use `CLAUDE.md` as the quality standard reference
 - Prioritize feedback: Critical → Warnings → Suggestions
 - Check for common security vulnerabilities specific to {{TECH_STACK}}
 - Verify test coverage meets project standards
@@ -156,7 +156,7 @@ This document defines specialized **development agents** for the {{PROJECT_NAME}
 - After significant code changes
 
 **Key Knowledge Areas**:
-- Documentation standards from `.cursorrules`
+- Documentation standards from `CLAUDE.md`
 - {{DOC_FORMAT}} (JSDoc, Dartdoc, etc.)
 - Markdown formatting
 - Architecture documentation patterns
@@ -173,7 +173,7 @@ This document defines specialized **development agents** for the {{PROJECT_NAME}
 - Update docs when code changes
 - Use clear, concise language
 - Include diagrams for complex concepts
-- Review `.cursorrules` documentation section for standards
+- Review `CLAUDE.md` documentation section for standards
 
 ---
 
@@ -215,19 +215,19 @@ Domain agents define **what expertise** is applied. Role-based agents (Implement
 
 ### Agent Prompts
 
-Domain agent definitions are in `.cursor/agents/domains/`. Each contains scope, modern practices, AI applications (builder + consumer), dependencies, monitoring hooks, and maintenance triggers.
+Domain agent definitions are in `.claude/agents/domains/`. Each contains scope, modern practices, AI applications (builder + consumer), dependencies, monitoring hooks, and maintenance triggers.
 
 ### Pipeline Integration
 
 Domain agents are wired into the full ideation-to-development pipeline:
 
 ```
-@idea-to-pdb → @vertical-calibrator → @pdb-to-tasks → development
+idea-to-pdb subagent → vertical-calibrator subagent → pdb-to-tasks subagent → development
 ```
 
-1. **`@idea-to-pdb`** (or `@context-to-pdb`) generates a PDB with a Domain Architecture section (4.5) that identifies which domains are relevant.
-2. **`@vertical-calibrator`** reads the PDB, walks through a 5-step calibration (discover vertical, identify domains, calibrate AI, set priorities, generate config), and outputs `docs/architecture/domain-config.yml`.
-3. **`@pdb-to-tasks`** reads `domain-config.yml` and auto-populates `domain_agents` on generated tasks based on domain relevance and signal matching.
+1. **`idea-to-pdb subagent`** (or `@context-to-pdb`) generates a PDB with a Domain Architecture section (4.4) that identifies which domains are relevant.
+2. **`vertical-calibrator subagent`** reads the PDB, walks through a 5-step calibration (discover vertical, identify domains, calibrate AI, set priorities, generate config), and outputs `docs/architecture/domain-config.yml`.
+3. **`pdb-to-tasks subagent`** reads `domain-config.yml` and auto-populates `domain_agents` on generated tasks based on domain relevance and signal matching.
 4. **During development**, domain agents bring craft expertise. The `domain-routing` rule auto-suggests `domain_agents` when editing task files. The `domain-consultation` rule pulls in Tier 3 lenses during code review.
 
 Use the `full-pipeline` skill to orchestrate all steps in sequence, or run each agent individually.
@@ -391,19 +391,50 @@ When multiple agents work on the same task:
 
 1. **First Agent (e.g., Implementation)**:
    - Complete their portion
-   - Update task with notes: "Implementation Agent: Feature complete. Ready for QA."
+   - Write a structured handoff note to the task's `notes` field (see format below)
    - Propose status update if appropriate
 
 2. **Second Agent (e.g., Quality Assurance)**:
-   - Review previous agent's work
+   - Read previous handoff notes to understand context
    - Complete their portion
-   - Update task: "QA Agent: Review complete. Ready for Testing Agent."
+   - Write their own handoff note
 
 3. **Final Agent (e.g., Testing)**:
-   - Review all previous work
+   - Review all previous work via handoff notes
    - Complete their portion
    - Validate all acceptance criteria
-   - Propose `status: done`
+   - Write final handoff note and propose `status: done`
+
+### Structured Handoff Note Format
+
+Use structured YAML entries in the `notes` field for consistency and parseability:
+
+```yaml
+notes:
+  - agent: implementation
+    status: complete
+    summary: "PUT /api/v1/users/:id/profile endpoint created."
+    files_changed:
+      - src/api/controllers/profileController.ts
+      - src/services/profileService.ts
+    decisions:
+      - "5MB avatar limit based on S3 constraints"
+    open_questions: []
+    next: testing
+```
+
+**Required fields**:
+- `agent` — which role wrote this note (matches `agent_roles` values)
+- `status` — `complete`, `blocked`, or `escalated`
+- `summary` — concise description of what was done (1-3 sentences)
+- `next` — which agent role should pick up next (omit on final handoff)
+
+**Optional fields**:
+- `files_changed` — list of files created or modified
+- `decisions` — non-obvious choices made and why
+- `open_questions` — unresolved items the next agent should be aware of
+
+Freeform string notes remain valid for backward compatibility, but the structured format is the recommended convention for new tasks.
 
 ---
 
@@ -411,7 +442,7 @@ When multiple agents work on the same task:
 
 ### Implementation Agent Checklist
 - [ ] Architecture pattern followed ({{ARCHITECTURE_PATTERN}})
-- [ ] Code follows style guidelines from `.cursorrules`
+- [ ] Code follows style guidelines from `CLAUDE.md`
 - [ ] Error handling and edge cases covered
 - [ ] No hardcoded secrets or API keys
 - [ ] Code is maintainable and performant
@@ -445,7 +476,7 @@ When multiple agents work on the same task:
 - [ ] API documentation updated (if applicable)
 - [ ] README updated if needed
 - [ ] Examples provided for complex functionality
-- [ ] Documentation follows standards from `.cursorrules`
+- [ ] Documentation follows standards from `CLAUDE.md`
 
 ---
 
@@ -478,7 +509,7 @@ Validation can be **skipped** when:
 
 **Step 2 — Compare.** Evaluate findings against:
 - The agent's built-in practices (e.g., domain agent "Modern Practices" sections)
-- The project's existing patterns and `.cursorrules`
+- The project's existing patterns and `CLAUDE.md`
 - The specific constraints of the task
 
 **Step 3 — Document.** Record in task notes or PR description:
@@ -487,7 +518,7 @@ Validation can be **skipped** when:
 - Whether built-in practices are still current or need updating
 - Any deviations from standard recommendations and why
 
-**Step 4 — Flag drift.** If research reveals that a domain agent's "Modern Practices" or the project's `.cursorrules` contain outdated guidance, flag it explicitly:
+**Step 4 — Flag drift.** If research reveals that a domain agent's "Modern Practices" or the project's `CLAUDE.md` contain outdated guidance, flag it explicitly:
 - Note the specific outdated practice
 - Cite the current recommendation with source
 - Recommend a template or rules update
@@ -538,7 +569,7 @@ A validated implementation includes:
 - Write self-documenting code with clear naming
 
 **Quality Assurance Agent**:
-- Use `.cursorrules` as the reference standard
+- Use `CLAUDE.md` as the reference standard
 - Prioritize critical security and architectural issues
 - Provide actionable feedback
 - Check for common pitfalls in {{TECH_STACK}}
@@ -557,11 +588,15 @@ A validated implementation includes:
 
 ### Plugin, Skill & MCP Awareness
 
+**Permissions**: Agents have permission to leverage existing skills and create new ones at any time. Invoke `/skill-name` when a task would benefit (e.g., `@brainstorming`, `@test-driven-development`, `@security-audit`). Use the `create-skill` workflow to author project-specific skills. After adding capabilities, update `docs/CLAUDE_CODE_CAPABILITIES.md` so all agents are aware.
+
+**Antigravity Awesome Skills**: If installed (see `docs/CLAUDE_CODE_CAPABILITIES.md`), 946+ skills live in `.claude/skills/`. Project config agents (apply-multi-agent-template, calibrate-domains, domain-routing) can run `./scripts/install-antigravity-skills.sh` during setup or when the user requests it — these skills are accessible at any time.
+
 All agents should actively identify gaps in available tooling — not just use what's already installed. There are two trigger points:
 
 **During review** (QA Agent, code-reviewer subagent, designer subagent):
-- Check whether installed skills and MCP tools from `docs/CURSOR_PLUGINS.md` are being used where they would help
-- Flag opportunities where an existing Cursor marketplace plugin would address a quality, accessibility, testing, or documentation gap
+- Check whether installed skills and MCP tools from `docs/CLAUDE_CODE_CAPABILITIES.md` are being used where they would help
+- Flag opportunities where an existing Claude Code skills plugin would address a quality, accessibility, testing, or documentation gap
 - Recommend creating a custom skill when the review reveals a repetitive pattern that agents keep reinventing
 
 **During development** (Implementation Agent, specialist subagents):
@@ -582,7 +617,7 @@ All agents should actively identify gaps in available tooling — not just use w
 - Structured access would be safer or more efficient than raw shell execution
 - Multiple agents need the same tool access
 
-**After installing or creating**: Always update `docs/CURSOR_PLUGINS.md` so all agents are aware of the new capability.
+**After installing or creating**: Always update `docs/CLAUDE_CODE_CAPABILITIES.md` so all agents are aware of the new capability.
 
 ---
 
@@ -606,7 +641,7 @@ All agents should actively identify gaps in available tooling — not just use w
 
 ## 🔗 Related Documentation
 
-- **`.cursorrules`**: Architecture patterns, code style, and project conventions
+- **`CLAUDE.md`**: Architecture patterns, code style, and project conventions
 - **`tasks/*.yml`**: Task definitions with agent role assignments
 - **`docs/workflow/`**: Workflow documentation and conventions
 

@@ -34,7 +34,7 @@ Use these agents when:
 
 **In Cursor**:
 ```
-@codebase-auditor
+codebase-auditor subagent
 
 Prompt: "Perform comprehensive codebase audit. Build knowledge graph of all modules, dependencies, data flows, and architecture patterns."
 ```
@@ -63,7 +63,7 @@ Prompt: "Perform comprehensive codebase audit. Build knowledge graph of all modu
 
 **In Cursor**:
 ```
-@gap-analysis
+gap-analysis subagent
 
 Prompt: "Analyze codebase knowledge graph. Identify ALL security vulnerabilities, missing infrastructure, test coverage gaps, and deployment blockers. Prioritize by severity."
 ```
@@ -90,14 +90,14 @@ Prompt: "Analyze codebase knowledge graph. Identify ALL security vulnerabilities
 - Existing README, wiki, or documentation
 
 **Output**: 
-- `docs/product_design/generated_pdb.md`
+- `docs/product_design/{{PROJECT_NAME}}_pdb.md`
 - `docs/architecture/technical_architecture.md`
 
 **When to invoke**: After Gap Analysis completes (or after Codebase Auditor if skipping Gap Analysis)
 
 **In Cursor**:
 ```
-@documentation-backfill
+documentation-backfill subagent
 
 Prompt: "Generate Product Design Blueprint (PDB) and Technical Architecture Document (TAD) from codebase knowledge graph and gap analysis. Mark inferences and add validation checklists."
 ```
@@ -173,13 +173,13 @@ For rapid prototypes that need production hardening:
 TEMPLATE_DIR=/path/to/multi-agent-system-template
 
 # Create ingestion agents directory
-mkdir -p .cursor/agents/ingestion
+mkdir -p .claude/agents/ingestion
 
 # Copy all ingestion agents
-cp $TEMPLATE_DIR/templates/subagents/ingestion/*.md .cursor/agents/ingestion/
+cp $TEMPLATE_DIR/templates/subagents/ingestion/*.md .claude/agents/ingestion/
 
 # Verify
-ls .cursor/agents/ingestion/
+ls .claude/agents/ingestion/
 # Should show:
 # - codebase-auditor.md
 # - gap-analysis.md
@@ -199,7 +199,7 @@ Before using, replace these variables in each agent file:
 
 **Quick replace**:
 ```bash
-cd .cursor/agents/ingestion
+cd .claude/agents/ingestion
 
 # Replace project name
 sed -i '' 's/{{PROJECT_NAME}}/YourProjectName/g' *.md
@@ -217,9 +217,9 @@ sed -i '' 's/{{FRAMEWORK}}/React/g' *.md
 
 ## Usage Tips
 
-### Running Agents in Cursor
+### Running Agents in Claude Code
 
-1. **Invoke agent by name**: `@codebase-auditor`, `@gap-analysis`, `@documentation-backfill`
+1. **Invoke agent by name**: `codebase-auditor subagent`, `gap-analysis subagent`, `documentation-backfill subagent`
 2. **Provide detailed prompt**: Tell the agent exactly what to focus on
 3. **Wait for completion**: These agents do heavy analysis - can take time
 4. **Review output**: Check generated markdown files in `docs/`
@@ -271,11 +271,11 @@ docs/
 │   ├── gap_analysis_report.md            (from Gap Analysis)
 │   └── technical_architecture.md         (from Documentation Backfill)
 └── product_design/
-    └── generated_pdb.md                  (from Documentation Backfill)
+    └── {{PROJECT_NAME}}_pdb.md           (from Documentation Backfill)
 ```
 
 These files then become the foundation for:
-- `.cursorrules` configuration
+- `CLAUDE.md` configuration
 - Task files (`tasks/*.yml`) with `spec_refs` pointing to PDB
 - Standard multi-agent development workflow
 
@@ -283,15 +283,15 @@ These files then become the foundation for:
 
 ## Troubleshooting
 
-### Agent not found in Cursor
+### Agent not found in Claude Code
 
-**Problem**: `@codebase-auditor` doesn't auto-complete
+**Problem**: `codebase-auditor subagent` doesn't auto-complete
 
 **Solution**:
-1. Check agent file exists: `ls .cursor/agents/ingestion/codebase-auditor.md`
+1. Check agent file exists: `ls .claude/agents/ingestion/codebase-auditor.md`
 2. Verify frontmatter format (must have `name:` field)
-3. Restart Cursor IDE
-4. Try full path: `.cursor/agents/ingestion/codebase-auditor.md`
+3. Restart Claude Code CLI
+4. Try full path: `.claude/agents/ingestion/codebase-auditor.md`
 
 ### Generated docs are inaccurate
 
@@ -309,7 +309,7 @@ These files then become the foundation for:
 
 **Solution**:
 1. Ensure Codebase Auditor completed successfully first
-2. Re-run with specific focus: "@gap-analysis focus on security and infrastructure"
+2. Re-run with specific focus: "gap-analysis subagent focus on security and infrastructure"
 3. Manually add gaps you're aware of to the report
 4. Consider project maturity - MVP code SHOULD have many gaps
 

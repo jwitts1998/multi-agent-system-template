@@ -46,7 +46,7 @@ This document defines specialized **development agents** for mobile app developm
 - Follow repository and service patterns from existing features
 - Ensure offline behavior is handled (if applicable)
 - Test on both iOS and Android
-- Check `.cursorrules` for architecture decisions
+- Check `CLAUDE.md` for architecture decisions
 
 ---
 
@@ -159,7 +159,7 @@ This document defines specialized **development agents** for mobile app developm
 - [ ] Offline behavior tested (if applicable)
 - [ ] Performance acceptable (no memory leaks)
 - [ ] Accessibility tested
-- [ ] Relevant MCP tools and skills used where applicable (see `docs/CURSOR_PLUGINS.md`)
+- [ ] Relevant MCP tools and skills used where applicable (see `docs/CLAUDE_CODE_CAPABILITIES.md`)
 
 **Special Instructions**:
 - Test business logic in domain layer (Clean Architecture features)
@@ -274,7 +274,11 @@ When you pick up a task with multiple `agent_roles`, follow this protocol:
 
 ## 🔌 Plugins and MCP Tools
 
-Agents have access to MCP tools and skills provided by installed Cursor plugins. See `docs/CURSOR_PLUGINS.md` for the full list. Use them when relevant to the task.
+Agents have access to MCP tools and skills provided by installed Claude Code skills. See `docs/CLAUDE_CODE_CAPABILITIES.md` for the full list. Use them when relevant to the task.
+
+**Permissions**: Agents may leverage existing skills and create new ones at any time. Use `/skill-name` when a task would benefit. Use the `create-skill` workflow to author project-specific skills. Update `docs/CLAUDE_CODE_CAPABILITIES.md` after adding capabilities.
+
+**Antigravity Awesome Skills**: If installed (`./scripts/install-antigravity-skills.sh`), 946+ skills are in `.claude/skills/`. Project config agents can run the install script during setup or when requested.
 
 **Stack-relevant examples**:
 - **Context7**: Look up current docs for {{FRAMEWORK}} and mobile dependencies before implementing unfamiliar APIs
@@ -282,7 +286,7 @@ Agents have access to MCP tools and skills provided by installed Cursor plugins.
 - **Figma skills**: Translate Figma mockups to mobile UI components with 1:1 fidelity
 - **parallel-web-search**: Verify best practices for mobile patterns, accessibility, or platform-specific behavior
 
-Flag gaps: if agents are doing work manually that a plugin, skill, or MCP server could handle, recommend installing or creating one and update `docs/CURSOR_PLUGINS.md`.
+Flag gaps: if agents are doing work manually that a plugin, skill, or MCP server could handle, recommend installing or creating one and update `docs/CLAUDE_CODE_CAPABILITIES.md`.
 
 ---
 
@@ -295,9 +299,9 @@ Flag gaps: if agents are doing work manually that a plugin, skill, or MCP server
 - [ ] Error handling present for async operations
 - [ ] Loading states implemented
 - [ ] Offline behavior handled (if applicable)
-- [ ] Code follows `.cursorrules` standards
+- [ ] Code follows `CLAUDE.md` standards
 - [ ] No hardcoded secrets or API keys
-- [ ] Relevant MCP tools and skills used where applicable (see `docs/CURSOR_PLUGINS.md`)
+- [ ] Relevant MCP tools and skills used where applicable (see `docs/CLAUDE_CODE_CAPABILITIES.md`)
 
 ### UI/UX Agent Checklist
 - [ ] All colors, fonts, spacing use theme tokens
@@ -308,7 +312,7 @@ Flag gaps: if agents are doing work manually that a plugin, skill, or MCP server
 - [ ] All screens provide clear next actions
 - [ ] Platform-appropriate widgets used (Material vs Cupertino)
 - [ ] Animations are subtle and appropriate
-- [ ] Relevant MCP tools and skills used where applicable (see `docs/CURSOR_PLUGINS.md`)
+- [ ] Relevant MCP tools and skills used where applicable (see `docs/CLAUDE_CODE_CAPABILITIES.md`)
 
 ### Testing Agent Checklist
 - [ ] Unit tests for business logic (services, providers)
@@ -319,7 +323,7 @@ Flag gaps: if agents are doing work manually that a plugin, skill, or MCP server
 - [ ] Tests are fast (no real network calls)
 - [ ] Edge cases and error scenarios tested
 - [ ] Test coverage meets {{TEST_COVERAGE_TARGET}}% target
-- [ ] Relevant MCP tools and skills used where applicable (see `docs/CURSOR_PLUGINS.md`)
+- [ ] Relevant MCP tools and skills used where applicable (see `docs/CLAUDE_CODE_CAPABILITIES.md`)
 
 ---
 
@@ -347,7 +351,7 @@ Flag gaps: if agents are doing work manually that a plugin, skill, or MCP server
 
 ## 🔗 Related Documentation
 
-- **`.cursorrules`**: Architecture patterns, mobile best practices, design system
+- **`CLAUDE.md`**: Architecture patterns, mobile best practices, design system
 - **`docs/design/`**: Design system and UI guidelines
 - **`lib/core/theme/`**: Theme system and design tokens
 - **`test/`**: Existing test patterns and structure

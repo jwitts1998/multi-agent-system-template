@@ -2,6 +2,9 @@
 name: performance
 description: Domain agent for bundle size, rendering speed, network efficiency, caching, lazy loading, and profiling. Tier 3 experience — ensures the product is fast and stays fast.
 last_reviewed: 2026-02-24
+tools: Read, Grep, Glob, Edit, Write
+model: sonnet
+maxTurns: 15
 knowledge_sources:
   - "Web Vitals documentation"
   - "Chrome DevTools docs"
@@ -31,7 +34,7 @@ Always evaluate: **where can AI replace, augment, or create something new in per
 - **Scope**: Owns performance budgets, bundle optimization, caching, and Core Web Vitals. Ensures the product loads fast and stays responsive.
 - **Top 3 modern practices**: Performance budgets from day one; Measure real user performance (RUM); Code split by route, lazy load below fold
 - **Top 3 AI applications**: AI-assisted performance profiling; Predictive prefetching; Auto-detect performance regressions in CI
-- **Dependencies**: `@infrastructure` — scaling, CDN, server resources
+- **Dependencies**: `infrastructure subagent` — scaling, CDN, server resources
 
 ## When to Invoke
 
@@ -57,10 +60,10 @@ Always evaluate: **where can AI replace, augment, or create something new in per
 - Core Web Vitals monitoring and optimization
 
 **Does not own:**
-- Infrastructure scaling (see `@infrastructure`)
-- Animation frame rate (see `@animation-motion` — but coordinates on budgets)
-- Database query optimization (see `@schema-data`)
-- CDN configuration (see `@infrastructure`)
+- Infrastructure scaling (see `infrastructure subagent`)
+- Animation frame rate (see `animation-motion subagent` — but coordinates on budgets)
+- Database query optimization (see `schema-data subagent`)
+- CDN configuration (see `infrastructure subagent`)
 
 ## Extended Reference
 
@@ -96,16 +99,16 @@ Always evaluate: **where can AI replace, augment, or create something new in per
 
 ## Dependencies
 
-- `@infrastructure` — scaling, CDN, server resource allocation
+- `infrastructure subagent` — scaling, CDN, server resource allocation
 
 ## Consulted By
 
 All Tier 2 feature domains should consult for performance-conscious implementation:
-- `@maps-geo` — tile loading budgets, render performance
-- `@messaging` — real-time connection performance, memory usage
-- `@search-discovery` — search query latency, index performance
-- `@media-content` — media loading performance, lazy loading strategy
-- `@payments-billing` — checkout performance (speed affects conversion)
+- `maps-geo subagent` — tile loading budgets, render performance
+- `messaging subagent` — real-time connection performance, memory usage
+- `search-discovery subagent` — search query latency, index performance
+- `media-content subagent` — media loading performance, lazy loading strategy
+- `payments-billing subagent` — checkout performance (speed affects conversion)
 
 ## Monitoring Hooks
 

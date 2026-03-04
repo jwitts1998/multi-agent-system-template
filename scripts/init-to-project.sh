@@ -64,9 +64,9 @@ echo "Target project: $(cd "$TARGET" && pwd)"
 echo "Project type  : $PROJECT_TYPE"
 echo ""
 
-CURSORRULES_SRC="$TEMPLATE_DIR/templates/cursorrules/${PROJECT_TYPE}.cursorrules"
+CURSORRULES_SRC="$TEMPLATE_DIR/templates/claude-config/${PROJECT_TYPE}CLAUDE.md"
 if [ "$PROJECT_TYPE" = "backend" ]; then
-  CURSORRULES_SRC="$TEMPLATE_DIR/templates/cursorrules/backend-service.cursorrules"
+  CURSORRULES_SRC="$TEMPLATE_DIR/templates/claude-config/backend-serviceCLAUDE.md"
 fi
 
 AGENTS_MAP=""
@@ -77,8 +77,8 @@ case "$PROJECT_TYPE" in
   full-stack)  AGENTS_MAP="AGENTS-full-stack.md" ;;
 esac
 
-echo "Copying .cursorrules..."
-cp "$CURSORRULES_SRC" "$TARGET/.cursorrules"
+echo "Copying CLAUDE.md..."
+cp "$CURSORRULES_SRC" "$TARGET/CLAUDE.md"
 
 echo "Copying AGENTS.md..."
 cp "$TEMPLATE_DIR/templates/agents/$AGENTS_MAP" "$TARGET/AGENTS.md"
@@ -93,40 +93,40 @@ mkdir -p "$TARGET/docs/workflow"
 cp "$TEMPLATE_DIR/templates/workflow/"*.md "$TARGET/docs/workflow/"
 
 echo "Copying subagents..."
-mkdir -p "$TARGET/.cursor/agents"
-cp "$TEMPLATE_DIR/templates/subagents/generic/"*.md "$TARGET/.cursor/agents/"
+mkdir -p "$TARGET/.claude/agents"
+cp "$TEMPLATE_DIR/templates/subagents/generic/"*.md "$TARGET/.claude/agents/"
 
 SPECIALISTS_DIR="$TEMPLATE_DIR/templates/subagents/specialists"
 case "$PROJECT_TYPE" in
   mobile-app)
-    [ -f "$SPECIALISTS_DIR/flutter-specialist.md" ] && cp "$SPECIALISTS_DIR/flutter-specialist.md" "$TARGET/.cursor/agents/"
+    [ -f "$SPECIALISTS_DIR/flutter-specialist.md" ] && cp "$SPECIALISTS_DIR/flutter-specialist.md" "$TARGET/.claude/agents/"
     ;;
   web-app)
-    [ -f "$SPECIALISTS_DIR/react-specialist.md" ] && cp "$SPECIALISTS_DIR/react-specialist.md" "$TARGET/.cursor/agents/"
+    [ -f "$SPECIALISTS_DIR/react-specialist.md" ] && cp "$SPECIALISTS_DIR/react-specialist.md" "$TARGET/.claude/agents/"
     ;;
   backend)
-    [ -f "$SPECIALISTS_DIR/node-specialist.md" ] && cp "$SPECIALISTS_DIR/node-specialist.md" "$TARGET/.cursor/agents/"
+    [ -f "$SPECIALISTS_DIR/node-specialist.md" ] && cp "$SPECIALISTS_DIR/node-specialist.md" "$TARGET/.claude/agents/"
     ;;
   full-stack)
-    [ -f "$SPECIALISTS_DIR/react-specialist.md" ] && cp "$SPECIALISTS_DIR/react-specialist.md" "$TARGET/.cursor/agents/"
-    [ -f "$SPECIALISTS_DIR/node-specialist.md" ] && cp "$SPECIALISTS_DIR/node-specialist.md" "$TARGET/.cursor/agents/"
+    [ -f "$SPECIALISTS_DIR/react-specialist.md" ] && cp "$SPECIALISTS_DIR/react-specialist.md" "$TARGET/.claude/agents/"
+    [ -f "$SPECIALISTS_DIR/node-specialist.md" ] && cp "$SPECIALISTS_DIR/node-specialist.md" "$TARGET/.claude/agents/"
     ;;
 esac
 
 echo ""
 echo "Setup complete. Files copied to $(cd "$TARGET" && pwd):"
 echo ""
-echo "  .cursorrules           — Workspace rules"
+echo "  CLAUDE.md           — Workspace rules"
 echo "  AGENTS.md              — Agent role definitions"
 echo "  tasks.yml              — Portfolio-level task schema"
 echo "  tasks/                 — Feature task directory"
 echo "  docs/workflow/         — Workflow documentation"
-echo "  .cursor/agents/        — Subagent configurations"
+echo "  .claude/agents/        — Subagent configurations"
 echo ""
 echo "Next steps:"
-echo "  1. Replace all {{VARIABLE}} placeholders in .cursorrules and AGENTS.md"
+echo "  1. Replace all {{VARIABLE}} placeholders in CLAUDE.md and AGENTS.md"
 echo "  2. Customize task schema and subagent prompts for your project"
 echo "  3. Validate: $TEMPLATE_DIR/scripts/validate-no-placeholders.sh $(cd "$TARGET" && pwd)"
-echo "  4. (Optional) Copy .cursor/rules/ templates:"
-echo "     mkdir -p .cursor/rules && cp $TEMPLATE_DIR/templates/cursorrules/rules/*.mdc .cursor/rules/"
-echo "  5. Commit .cursorrules, AGENTS.md, .cursor/agents/, and tasks.yml"
+echo "  4. (Optional) Copy .claude/rules/ templates:"
+echo "     mkdir -p .claude/rules && cp $TEMPLATE_DIR/templates/claude-config/rules/*.md .claude/rules/"
+echo "  5. Commit CLAUDE.md, AGENTS.md, .claude/agents/, and tasks.yml"

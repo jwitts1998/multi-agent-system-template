@@ -13,7 +13,7 @@ cd my-new-project
 ./setup.sh
 ```
 
-The setup script will ask for your project name, type, tech stack, and architecture — then configure `.cursorrules`, `AGENTS.md`, subagents, and task files automatically.
+The setup script will ask for your project name, type, tech stack, and architecture — then configure `CLAUDE.md`, `AGENTS.md`, subagents, and task files automatically.
 
 After setup, validate that all template variables are resolved:
 
@@ -71,10 +71,11 @@ cd my-project
 ### Full Workflow
 
 1. **Clone** this repo
-2. **Run `./setup.sh`** — configures .cursorrules, AGENTS.md, subagents, and task files for your project
-3. **Invoke `@idea-to-pdb`** in Cursor — explore your idea and generate a Product Design Blueprint
-4. **Invoke `@pdb-to-tasks`** in Cursor — decompose the PDB into epics and task files
-5. **Start developing** — agents follow your project conventions via .cursorrules
+2. **Run `./setup.sh`** — configures CLAUDE.md, AGENTS.md, subagents, and task files for your project
+3. **Optional**: Install Antigravity Awesome Skills (946+ skills) with `./scripts/install-antigravity-skills.sh`
+4. **Invoke `idea-to-pdb subagent`** in Claude Code — explore your idea and generate a Product Design Blueprint
+5. **Invoke `pdb-to-tasks subagent`** in Claude Code — decompose the PDB into epics and task files
+6. **Start developing** — agents follow your project conventions via CLAUDE.md
 
 ### Other Paths
 
@@ -107,7 +108,7 @@ Then replace `{{VARIABLES}}` and validate with `$TEMPLATE_DIR/scripts/validate-n
 
 | Component | Description | Location |
 |-----------|-------------|----------|
-| **.cursorrules** | Workspace-level AI agent rules | `templates/cursorrules/` |
+| **CLAUDE.md** | Workspace-level AI agent rules | `templates/claude-config/` |
 | **AGENTS.md** | Agent role definitions and workflows | `templates/agents/` |
 | **Task Schema** | Task tracking with agent integration | `templates/tasks/` |
 | **Workflow Docs** | Agent collaboration patterns | `templates/workflow/` |
@@ -130,7 +131,7 @@ graph TB
     Dev[Developer] --> Quest[Project Questionnaire]
     Quest --> Select[Template Selection]
     
-    Select --> CR[.cursorrules]
+    Select --> CR[CLAUDE.md]
     Select --> AG[AGENTS.md]
     Select --> TS[Task Schema]
     Select --> WF[Workflow Docs]
@@ -197,7 +198,7 @@ graph TB
 ### Reference
 - [docs/TROUBLESHOOTING.md](./docs/TROUBLESHOOTING.md) - Common issues and solutions
 - [docs/FAQ.md](./docs/FAQ.md) - Frequently asked questions
-- [docs/CURSOR_PLUGINS.md](./docs/CURSOR_PLUGINS.md) - Cursor plugin capabilities and integrations
+- [docs/CLAUDE_CODE_CAPABILITIES.md](./docs/CLAUDE_CODE_CAPABILITIES.md) - Claude Code skill capabilities and integrations
 
 ### Examples (Net-New Ideas — Clone and Setup)
 - [examples/mobile-app-example/](./examples/mobile-app-example/) - Flutter fitness app from idea to tasks
@@ -261,7 +262,7 @@ See [SETUP_GUIDE.md - Variable Reference](./SETUP_GUIDE.md#variable-reference) f
 ```
 multi-agent-system-template/
 ├── README.md                          # This file
-├── .cursorrules                       # AI agent rules (generic starter, replaced by setup.sh)
+├── CLAUDE.md                       # AI agent rules (generic starter, replaced by setup.sh)
 ├── AGENTS.md                          # Agent role definitions (generic starter, replaced by setup.sh)
 ├── setup.sh                           # Interactive project setup script
 ├── validate.sh                        # Template variable validation script
@@ -269,12 +270,12 @@ multi-agent-system-template/
 ├── PROJECT_QUESTIONNAIRE.md           # Project identification
 │
 ├── templates/
-│   ├── cursorrules/
-│   │   ├── base-template.cursorrules          # Generic base
-│   │   ├── mobile-app.cursorrules             # Mobile-specific
-│   │   ├── web-app.cursorrules                # Web-specific
-│   │   ├── backend-service.cursorrules        # Backend-specific
-│   │   └── full-stack.cursorrules             # Full-stack-specific
+│   ├── claude-config/
+│   │   ├── base-template.md              # Generic base
+│   │   ├── mobile-app.md                 # Mobile-specific
+│   │   ├── web-app.md                    # Web-specific
+│   │   ├── backend-service.md            # Backend-specific
+│   │   └── full-stack.md                 # Full-stack-specific
 │   │
 │   ├── agents/
 │   │   ├── AGENTS-base.md                     # Generic agent roles
@@ -358,7 +359,7 @@ multi-agent-system-template/
 ### Mobile App (Flutter)
 ```bash
 # 1. Copy mobile templates
-cp templates/cursorrules/mobile-app.cursorrules .cursorrules
+cp templates/claude-config/mobile-app.md CLAUDE.md
 cp templates/agents/AGENTS-mobile.md AGENTS.md
 
 # 2. Customize for your project
@@ -367,9 +368,9 @@ cp templates/agents/AGENTS-mobile.md AGENTS.md
 # Replace {{STATE_MANAGEMENT}} with "Riverpod"
 
 # 3. Set up subagents
-mkdir -p .cursor/agents
-cp templates/subagents/generic/*.md .cursor/agents/
-cp templates/subagents/specialists/flutter-specialist.md .cursor/agents/
+mkdir -p .claude/agents
+cp templates/subagents/generic/*.md .claude/agents/
+cp templates/subagents/specialists/flutter-specialist.md .claude/agents/
 ```
 
 ### Web App (React)
@@ -378,7 +379,7 @@ cp templates/subagents/specialists/flutter-specialist.md .cursor/agents/
 TEMPLATE_DIR=/path/to/multi-agent-system-template
 
 # 1. Copy web templates
-cp $TEMPLATE_DIR/templates/cursorrules/web-app.cursorrules .cursorrules
+cp $TEMPLATE_DIR/templates/claude-config/web-app.md CLAUDE.md
 cp $TEMPLATE_DIR/templates/agents/AGENTS-web.md AGENTS.md
 
 # 2. Customize for your project
@@ -387,9 +388,9 @@ cp $TEMPLATE_DIR/templates/agents/AGENTS-web.md AGENTS.md
 # Replace {{STATE_MANAGEMENT}} with "Redux Toolkit"
 
 # 3. Set up subagents
-mkdir -p .cursor/agents
-cp $TEMPLATE_DIR/templates/subagents/generic/*.md .cursor/agents/
-cp $TEMPLATE_DIR/templates/subagents/specialists/react-specialist.md .cursor/agents/
+mkdir -p .claude/agents
+cp $TEMPLATE_DIR/templates/subagents/generic/*.md .claude/agents/
+cp $TEMPLATE_DIR/templates/subagents/specialists/react-specialist.md .claude/agents/
 ```
 
 ### Backend Service (Node.js)
@@ -398,7 +399,7 @@ cp $TEMPLATE_DIR/templates/subagents/specialists/react-specialist.md .cursor/age
 TEMPLATE_DIR=/path/to/multi-agent-system-template
 
 # 1. Copy backend templates
-cp $TEMPLATE_DIR/templates/cursorrules/backend-service.cursorrules .cursorrules
+cp $TEMPLATE_DIR/templates/claude-config/backend-service.md CLAUDE.md
 cp $TEMPLATE_DIR/templates/agents/AGENTS-backend.md AGENTS.md
 
 # 2. Customize for your project
@@ -407,9 +408,9 @@ cp $TEMPLATE_DIR/templates/agents/AGENTS-backend.md AGENTS.md
 # Replace {{DATABASE_TYPE}} with "PostgreSQL"
 
 # 3. Set up subagents
-mkdir -p .cursor/agents
-cp $TEMPLATE_DIR/templates/subagents/generic/*.md .cursor/agents/
-cp $TEMPLATE_DIR/templates/subagents/specialists/node-specialist.md .cursor/agents/
+mkdir -p .claude/agents
+cp $TEMPLATE_DIR/templates/subagents/generic/*.md .claude/agents/
+cp $TEMPLATE_DIR/templates/subagents/specialists/node-specialist.md .claude/agents/
 ```
 
 ## 🎓 Best Practices
@@ -436,7 +437,7 @@ cp $TEMPLATE_DIR/templates/subagents/specialists/node-specialist.md .cursor/agen
 |-------|----------|
 | Agents not activating | Check YAML frontmatter in subagent configs |
 | Generic advice | Ensure templates are fully customized for your project |
-| Task files ignored | Verify `.cursorrules` includes task workflow section |
+| Task files ignored | Verify `CLAUDE.md` includes task workflow section |
 | Variables remaining | Search for `{{` and replace all placeholders |
 | Conflicting advice | Use sequential workflow, prioritize specialist agents |
 

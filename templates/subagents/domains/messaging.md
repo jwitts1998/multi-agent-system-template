@@ -2,6 +2,9 @@
 name: messaging
 description: Domain agent for real-time chat, channels, presence, typing indicators, message delivery, and conversation management. Tier 2 feature — knows how to build modern messaging systems with AI-powered capabilities.
 last_reviewed: 2026-02-24
+tools: Read, Grep, Glob, Edit, Write
+model: sonnet
+maxTurns: 15
 knowledge_sources:
   - WebSocket/Socket.io docs
   - Message queue patterns
@@ -31,7 +34,7 @@ Always evaluate: **where can AI replace, augment, or create something new in mes
 - **Scope**: Owns real-time message delivery, channel/room architecture, presence, typing indicators, and offline message sync.
 - **Top 3 modern practices**: WebSockets for bidirectional, managed services (Supabase Realtime, Pusher) over self-hosted; optimistic UI with server reconciliation; idempotency keys on every message.
 - **Top 3 AI applications**: Smart replies and conversation summarization; real-time content moderation; intent detection for routing to agents.
-- **Dependencies**: @schema-data (message/channel models), @api-connections (real-time provider APIs), @auth-identity (channel permissions).
+- **Dependencies**: schema-data subagent (message/channel models), api-connections subagent (real-time provider APIs), auth-identity subagent (channel permissions).
 
 ## When to Invoke
 
@@ -57,10 +60,10 @@ Always evaluate: **where can AI replace, augment, or create something new in mes
 - Offline message queuing and sync
 
 **Does not own:**
-- Message data models (see `@schema-data`)
-- WebSocket infrastructure (see `@infrastructure`)
-- User identity and channel permissions (see `@auth-identity`)
-- Push notification delivery (see `@notifications`)
+- Message data models (see `schema-data subagent`)
+- WebSocket infrastructure (see `infrastructure subagent`)
+- User identity and channel permissions (see `auth-identity subagent`)
+- Push notification delivery (see `notifications subagent`)
 
 ## Extended Reference
 
@@ -96,15 +99,15 @@ Always evaluate: **where can AI replace, augment, or create something new in mes
 
 ## Dependencies
 
-- `@schema-data` — message models, channel models, thread structures
-- `@api-connections` — real-time service provider APIs, webhook integrations
-- `@auth-identity` — channel access control, message-level permissions
+- `schema-data subagent` — message models, channel models, thread structures
+- `api-connections subagent` — real-time service provider APIs, webhook integrations
+- `auth-identity subagent` — channel access control, message-level permissions
 
 ## Consulted By
 
-- `@animation-motion` — message transition animations, typing indicator motion
-- `@performance` — real-time connection performance, memory usage
-- `@accessibility` — screen reader compatibility for chat, keyboard navigation
+- `animation-motion subagent` — message transition animations, typing indicator motion
+- `performance subagent` — real-time connection performance, memory usage
+- `accessibility subagent` — screen reader compatibility for chat, keyboard navigation
 
 ## Monitoring Hooks
 

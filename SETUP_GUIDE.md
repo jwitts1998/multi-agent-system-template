@@ -75,8 +75,10 @@ graph TB
 Before setting up the multi-agent system, ensure you have:
 
 - **Active Project**: An existing or new software project
-- **Cursor IDE**: The multi-agent system is designed for Cursor
-- **Cursor Plugins** (optional but recommended): Marketplace plugins add agent skills and MCP tools (web search, browser automation, visual testing, design-to-code, docs lookup, and more). See [docs/CURSOR_PLUGINS.md](./docs/CURSOR_PLUGINS.md) for the full list of available capabilities.
+- **Claude Code CLI**: The multi-agent system is designed for Claude Code
+- **Cursor Plugins** (optional but recommended): Marketplace plugins add agent skills and MCP tools (web search, browser automation, visual testing, design-to-code, docs lookup, and more). See [docs/CLAUDE_CODE_CAPABILITIES.md](./docs/CLAUDE_CODE_CAPABILITIES.md) for the full list of available capabilities.
+- **Antigravity Awesome Skills** (optional): 946+ agentic skills for brainstorming, TDD, security, architecture, and more. Install with `./scripts/install-antigravity-skills.sh` during or after setup.
+- **Idea Reality Check MCP** (optional): The template includes `idea-reality-mcp` in `.claude/mcp.json`. Requires [uv](https://docs.astral.sh/uv/getting-started/installation/) (provides `uvx`). Install: `curl -LsSf https://astral.sh/uv/install.sh | sh` (macOS/Linux), `brew install uv` (macOS), or `scoop install main/uv` (Windows). See [CURSOR_PLUGINS.md](./docs/CLAUDE_CODE_CAPABILITIES.md#idea-reality-check-mcp-optional) for full install options.
 - **Project Documentation**: Basic understanding of your project's architecture and goals (or willingness to generate it)
 - **Version Control**: Git repository for tracking changes
 
@@ -89,7 +91,7 @@ Before setting up the multi-agent system, ensure you have:
 
 **Setup Flow**:
 1. Complete PROJECT_QUESTIONNAIRE.md
-2. Create Product Design Blueprint (PDB) — see [Idea to PDB Guide](./docs/IDEA_TO_PDB.md) for the full workflow, or use the `@idea-to-pdb` agent ([templates/subagents/ideation/](./templates/subagents/ideation/)) to generate one inside Cursor
+2. Create Product Design Blueprint (PDB) — see [Idea to PDB Guide](./docs/IDEA_TO_PDB.md) for the full workflow, or use the `idea-to-pdb subagent` agent ([templates/subagents/ideation/](./templates/subagents/ideation/)) to generate one inside Cursor
 3. Set up multi-agent system with standard templates
 4. Reference PDB in task files (`spec_refs`)
 5. Use agents to implement from PDB
@@ -224,12 +226,12 @@ Fill out the [Project Questionnaire](./PROJECT_QUESTIONNAIRE.md) to determine:
 
 Based on your project type, choose appropriate templates:
 
-| Project Type | .cursorrules | AGENTS.md | Subagents |
+| Project Type | CLAUDE.md | AGENTS.md | Subagents |
 |--------------|--------------|-----------|-----------|
-| Mobile App | `mobile-app.cursorrules` | `AGENTS-mobile.md` | flutter/react-native-specialist |
-| Web App | `web-app.cursorrules` | `AGENTS-web.md` | react/vue-specialist |
-| Backend | `backend-service.cursorrules` | `AGENTS-backend.md` | node/django-specialist |
-| Full-Stack | `full-stack.cursorrules` | `AGENTS-full-stack.md` | Multiple specialists |
+| Mobile App | `mobile-appCLAUDE.md` | `AGENTS-mobile.md` | flutter/react-native-specialist |
+| Web App | `web-appCLAUDE.md` | `AGENTS-web.md` | react/vue-specialist |
+| Backend | `backend-serviceCLAUDE.md` | `AGENTS-backend.md` | node/django-specialist |
+| Full-Stack | `full-stack.md` | `AGENTS-full-stack.md` | Multiple specialists |
 
 ### Step 3: Customize Templates
 
@@ -246,7 +248,7 @@ Based on your project type, choose appropriate templates:
 
 ### Step 5: Configure Subagents
 
-1. Copy generic subagent configs to `.cursor/agents/`
+1. Copy generic subagent configs to `.claude/agents/`
 2. Customize the project-specific specialist (e.g., `flutter-specialist.md`)
 3. Update subagent descriptions to match your project context
 
@@ -308,18 +310,18 @@ $TEMPLATE_DIR/scripts/init-to-project.sh /path/to/your/project
 
 If you prefer manual control, follow the steps below.
 
-#### 2.1 Set Up .cursorrules
+#### 2.1 Set Up CLAUDE.md
 
-The `.cursorrules` file defines workspace-level AI agent behavior.
+The `CLAUDE.md` file defines workspace-level AI agent behavior.
 
 1. **Choose your template**:
    ```bash
    # Copy the appropriate template to your project root
-   cp templates/cursorrules/mobile-app.cursorrules /path/to/your/project/.cursorrules
+   cp templates/claude-config/mobile-appCLAUDE.md /path/to/your/project/CLAUDE.md
    ```
 
 2. **Customize variables**:
-   - Open `.cursorrules` in your editor
+   - Open `CLAUDE.md` in your editor
    - Search for `{{VARIABLE_NAME}}` patterns
    - Replace with your project-specific values
    - See [Variable Reference](#variable-reference) for full list
@@ -343,24 +345,24 @@ TaskMaster is a collaborative task management app for remote teams.
 **Key Philosophy**: Feature-first architecture with shared infrastructure
 ```
 
-#### 2.1b (Optional) Set Up .cursor/rules/
+#### 2.1b (Optional) Set Up .claude/rules/
 
-As an alternative (or supplement) to a single `.cursorrules` file, you can use Cursor's `.cursor/rules/` directory with multiple `.mdc` files. Each `.mdc` file has YAML frontmatter that controls when it applies.
+As an alternative (or supplement) to a single `CLAUDE.md` file, you can use Claude Code's `.claude/rules/` directory with multiple `.md` files. Each `.md` file has YAML frontmatter that controls when it applies.
 
-**When to use `.cursor/rules/`**:
+**When to use `.claude/rules/`**:
 - You want file-scoped rules (e.g., TypeScript conventions only when `.ts` files are open)
 - You prefer splitting concerns into separate, focused rule files
-- You want rules discoverable in Cursor's rule picker
+- You want rules discoverable in Claude Code's rule picker
 
-**Both formats are supported** — you can use `.cursorrules` alone, `.cursor/rules/` alone, or both together.
+**Both formats are supported** — you can use `CLAUDE.md` alone, `.claude/rules/` alone, or both together.
 
 1. **Copy the rule templates**:
    ```bash
-   mkdir -p /path/to/your/project/.cursor/rules
-   cp $TEMPLATE_DIR/templates/cursorrules/rules/*.mdc /path/to/your/project/.cursor/rules/
+   mkdir -p /path/to/your/project/.claude/rules
+   cp $TEMPLATE_DIR/templates/claude-config/rules/*.md /path/to/your/project/.claude/rules/
    ```
 
-2. **Customize variables**: Replace `{{VARIABLE_NAME}}` placeholders just as you would in `.cursorrules`.
+2. **Customize variables**: Replace `{{VARIABLE_NAME}}` placeholders just as you would in `CLAUDE.md`.
 
 3. **Adjust scope** (optional): Edit the `globs` or `alwaysApply` fields in each file's frontmatter to control when rules activate.
 
@@ -368,11 +370,11 @@ As an alternative (or supplement) to a single `.cursorrules` file, you can use C
 
 | File | Scope | Content |
 |------|-------|---------|
-| `code-style-and-security.mdc` | Always apply | Naming, file org, code quality, security |
-| `testing-and-docs.mdc` | Always apply | Test strategy, coverage, documentation |
-| `workflow-and-tasks.mdc` | Always apply | Task-driven dev, multi-agent workflow |
+| `code-style-and-security.md` | Always apply | Naming, file org, code quality, security |
+| `testing-and-docs.md` | Always apply | Test strategy, coverage, documentation |
+| `workflow-and-tasks.md` | Always apply | Task-driven dev, multi-agent workflow |
 
-See [Cursor Rules: .cursorrules vs .cursor/rules/](#cursor-rules-cursorrules-vs-cursorrules) in Component Reference for details on the two formats.
+See [Cursor Rules: CLAUDE.md vs .claude/rules/](#cursor-rules-cursorrules-vs-cursorrules) in Component Reference for details on the two formats.
 
 #### 2.2 Set Up AGENTS.md
 
@@ -444,17 +446,17 @@ Subagents are specialized AI assistants that handle specific tasks.
 
 1. **Copy generic subagents**:
    ```bash
-   mkdir -p /path/to/your/project/.cursor/agents
-   cp templates/subagents/generic/*.md /path/to/your/project/.cursor/agents/
+   mkdir -p /path/to/your/project/.claude/agents
+   cp templates/subagents/generic/*.md /path/to/your/project/.claude/agents/
    ```
 
 2. **Set up project specialist**:
    ```bash
    # For Flutter projects
-   cp templates/subagents/specialists/flutter-specialist.md /path/to/your/project/.cursor/agents/
+   cp templates/subagents/specialists/flutter-specialist.md /path/to/your/project/.claude/agents/
    
    # For React projects
-   cp templates/subagents/specialists/react-specialist.md /path/to/your/project/.cursor/agents/
+   cp templates/subagents/specialists/react-specialist.md /path/to/your/project/.claude/agents/
    
    # etc.
    ```
@@ -472,12 +474,12 @@ Subagents are specialized AI assistants that handle specific tasks.
 1. **Check file locations**:
    ```
    your-project/
-   ├── .cursorrules              ✓ Workspace rules
+   ├── CLAUDE.md              ✓ Workspace rules
    ├── AGENTS.md                 ✓ Agent definitions
    ├── tasks.yml                 ✓ Portfolio tasks
    ├── tasks/                    ✓ Feature tasks
    ├── docs/workflow/            ✓ Workflow docs
-   └── .cursor/agents/           ✓ Subagent configs
+   └── .claude/agents/           ✓ Subagent configs
    ```
 
 2. **Validate variable substitution**:
@@ -524,13 +526,39 @@ Subagents are specialized AI assistants that handle specific tasks.
    - Enhance workflow documentation
 
 3. **Share with team**:
-   - Commit `.cursorrules`, `AGENTS.md`, and subagent configs
+   - Commit `CLAUDE.md`, `AGENTS.md`, and subagent configs
    - Document any team-specific customizations
    - Train team on agent usage
 
+#### 3.4 Optional: Antigravity Awesome Skills
+
+[Antigravity Awesome Skills](https://github.com/sickn33/antigravity-awesome-skills) adds 946+ agentic skills (brainstorming, TDD, security audit, architecture, React patterns, etc.) alongside this template's project skills. Skills are merged into `.claude/skills/` — your `calibrate-domains`, `domain-routing`, and other project skills are preserved.
+
+**Install (project-level)**:
+```bash
+./scripts/install-antigravity-skills.sh
+```
+
+**Install (user-level, all projects)**:
+```bash
+./scripts/install-antigravity-skills.sh --global
+```
+
+**Install to a target project** (when using `init-to-project.sh`):
+```bash
+$TEMPLATE_DIR/scripts/install-antigravity-skills.sh --project /path/to/your/project
+```
+
+**Direct npx** (if the script is unavailable):
+```bash
+npx antigravity-awesome-skills --path .claude/skills
+```
+
+After installation, use `/skill-name` in Claude Code chat (e.g. `@brainstorming`, `@test-driven-development`, `@security-audit`). Browse bundles in [docs/BUNDLES.md](https://github.com/sickn33/antigravity-awesome-skills/blob/main/docs/BUNDLES.md).
+
 ## 📚 Component Reference
 
-### .cursorrules
+### CLAUDE.md
 
 **Purpose**: Define workspace-level AI agent behavior and project context
 
@@ -548,21 +576,21 @@ Subagents are specialized AI assistants that handle specific tasks.
 
 **Customization**: Replace variables, add project-specific sections, adjust for team workflow
 
-### Cursor Rules: .cursorrules vs .cursor/rules/
+### Cursor Rules: CLAUDE.md vs .claude/rules/
 
 Cursor supports two formats for workspace rules. This template ships templates for both.
 
-| Aspect | `.cursorrules` | `.cursor/rules/*.mdc` |
+| Aspect | `CLAUDE.md` | `.claude/rules/*.md` |
 |--------|---------------|----------------------|
-| **Location** | Single file at project root | Multiple files in `.cursor/rules/` |
+| **Location** | Single file at project root | Multiple files in `.claude/rules/` |
 | **Scope** | All content applies globally | Per-file via `globs`, or global via `alwaysApply` |
 | **Format** | Plain markdown | Markdown with YAML frontmatter (`description`, `globs`, `alwaysApply`) |
-| **Rule picker** | Shown as one rule | Each `.mdc` shown separately in Cursor's rule picker |
+| **Rule picker** | Shown as one rule | Each `.md` shown separately in Claude Code's rule picker |
 | **Best for** | Simple projects, quick setup | File-specific rules, large projects, team collaboration |
 
-**Recommendation**: Start with `.cursorrules` for simplicity. Adopt `.cursor/rules/` when you want file-scoped rules or prefer splitting concerns across multiple files. You can use both simultaneously — Cursor merges them.
+**Recommendation**: Start with `CLAUDE.md` for simplicity. Adopt `.claude/rules/` when you want file-scoped rules or prefer splitting concerns across multiple files. You can use both simultaneously — Cursor merges them.
 
-**Adding more rules**: You can create additional `.mdc` files at any time via Cursor's rule picker (Cursor Settings > Rules) or by adding files directly to `.cursor/rules/`. The templates provided here are a starting point, not a ceiling.
+**Adding more rules**: You can create additional `.md` files at any time via Claude Code's rule picker (Cursor Settings > Rules) or by adding files directly to `.claude/rules/`. The templates provided here are a starting point, not a ceiling.
 
 ### AGENTS.md
 
@@ -693,7 +721,7 @@ Conditions:
 TEMPLATE_DIR=/path/to/multi-agent-system-template
 
 # 1. Copy templates
-cp $TEMPLATE_DIR/templates/cursorrules/mobile-app.cursorrules .cursorrules
+cp $TEMPLATE_DIR/templates/claude-config/mobile-appCLAUDE.md CLAUDE.md
 cp $TEMPLATE_DIR/templates/agents/AGENTS-mobile.md AGENTS.md
 
 # 2. Set up tasks
@@ -701,9 +729,9 @@ cp $TEMPLATE_DIR/templates/tasks/tasks-schema.yml tasks.yml
 mkdir tasks
 
 # 3. Configure subagents
-mkdir -p .cursor/agents
-cp $TEMPLATE_DIR/templates/subagents/generic/*.md .cursor/agents/
-cp $TEMPLATE_DIR/templates/subagents/specialists/flutter-specialist.md .cursor/agents/
+mkdir -p .claude/agents
+cp $TEMPLATE_DIR/templates/subagents/generic/*.md .claude/agents/
+cp $TEMPLATE_DIR/templates/subagents/specialists/flutter-specialist.md .claude/agents/
 ```
 
 **Customization**:
@@ -728,7 +756,7 @@ cp $TEMPLATE_DIR/templates/subagents/specialists/flutter-specialist.md .cursor/a
 TEMPLATE_DIR=/path/to/multi-agent-system-template
 
 # 1. Copy templates
-cp $TEMPLATE_DIR/templates/cursorrules/web-app.cursorrules .cursorrules
+cp $TEMPLATE_DIR/templates/claude-config/web-appCLAUDE.md CLAUDE.md
 cp $TEMPLATE_DIR/templates/agents/AGENTS-web.md AGENTS.md
 
 # 2. Set up tasks and workflow
@@ -738,9 +766,9 @@ mkdir -p docs/workflow
 cp $TEMPLATE_DIR/templates/workflow/*.md docs/workflow/
 
 # 3. Configure subagents
-mkdir -p .cursor/agents
-cp $TEMPLATE_DIR/templates/subagents/generic/*.md .cursor/agents/
-cp $TEMPLATE_DIR/templates/subagents/specialists/react-specialist.md .cursor/agents/
+mkdir -p .claude/agents
+cp $TEMPLATE_DIR/templates/subagents/generic/*.md .claude/agents/
+cp $TEMPLATE_DIR/templates/subagents/specialists/react-specialist.md .claude/agents/
 ```
 
 **Customization**:
@@ -766,7 +794,7 @@ cp $TEMPLATE_DIR/templates/subagents/specialists/react-specialist.md .cursor/age
 TEMPLATE_DIR=/path/to/multi-agent-system-template
 
 # 1. Copy templates
-cp $TEMPLATE_DIR/templates/cursorrules/backend-service.cursorrules .cursorrules
+cp $TEMPLATE_DIR/templates/claude-config/backend-serviceCLAUDE.md CLAUDE.md
 cp $TEMPLATE_DIR/templates/agents/AGENTS-backend.md AGENTS.md
 
 # 2. Set up complete system
@@ -776,9 +804,9 @@ mkdir -p docs/workflow
 cp $TEMPLATE_DIR/templates/workflow/*.md docs/workflow/
 
 # 3. Configure subagents
-mkdir -p .cursor/agents
-cp $TEMPLATE_DIR/templates/subagents/generic/*.md .cursor/agents/
-cp $TEMPLATE_DIR/templates/subagents/specialists/node-specialist.md .cursor/agents/
+mkdir -p .claude/agents
+cp $TEMPLATE_DIR/templates/subagents/generic/*.md .claude/agents/
+cp $TEMPLATE_DIR/templates/subagents/specialists/node-specialist.md .claude/agents/
 ```
 
 **Customization**:
@@ -803,7 +831,7 @@ cp $TEMPLATE_DIR/templates/subagents/specialists/node-specialist.md .cursor/agen
 **Symptoms**: Subagents don't auto-invoke when expected
 
 **Solutions**:
-1. Check YAML frontmatter in `.cursor/agents/*.md` files
+1. Check YAML frontmatter in `.claude/agents/*.md` files
 2. Verify `description` field mentions "Use proactively"
 3. Ensure description is specific about when to activate
 4. Try manual invocation first: "Use the [agent-name] subagent to..."
@@ -813,7 +841,7 @@ cp $TEMPLATE_DIR/templates/subagents/specialists/node-specialist.md .cursor/agen
 **Symptoms**: Agents don't use project-specific patterns
 
 **Solutions**:
-1. Verify `.cursorrules` is properly filled out (no `{{VARIABLES}}` remaining)
+1. Verify `CLAUDE.md` is properly filled out (no `{{VARIABLES}}` remaining)
 2. Check `AGENTS.md` includes project-specific knowledge areas
 3. Ensure project-specialist subagent (e.g., `flutter-specialist.md`) is customized
 4. For specialist tasks, explicitly invoke the specialist: "Use the flutter-specialist..."
@@ -823,7 +851,7 @@ cp $TEMPLATE_DIR/templates/subagents/specialists/node-specialist.md .cursor/agen
 **Symptoms**: Agents don't reference task context
 
 **Solutions**:
-1. Check `.cursorrules` includes task workflow section
+1. Check `CLAUDE.md` includes task workflow section
 2. Verify task files are in expected locations (`tasks/*.yml`)
 3. Ensure task schema is valid YAML
 4. Explicitly reference task: "Review task F1_T2 in tasks/01_feature.yml"
@@ -871,7 +899,7 @@ cp $TEMPLATE_DIR/templates/subagents/specialists/node-specialist.md .cursor/agen
 - Refine agent roles based on usage patterns
 
 **Monthly**:
-- Review `.cursorrules` for outdated patterns
+- Review `CLAUDE.md` for outdated patterns
 - Update workflow documentation with lessons learned
 - Add new subagents for emerging needs
 
@@ -884,7 +912,7 @@ cp $TEMPLATE_DIR/templates/subagents/specialists/node-specialist.md .cursor/agen
 
 When your project evolves:
 
-1. **Architecture Changes**: Update `.cursorrules` architecture section
+1. **Architecture Changes**: Update `CLAUDE.md` architecture section
 2. **New Features**: Add feature tasks to `tasks/` directory
 3. **Tech Stack Changes**: Update framework references in all files
 4. **New Patterns**: Document in workflow docs and update agent prompts
@@ -893,26 +921,26 @@ When your project evolves:
 ### Version Control
 
 **What to commit**:
-- ✅ `.cursorrules` - Workspace rules
+- ✅ `CLAUDE.md` - Workspace rules
 - ✅ `AGENTS.md` - Agent definitions
 - ✅ `tasks.yml` - Portfolio tasks
 - ✅ `tasks/*.yml` - Feature tasks
 - ✅ `docs/workflow/` - Workflow documentation
-- ✅ `.cursor/agents/` - Subagent configurations
+- ✅ `.claude/agents/` - Subagent configurations
 
 **What to exclude**:
-- ❌ `.cursor/` (parent directory) - May contain user-specific settings
+- ❌ `.claude/` (parent directory) - May contain user-specific settings
 - ❌ Personal task assignments (use `.gitignore` for private task files if needed)
 
 **.gitignore recommendations**:
 ```gitignore
 # Commit these (remove from .gitignore if present)
-!.cursorrules
+!CLAUDE.md
 !AGENTS.md
-!.cursor/agents/
+!.claude/agents/
 
 # Exclude personal settings
-.cursor/settings/
+.claude/settings/
 ```
 
 ## 🔄 Ingestion & Modernization Setup (Paths D, E, F)
@@ -952,15 +980,15 @@ You'll need three specialized agents that aren't included in the standard templa
 
 ```bash
 # 1. Set up ingestion agents
-mkdir -p .cursor/agents/ingestion
-cp $TEMPLATE_DIR/templates/subagents/ingestion/*.md .cursor/agents/ingestion/
+mkdir -p .claude/agents/ingestion
+cp $TEMPLATE_DIR/templates/subagents/ingestion/*.md .claude/agents/ingestion/
 
 # 2. Run Documentation Backfill
 # In Cursor, invoke: @documentation-backfill
 # Prompt: "Analyze existing documentation and codebase to generate comprehensive Product Design Blueprint"
 
 # 3. Review generated PDB
-# Location: docs/product_design/generated_pdb.md
+# Location: docs/product_design/{{PROJECT_NAME}}_pdb.md
 # Validate accuracy, add missing context, correct errors
 
 # 4. Run Gap Analysis (optional but recommended)
@@ -968,7 +996,7 @@ cp $TEMPLATE_DIR/templates/subagents/ingestion/*.md .cursor/agents/ingestion/
 # Prompt: "Analyze codebase against generated PDB to identify documentation gaps"
 
 # 5. Set up standard multi-agent system
-cp $TEMPLATE_DIR/templates/cursorrules/{PROJECT_TYPE}.cursorrules .cursorrules
+cp $TEMPLATE_DIR/templates/claude-config/{PROJECT_TYPE}CLAUDE.md CLAUDE.md
 cp $TEMPLATE_DIR/templates/agents/AGENTS-{PROJECT_TYPE}.md AGENTS.md
 # ... follow standard setup from Quick Start
 ```
@@ -992,8 +1020,8 @@ cp $TEMPLATE_DIR/templates/agents/AGENTS-{PROJECT_TYPE}.md AGENTS.md
 
 ```bash
 # 1. Set up ingestion agents
-mkdir -p .cursor/agents/ingestion
-cp $TEMPLATE_DIR/templates/subagents/ingestion/*.md .cursor/agents/ingestion/
+mkdir -p .claude/agents/ingestion
+cp $TEMPLATE_DIR/templates/subagents/ingestion/*.md .claude/agents/ingestion/
 
 # 2. Run Codebase Auditor (comprehensive scan)
 # In Cursor, invoke: @codebase-auditor
@@ -1015,7 +1043,7 @@ cp $TEMPLATE_DIR/templates/subagents/ingestion/*.md .cursor/agents/ingestion/
 
 # Wait for completion (1-3hrs depending on complexity)
 # Output: 
-# - docs/product_design/generated_pdb.md
+# - docs/product_design/{{PROJECT_NAME}}_pdb.md
 # - docs/architecture/technical_architecture.md
 
 # 5. Manual Review & Validation (CRITICAL)
@@ -1025,13 +1053,13 @@ cp $TEMPLATE_DIR/templates/subagents/ingestion/*.md .cursor/agents/ingestion/
 # Fill in "why" for architectural decisions
 
 # 6. Set up standard multi-agent system
-cp $TEMPLATE_DIR/templates/cursorrules/{PROJECT_TYPE}.cursorrules .cursorrules
+cp $TEMPLATE_DIR/templates/claude-config/{PROJECT_TYPE}CLAUDE.md CLAUDE.md
 cp $TEMPLATE_DIR/templates/agents/AGENTS-{PROJECT_TYPE}.md AGENTS.md
 cp $TEMPLATE_DIR/templates/tasks/tasks-schema.yml tasks.yml
-mkdir -p tasks docs/workflow .cursor/agents
+mkdir -p tasks docs/workflow .claude/agents
 cp $TEMPLATE_DIR/templates/workflow/*.md docs/workflow/
-cp $TEMPLATE_DIR/templates/subagents/generic/*.md .cursor/agents/
-cp $TEMPLATE_DIR/templates/subagents/specialists/{SPECIALIST}.md .cursor/agents/
+cp $TEMPLATE_DIR/templates/subagents/generic/*.md .claude/agents/
+cp $TEMPLATE_DIR/templates/subagents/specialists/{SPECIALIST}.md .claude/agents/
 
 # 7. Create modernization roadmap from gap analysis
 # Use gap analysis report to create task files in tasks/
@@ -1074,8 +1102,8 @@ git add .
 git commit -m "Initial import from [Replit/Bolt/V0]"
 
 # 2. Set up ingestion agents
-mkdir -p .cursor/agents/ingestion
-cp $TEMPLATE_DIR/templates/subagents/ingestion/*.md .cursor/agents/ingestion/
+mkdir -p .claude/agents/ingestion
+cp $TEMPLATE_DIR/templates/subagents/ingestion/*.md .claude/agents/ingestion/
 
 # 3. Run Codebase Auditor with MVP focus
 # In Cursor, invoke: @codebase-auditor
@@ -1108,11 +1136,11 @@ cp $TEMPLATE_DIR/templates/subagents/ingestion/*.md .cursor/agents/ingestion/
 # - Phase 5: Code Quality & Refactoring (ongoing)
 
 # 7. Set up multi-agent system
-cp $TEMPLATE_DIR/templates/cursorrules/{PROJECT_TYPE}.cursorrules .cursorrules
+cp $TEMPLATE_DIR/templates/claude-config/{PROJECT_TYPE}CLAUDE.md CLAUDE.md
 cp $TEMPLATE_DIR/templates/agents/AGENTS-{PROJECT_TYPE}.md AGENTS.md
 # Include additional hardening agents:
-cp $TEMPLATE_DIR/templates/subagents/generic/security-auditor.md .cursor/agents/
-cp $TEMPLATE_DIR/templates/subagents/generic/performance-optimizer.md .cursor/agents/
+cp $TEMPLATE_DIR/templates/subagents/generic/security-auditor.md .claude/agents/
+cp $TEMPLATE_DIR/templates/subagents/generic/performance-optimizer.md .claude/agents/
 # ... standard agent setup
 
 # 8. Execute Modernization Roadmap
@@ -1139,11 +1167,11 @@ cp $TEMPLATE_DIR/templates/subagents/generic/performance-optimizer.md .cursor/ag
 
 ### Ingestion Agent Setup
 
-The ingestion agents are specialized subagents not included in the standard templates. Create them in `.cursor/agents/ingestion/`.
+The ingestion agents are specialized subagents not included in the standard templates. Create them in `.claude/agents/ingestion/`.
 
 #### 1. Codebase Auditor Agent
 
-Create `.cursor/agents/ingestion/codebase-auditor.md`:
+Create `.claude/agents/ingestion/codebase-auditor.md`:
 
 ```markdown
 ---
@@ -1262,7 +1290,7 @@ Generate `docs/architecture/codebase_knowledge_graph.md`:
 
 #### 2. Gap Analysis Agent
 
-Create `.cursor/agents/ingestion/gap-analysis.md`:
+Create `.claude/agents/ingestion/gap-analysis.md`:
 
 ```markdown
 ---
@@ -1422,7 +1450,7 @@ Generate `docs/architecture/gap_analysis_report.md`:
 
 #### 3. Documentation Backfill Agent
 
-Create `.cursor/agents/ingestion/documentation-backfill.md`:
+Create `.claude/agents/ingestion/documentation-backfill.md`:
 
 ```markdown
 ---
@@ -1525,7 +1553,7 @@ Infer from code patterns:
 
 Generate two documents:
 
-**1. docs/product_design/generated_pdb.md**:
+**1. docs/product_design/{{PROJECT_NAME}}_pdb.md**:
 \`\`\`markdown
 # Product Design Blueprint (Generated)
 

@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ReactFlow,
   Background,
@@ -11,7 +11,7 @@ import {
   applyNodeChanges,
   BackgroundVariant,
 } from '@xyflow/react';
-import { nodes as rawNodes, categoryMeta, type ExplorerNode, type ExplorerNodeData, type NodeCategory } from './data/nodes';
+import { nodes as rawNodes, categoryMeta, type ExplorerNodeData, type NodeCategory } from './data/nodes';
 import { edges as allEdges } from './data/edges';
 import { workflowNodes as rawWorkflowNodes } from './data/workflow-nodes';
 import { workflowEdges } from './data/workflow-edges';
@@ -24,7 +24,7 @@ import { domainEdges } from './data/domain-edges';
 import { getLayoutedElements } from './data/layout';
 import { parseTranscript, parseTxtTranscript, sessionToNodes, type SessionData, type MonitorNodeData, STATUS_COLORS } from './data/transcript-parser';
 import { DEMO_TRANSCRIPT } from './data/demo-transcript';
-import { calculateCost, type ModelId } from './data/model-pricing';
+import { type ModelId } from './data/model-pricing';
 import { AgentNode } from './components/AgentNode';
 import { MemoryNode } from './components/MemoryNode';
 import { ResearchNode } from './components/ResearchNode';
@@ -38,9 +38,20 @@ import { Legend } from './components/Legend';
 import { ArchitectureDocsPanel } from './components/ArchitectureDocsPanel';
 import { FileDropZone } from './components/FileDropZone';
 import { SessionDetailPanel } from './components/SessionDetailPanel';
+import { MonitorLegend } from './components/MonitorLegend';
+import { ViewToggle } from './components/ViewToggle';
 import { Timeline } from './components/Timeline';
+import { EmptyState } from './components/shared/EmptyState';
+import { useDebounce } from './hooks/useDebounce';
 
 export type ViewMode = 'system' | 'newIdea' | 'existingRepo' | 'contextToMvp' | 'domainArchitecture' | 'monitor';
+
+const VALID_VIEWS = new Set<ViewMode>(['system', 'newIdea', 'existingRepo', 'contextToMvp', 'domainArchitecture', 'monitor']);
+
+function getInitialView(): ViewMode {
+  const hash = window.location.hash.replace('#', '');
+  return VALID_VIEWS.has(hash as ViewMode) ? (hash as ViewMode) : 'system';
+}
 
 const nodeTypes: NodeTypes = {
   agentNode: AgentNode,
@@ -54,29 +65,16 @@ const nodeTypes: NodeTypes = {
 
 const { nodes: systemNodes } = getLayoutedElements(rawNodes, allEdges);
 const { nodes: newIdeaNodes } = getLayoutedElements(rawWorkflowNodes, workflowEdges, {
-  nodeWidth: 280,
-  nodeHeight: 280,
-  ranksep: 180,
-  nodesep: 50,
+  nodeWidth: 280, nodeHeight: 280, ranksep: 180, nodesep: 50,
 });
 const { nodes: existingRepoLayoutNodes } = getLayoutedElements(rawExistingRepoNodes, existingRepoEdges, {
-  nodeWidth: 280,
-  nodeHeight: 280,
-  ranksep: 180,
-  nodesep: 50,
+  nodeWidth: 280, nodeHeight: 280, ranksep: 180, nodesep: 50,
 });
 const { nodes: contextMvpLayoutNodes } = getLayoutedElements(rawContextNodes, contextWorkflowEdges, {
-  nodeWidth: 280,
-  nodeHeight: 280,
-  ranksep: 180,
-  nodesep: 50,
+  nodeWidth: 280, nodeHeight: 280, ranksep: 180, nodesep: 50,
 });
 const { nodes: domainLayoutNodes } = getLayoutedElements(rawDomainNodes, domainEdges, {
-  nodeWidth: 240,
-  nodeHeight: 140,
-  direction: 'TB',
-  ranksep: 160,
-  nodesep: 80,
+  nodeWidth: 240, nodeHeight: 140, direction: 'TB', ranksep: 160, nodesep: 80,
 });
 
 interface LoadedSession {
@@ -86,8 +84,26 @@ interface LoadedSession {
   filename: string;
 }
 
+const DEMO_CALIBRATION: Record<string, CalibrationState> = {
+  'domain-maps-geo': { relevance: 'core', isAiDifferentiator: true },
+  'domain-messaging': { relevance: 'core' },
+  'domain-search-discovery': { relevance: 'supporting' },
+  'domain-payments-billing': { relevance: 'supporting' },
+  'domain-notifications': { relevance: 'core' },
+  'domain-media-content': { relevance: 'not-applicable' },
+  'domain-schema-data': { relevance: 'core' },
+  'domain-api-connections': { relevance: 'core' },
+  'domain-auth-identity': { relevance: 'core' },
+  'domain-infrastructure': { relevance: 'core' },
+  'domain-animation-motion': { relevance: 'not-applicable' },
+  'domain-accessibility': { relevance: 'supporting' },
+  'domain-internationalization': { relevance: 'not-applicable' },
+  'domain-performance': { relevance: 'supporting' },
+  'domain-analytics-telemetry': { relevance: 'supporting' },
+};
+
 export default function App() {
-  const [viewMode, setViewMode] = useState<ViewMode>('system');
+  const [viewMode, setViewMode] = useState<ViewMode>(getInitialView);
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const [hiddenCategories, setHiddenCategories] = useState<Set<NodeCategory>>(new Set());
   const [searchQuery, setSearchQuery] = useState('');
@@ -106,35 +122,79 @@ export default function App() {
   const [showSessionOverview, setShowSessionOverview] = useState(false);
   const [selectedModel, setSelectedModel] = useState<ModelId>('claude-sonnet-4');
   const [monitorSearchQuery, setMonitorSearchQuery] = useState('');
+  const [sessionsRestored, setSessionsRestored] = useState(false);
 
   const activeLoadedSession = activeSessionIndex >= 0 ? sessions[activeSessionIndex] ?? null : null;
   const monitorSession = activeLoadedSession?.session ?? null;
   const monitorNodes = activeLoadedSession?.nodes ?? [];
   const monitorEdges = activeLoadedSession?.edges ?? [];
-  const sessionFilename = activeLoadedSession?.filename ?? null;
+
+  // --- Session persistence (raw content stored for reload) ---
+
+  const sessionSourcesRef = useRef<Map<string, string>>(new Map());
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('explorer-sessions');
+      if (saved) {
+        const parsed = JSON.parse(saved) as { content: string; filename: string }[];
+        const loaded: LoadedSession[] = [];
+        for (const { content, filename } of parsed) {
+          const isJsonl = filename.endsWith('.jsonl') || content.trim().startsWith('{');
+          const session = isJsonl ? parseTranscript(content) : parseTxtTranscript(content);
+          const { nodes: rawMonNodes, edges: monEdges } = sessionToNodes(session);
+          const { nodes: layoutedMonNodes } = getLayoutedElements(rawMonNodes, monEdges, {
+            nodeWidth: 260, nodeHeight: 160, ranksep: 120, nodesep: 80,
+          });
+          sessionSourcesRef.current.set(session.id, content);
+          loaded.push({ session, nodes: layoutedMonNodes, edges: monEdges, filename });
+        }
+        if (loaded.length > 0) {
+          setSessions(loaded);
+          setActiveSessionIndex(0);
+        }
+      }
+    } catch {
+      // corrupted storage
+    }
+    setSessionsRestored(true);
+  }, []);
+
+  const persistSessions = useCallback((currentSessions: LoadedSession[]) => {
+    try {
+      const data = currentSessions
+        .map(s => {
+          const content = sessionSourcesRef.current.get(s.session.id);
+          return content ? { content, filename: s.filename } : null;
+        })
+        .filter(Boolean);
+      localStorage.setItem('explorer-sessions', JSON.stringify(data));
+    } catch {
+      // storage full
+    }
+  }, []);
+
+  // --- Session management ---
 
   const loadSession = useCallback((content: string, filename: string) => {
     const isJsonl = filename.endsWith('.jsonl') || content.trim().startsWith('{');
     const session = isJsonl ? parseTranscript(content) : parseTxtTranscript(content);
-
     const { nodes: rawMonNodes, edges: monEdges } = sessionToNodes(session);
     const { nodes: layoutedMonNodes } = getLayoutedElements(rawMonNodes, monEdges, {
-      nodeWidth: 260,
-      nodeHeight: 160,
-      ranksep: 120,
-      nodesep: 80,
+      nodeWidth: 260, nodeHeight: 160, ranksep: 120, nodesep: 80,
     });
-
+    sessionSourcesRef.current.set(session.id, content);
     const newEntry: LoadedSession = { session, nodes: layoutedMonNodes, edges: monEdges, filename };
     setSessions(prev => {
       const next = [...prev, newEntry];
       setActiveSessionIndex(next.length - 1);
+      persistSessions(next);
       return next;
     });
     setSelectedNode(null);
     setShowSessionOverview(true);
     setShowAddSessionOverlay(false);
-  }, []);
+  }, [persistSessions]);
 
   const loadDemoSession = useCallback(() => {
     loadSession(DEMO_TRANSCRIPT, 'demo-session.jsonl');
@@ -142,6 +202,8 @@ export default function App() {
 
   const removeSession = useCallback((index: number) => {
     setSessions(prev => {
+      const removed = prev[index];
+      if (removed) sessionSourcesRef.current.delete(removed.session.id);
       const next = prev.filter((_, i) => i !== index);
       setActiveSessionIndex(prevIdx => {
         if (next.length === 0) return -1;
@@ -149,24 +211,22 @@ export default function App() {
         if (index < prevIdx) return prevIdx - 1;
         return prevIdx;
       });
+      persistSessions(next);
       return next;
     });
     setSelectedNode(null);
     setShowSessionOverview(false);
-  }, []);
+  }, [persistSessions]);
+
+  // --- Node interaction ---
 
   const onNodesChange = useCallback((changes: NodeChange[]) => {
-    if (viewMode === 'system') {
-      setSysNodes(prev => applyNodeChanges(changes, prev));
-    } else if (viewMode === 'newIdea') {
-      setIdeaNodes(prev => applyNodeChanges(changes, prev));
-    } else if (viewMode === 'existingRepo') {
-      setRepoNodes(prev => applyNodeChanges(changes, prev));
-    } else if (viewMode === 'contextToMvp') {
-      setContextMvpNodes(prev => applyNodeChanges(changes, prev));
-    } else if (viewMode === 'domainArchitecture') {
-      setDomainNodes(prev => applyNodeChanges(changes, prev));
-    } else {
+    if (viewMode === 'system') setSysNodes(prev => applyNodeChanges(changes, prev));
+    else if (viewMode === 'newIdea') setIdeaNodes(prev => applyNodeChanges(changes, prev));
+    else if (viewMode === 'existingRepo') setRepoNodes(prev => applyNodeChanges(changes, prev));
+    else if (viewMode === 'contextToMvp') setContextMvpNodes(prev => applyNodeChanges(changes, prev));
+    else if (viewMode === 'domainArchitecture') setDomainNodes(prev => applyNodeChanges(changes, prev));
+    else {
       setSessions(prev => {
         if (activeSessionIndex < 0 || activeSessionIndex >= prev.length) return prev;
         const updated = [...prev];
@@ -184,50 +244,78 @@ export default function App() {
     setShowSessionOverview(false);
   }, []);
 
-  const onPaneClick = useCallback(() => {
-    setSelectedNode(null);
-  }, []);
+  const onPaneClick = useCallback(() => setSelectedNode(null), []);
 
   const toggleCategory = useCallback((category: NodeCategory) => {
     setHiddenCategories(prev => {
       const next = new Set(prev);
-      if (next.has(category)) {
-        next.delete(category);
-      } else {
-        next.add(category);
-      }
+      next.has(category) ? next.delete(category) : next.add(category);
       return next;
     });
   }, []);
 
-  // Demo calibration data — in production, this comes from domain-config.yml
-  const demoCalibration: Record<string, CalibrationState> = {
-    'domain-maps-geo': { relevance: 'core', isAiDifferentiator: true },
-    'domain-messaging': { relevance: 'core' },
-    'domain-search-discovery': { relevance: 'supporting' },
-    'domain-payments-billing': { relevance: 'supporting' },
-    'domain-notifications': { relevance: 'core' },
-    'domain-media-content': { relevance: 'not-applicable' },
-    'domain-schema-data': { relevance: 'core' },
-    'domain-api-connections': { relevance: 'core' },
-    'domain-auth-identity': { relevance: 'core' },
-    'domain-infrastructure': { relevance: 'core' },
-    'domain-animation-motion': { relevance: 'not-applicable' },
-    'domain-accessibility': { relevance: 'supporting' },
-    'domain-internationalization': { relevance: 'not-applicable' },
-    'domain-performance': { relevance: 'supporting' },
-    'domain-analytics-telemetry': { relevance: 'supporting' },
-  };
+  const handleViewChange = useCallback((mode: ViewMode) => {
+    setViewMode(mode);
+    setSelectedNode(null);
+    window.history.pushState(null, '', `#${mode}`);
+  }, []);
+
+  useEffect(() => {
+    const onHashChange = () => {
+      const hash = window.location.hash.replace('#', '');
+      if (VALID_VIEWS.has(hash as ViewMode)) {
+        setViewMode(hash as ViewMode);
+        setSelectedNode(null);
+      }
+    };
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, []);
+
+  // --- Keyboard shortcuts ---
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      const isInput = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT';
+
+      if (e.key === 'Escape') {
+        if (showArchDocs) setShowArchDocs(false);
+        else if (showAddSessionOverlay) setShowAddSessionOverlay(false);
+        else if (selectedNode) setSelectedNode(null);
+        else if (showSessionOverview) setShowSessionOverview(false);
+        return;
+      }
+
+      if (isInput) return;
+
+      const viewKeys: Record<string, ViewMode> = {
+        '1': 'system', '2': 'newIdea', '3': 'existingRepo',
+        '4': 'contextToMvp', '5': 'domainArchitecture', '6': 'monitor',
+      };
+      if (viewKeys[e.key]) {
+        handleViewChange(viewKeys[e.key]);
+        return;
+      }
+
+      if (e.key === '/') {
+        e.preventDefault();
+        const searchInput = document.querySelector<HTMLInputElement>('input[type="text"][placeholder*="Search"]');
+        searchInput?.focus();
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [showArchDocs, showAddSessionOverlay, selectedNode, showSessionOverview, handleViewChange]);
+
+  // --- Derived data ---
 
   const calibratedDomainNodes = useMemo(() => {
     if (!calibrationActive) return domainNodes;
     return domainNodes.map(n => {
-      const cal = demoCalibration[n.id];
+      const cal = DEMO_CALIBRATION[n.id];
       if (!cal) return n;
-      return {
-        ...n,
-        data: { ...n.data as DomainNodeData, calibration: cal },
-      };
+      return { ...n, data: { ...n.data as DomainNodeData, calibration: cal } };
     });
   }, [domainNodes, calibrationActive]);
 
@@ -236,102 +324,86 @@ export default function App() {
     return sysNodes.filter(n => {
       const d = n.data as ExplorerNodeData;
       if (hiddenCategories.has(d.category)) return false;
-      if (query && !d.name.toLowerCase().includes(query) && !d.description.toLowerCase().includes(query)) {
-        return false;
-      }
+      if (query && !d.name.toLowerCase().includes(query) && !d.description.toLowerCase().includes(query)) return false;
       return true;
     });
   }, [sysNodes, hiddenCategories, searchQuery]);
 
   const visibleSystemNodeIds = useMemo(() => new Set(filteredSystemNodes.map(n => n.id)), [filteredSystemNodes]);
+  const filteredSystemEdges = useMemo(() => allEdges.filter(e => visibleSystemNodeIds.has(e.source) && visibleSystemNodeIds.has(e.target)), [visibleSystemNodeIds]);
 
-  const filteredSystemEdges = useMemo(() => {
-    return allEdges.filter(e => visibleSystemNodeIds.has(e.source) && visibleSystemNodeIds.has(e.target));
-  }, [visibleSystemNodeIds]);
+  const debouncedMonitorSearch = useDebounce(monitorSearchQuery, 200);
 
   const { filteredMonitorNodes, monitorMatchCount } = useMemo(() => {
-    const query = monitorSearchQuery.toLowerCase().trim();
+    const query = debouncedMonitorSearch.toLowerCase().trim();
     if (!query) return { filteredMonitorNodes: monitorNodes, monitorMatchCount: null };
-
     let matching = 0;
     const filtered = monitorNodes.map(node => {
       const d = node.data as MonitorNodeData;
-      const hit =
-        d.turn.summary.toLowerCase().includes(query) ||
+      const hit = d.turn.summary.toLowerCase().includes(query) ||
         d.turn.text.toLowerCase().includes(query) ||
         d.turn.toolCalls.some(tc => tc.name.toLowerCase().includes(query)) ||
         d.nodeType.toLowerCase().includes(query);
-
-      if (hit) {
-        matching++;
-        return node;
-      }
+      if (hit) { matching++; return node; }
       return { ...node, style: { ...node.style, opacity: 0.25 } };
     });
+    return { filteredMonitorNodes: filtered, monitorMatchCount: { matching, total: monitorNodes.length } };
+  }, [monitorNodes, debouncedMonitorSearch]);
 
-    return {
-      filteredMonitorNodes: filtered,
-      monitorMatchCount: { matching, total: monitorNodes.length },
-    };
-  }, [monitorNodes, monitorSearchQuery]);
+  // Apply search filter across workflow and domain views
+  const searchFilteredNodes = useMemo(() => {
+    if (!searchQuery.trim()) return null;
+    const query = searchQuery.toLowerCase();
 
-  const activeNodes = viewMode === 'system'
-    ? filteredSystemNodes
-    : viewMode === 'newIdea'
-      ? ideaNodes
-      : viewMode === 'existingRepo'
-        ? repoNodes
-        : viewMode === 'contextToMvp'
-          ? contextMvpNodes
-          : viewMode === 'domainArchitecture'
-            ? calibratedDomainNodes
-            : filteredMonitorNodes;
+    const filterNodes = (nodes: Node[]) => nodes.map(node => {
+      const d = node.data as Record<string, unknown>;
+      const name = ((d.name || d.title || '') as string).toLowerCase();
+      const desc = ((d.description || d.scope || '') as string).toLowerCase();
+      const hit = name.includes(query) || desc.includes(query);
+      return hit ? node : { ...node, style: { ...node.style, opacity: 0.2 } };
+    });
 
-  const activeEdges = viewMode === 'system'
-    ? filteredSystemEdges
-    : viewMode === 'newIdea'
-      ? workflowEdges
-      : viewMode === 'existingRepo'
-        ? existingRepoEdges
-        : viewMode === 'contextToMvp'
-          ? contextWorkflowEdges
-          : viewMode === 'domainArchitecture'
-            ? domainEdges
-            : monitorEdges;
+    if (viewMode === 'newIdea') return filterNodes(ideaNodes);
+    if (viewMode === 'existingRepo') return filterNodes(repoNodes);
+    if (viewMode === 'contextToMvp') return filterNodes(contextMvpNodes);
+    if (viewMode === 'domainArchitecture') return filterNodes(calibratedDomainNodes);
+    return null;
+  }, [searchQuery, viewMode, ideaNodes, repoNodes, contextMvpNodes, calibratedDomainNodes]);
+
+  const activeNodes = viewMode === 'system' ? filteredSystemNodes
+    : viewMode === 'newIdea' ? (searchFilteredNodes ?? ideaNodes)
+    : viewMode === 'existingRepo' ? (searchFilteredNodes ?? repoNodes)
+    : viewMode === 'contextToMvp' ? (searchFilteredNodes ?? contextMvpNodes)
+    : viewMode === 'domainArchitecture' ? (searchFilteredNodes ?? calibratedDomainNodes)
+    : filteredMonitorNodes;
+
+  const activeEdges = viewMode === 'system' ? filteredSystemEdges
+    : viewMode === 'newIdea' ? workflowEdges
+    : viewMode === 'existingRepo' ? existingRepoEdges
+    : viewMode === 'contextToMvp' ? contextWorkflowEdges
+    : viewMode === 'domainArchitecture' ? domainEdges
+    : monitorEdges;
 
   const minimapNodeColor = useCallback((node: Node) => {
     if (viewMode === 'monitor') {
       const d = node.data as MonitorNodeData;
-      const key = d.nodeType === 'tool-cluster' ? 'toolCluster' : d.nodeType;
-      return STATUS_COLORS[key]?.border || '#64748b';
+      return STATUS_COLORS[d.nodeType === 'tool-cluster' ? 'toolCluster' : d.nodeType]?.border || '#64748b';
     }
     if (viewMode !== 'system') {
       const phase = (node.data as Record<string, unknown>).phase as string;
-      const phaseColorMap: Record<string, string> = {
-        setup: '#94a3b8',
-        ingest: '#f59e0b',
-        ideate: '#2dd4bf',
-        build: '#3b82f6',
-        verify: '#f59e0b',
-        ship: '#22c55e',
-        operate: '#c084fc',
-        foundation: '#f59e0b',
-        feature: '#3b82f6',
-        experience: '#a78bfa',
-        orchestration: '#34d399',
+      const map: Record<string, string> = {
+        setup: '#94a3b8', ingest: '#f59e0b', ideate: '#2dd4bf', build: '#3b82f6',
+        verify: '#f59e0b', ship: '#22c55e', operate: '#c084fc', foundation: '#f59e0b',
+        feature: '#3b82f6', experience: '#a78bfa', orchestration: '#34d399',
       };
-      return phaseColorMap[phase] || '#64748b';
+      return map[phase] || '#64748b';
     }
-    const d = node.data as ExplorerNodeData;
-    return categoryMeta[d.category]?.color || '#64748b';
+    return categoryMeta[(node.data as ExplorerNodeData).category]?.color || '#64748b';
   }, [viewMode]);
 
-  const handleViewChange = useCallback((mode: ViewMode) => {
-    setViewMode(mode);
-    setSelectedNode(null);
-  }, []);
-
   const showMonitorDropZone = viewMode === 'monitor' && sessions.length === 0;
+
+  // --- Render ---
 
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
@@ -341,19 +413,9 @@ export default function App() {
           <button
             onClick={loadDemoSession}
             style={{
-              position: 'absolute',
-              bottom: 40,
-              left: '50%',
-              transform: 'translateX(-50%)',
-              padding: '8px 20px',
-              fontSize: 13,
-              fontWeight: 500,
-              background: '#1e293b',
-              border: '1px solid #334155',
-              borderRadius: 8,
-              color: '#94a3b8',
-              cursor: 'pointer',
-              zIndex: 6,
+              position: 'absolute', bottom: 40, left: '50%', transform: 'translateX(-50%)',
+              padding: '8px 20px', fontSize: 13, fontWeight: 500, background: '#1e293b',
+              border: '1px solid #334155', borderRadius: 8, color: '#94a3b8', cursor: 'pointer', zIndex: 6,
             }}
           >
             Load demo session
@@ -392,30 +454,29 @@ export default function App() {
         </ReactFlow>
       )}
 
+      {/* Empty state when filters hide everything */}
+      {!showMonitorDropZone && activeNodes.length === 0 && (
+        <EmptyState
+          title="No nodes visible"
+          description={viewMode === 'system'
+            ? 'All categories are hidden or no nodes match your search. Try clearing the search or enabling more categories.'
+            : 'No nodes match the current filter. Try adjusting your search query.'}
+        />
+      )}
+
+      {/* Add session overlay */}
       {viewMode === 'monitor' && showAddSessionOverlay && (
-        <div style={{
-          position: 'absolute',
-          top: 0, left: 0, right: 0, bottom: 0,
-          zIndex: 20,
-          background: 'rgba(15, 23, 42, 0.9)',
-        }}>
+        <div
+          role="dialog" aria-modal="true" aria-label="Add session transcript"
+          style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 20, background: 'rgba(15, 23, 42, 0.9)' }}
+        >
           <FileDropZone onFileLoaded={loadSession} />
           <button
             onClick={() => setShowAddSessionOverlay(false)}
             style={{
-              position: 'absolute',
-              bottom: 40,
-              left: '50%',
-              transform: 'translateX(-50%)',
-              padding: '8px 20px',
-              fontSize: 13,
-              fontWeight: 500,
-              background: '#1e293b',
-              border: '1px solid #334155',
-              borderRadius: 8,
-              color: '#94a3b8',
-              cursor: 'pointer',
-              zIndex: 21,
+              position: 'absolute', bottom: 40, left: '50%', transform: 'translateX(-50%)',
+              padding: '8px 20px', fontSize: 13, fontWeight: 500, background: '#1e293b',
+              border: '1px solid #334155', borderRadius: 8, color: '#94a3b8', cursor: 'pointer', zIndex: 21,
             }}
           >
             Cancel
@@ -423,263 +484,27 @@ export default function App() {
         </div>
       )}
 
-      {/* View toggle tabs */}
-      <div className="view-toggle">
-        <button
-          className={viewMode === 'system' ? 'active' : ''}
-          onClick={() => handleViewChange('system')}
-        >
-          System Map
-        </button>
-        <button
-          className={viewMode === 'newIdea' ? 'active' : ''}
-          onClick={() => handleViewChange('newIdea')}
-        >
-          New Idea
-        </button>
-        <button
-          className={viewMode === 'existingRepo' ? 'active' : ''}
-          onClick={() => handleViewChange('existingRepo')}
-        >
-          Existing Repo
-        </button>
-        <button
-          className={viewMode === 'contextToMvp' ? 'active' : ''}
-          onClick={() => handleViewChange('contextToMvp')}
-        >
-          Context to MVP
-        </button>
-        <button
-          className={viewMode === 'domainArchitecture' ? 'active' : ''}
-          onClick={() => handleViewChange('domainArchitecture')}
-          style={viewMode === 'domainArchitecture' ? {} : { borderLeft: '1px solid #334155' }}
-        >
-          Domain Agents
-        </button>
-        <button
-          className={viewMode === 'monitor' ? 'active' : ''}
-          onClick={() => handleViewChange('monitor')}
-          style={viewMode === 'monitor' ? {} : { borderLeft: '1px solid #334155' }}
-        >
-          Session Monitor
-        </button>
-      </div>
+      {/* View toggle */}
+      <ViewToggle viewMode={viewMode} onViewChange={handleViewChange} />
 
+      {/* Monitor legend */}
       {viewMode === 'monitor' && monitorSession && (
-        <div style={{
-          position: 'absolute',
-          top: 12,
-          left: 12,
-          zIndex: 10,
-          background: '#1e293b',
-          border: '1px solid #334155',
-          borderRadius: 10,
-          padding: 16,
-          maxWidth: 220,
-          boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
-        }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: '#f1f5f9', marginBottom: 8 }}>
-            Session Monitor
-          </div>
-
-          <div style={{ marginBottom: 10 }}>
-            <div style={{ fontSize: 10, color: '#64748b', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              Sessions ({sessions.length})
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 2, maxHeight: 120, overflowY: 'auto' }}>
-              {sessions.map((s, i) => (
-                <div
-                  key={s.session.id}
-                  onClick={() => {
-                    setActiveSessionIndex(i);
-                    setSelectedNode(null);
-                    setShowSessionOverview(true);
-                  }}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '4px 8px',
-                    fontSize: 11,
-                    borderRadius: 4,
-                    cursor: 'pointer',
-                    background: i === activeSessionIndex ? '#0f172a' : 'transparent',
-                    borderLeft: i === activeSessionIndex ? '3px solid #3b82f6' : '3px solid transparent',
-                    color: i === activeSessionIndex ? '#e2e8f0' : '#94a3b8',
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0, flex: 1 }}>
-                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {s.filename.length > 20 ? s.filename.slice(0, 20) + '\u2026' : s.filename}
-                    </span>
-                    <span style={{ fontSize: 9, color: '#64748b', flexShrink: 0 }}>
-                      {s.session.turns.length}t
-                    </span>
-                  </div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      removeSession(i);
-                    }}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      color: '#64748b',
-                      cursor: 'pointer',
-                      fontSize: 13,
-                      padding: '0 2px',
-                      lineHeight: 1,
-                      flexShrink: 0,
-                    }}
-                  >
-                    ×
-                  </button>
-                </div>
-              ))}
-            </div>
-            <button
-              onClick={() => setShowAddSessionOverlay(true)}
-              style={{
-                marginTop: 6,
-                width: '100%',
-                padding: '4px 8px',
-                fontSize: 11,
-                background: '#0f172a',
-                border: '1px dashed #334155',
-                borderRadius: 6,
-                color: '#64748b',
-                cursor: 'pointer',
-              }}
-            >
-              + Add Session
-            </button>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 10 }}>
-            <div className="monitor-legend-item">
-              <span className="monitor-legend-dot" style={{ background: '#3b82f6' }} />
-              User Input
-            </div>
-            <div className="monitor-legend-item">
-              <span className="monitor-legend-dot" style={{ background: '#22c55e' }} />
-              Agent Turn
-            </div>
-            <div className="monitor-legend-item">
-              <span className="monitor-legend-dot" style={{ background: '#f59e0b' }} />
-              Tool Calls
-            </div>
-            <div className="monitor-legend-item">
-              <span className="monitor-legend-dot" style={{ background: '#a78bfa' }} />
-              Subagent
-            </div>
-          </div>
-
-          <div style={{ position: 'relative', marginBottom: 8 }}>
-            <input
-              type="text"
-              placeholder="Search nodes..."
-              value={monitorSearchQuery}
-              onChange={e => setMonitorSearchQuery(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '6px 10px',
-                paddingRight: monitorSearchQuery ? 28 : 10,
-                fontSize: 12,
-                background: '#0f172a',
-                border: '1px solid #334155',
-                borderRadius: 6,
-                color: '#e2e8f0',
-                outline: 'none',
-                boxSizing: 'border-box' as const,
-              }}
-            />
-            {monitorSearchQuery && (
-              <button
-                onClick={() => setMonitorSearchQuery('')}
-                style={{
-                  position: 'absolute',
-                  right: 6,
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  background: 'none',
-                  border: 'none',
-                  color: '#64748b',
-                  cursor: 'pointer',
-                  fontSize: 14,
-                  padding: '0 2px',
-                  lineHeight: 1,
-                }}
-              >
-                ×
-              </button>
-            )}
-          </div>
-          {monitorMatchCount && (
-            <div style={{ fontSize: 10, color: '#64748b', marginBottom: 8 }}>
-              {monitorMatchCount.matching} of {monitorMatchCount.total} nodes match
-            </div>
-          )}
-
-          <div className="monitor-session-bar">
-            <div className="monitor-session-stat">
-              <strong>{monitorSession.turns.length}</strong> turns
-            </div>
-            <div className="monitor-session-stat">
-              <strong>~{monitorSession.totalTokens.toLocaleString()}</strong> tok
-            </div>
-            <div className="monitor-session-stat">
-              <strong style={{ color: '#10b981' }}>
-                ${calculateCost(monitorSession.inputTokens, monitorSession.outputTokens, selectedModel).toFixed(2)}
-              </strong> est.
-            </div>
-          </div>
-
-          <div style={{ marginTop: 10, display: 'flex', gap: 6 }}>
-            <button
-              onClick={() => { setSelectedNode(null); setShowSessionOverview(true); }}
-              style={{
-                flex: 1,
-                padding: '5px 8px',
-                fontSize: 11,
-                background: '#0f172a',
-                border: '1px solid #334155',
-                borderRadius: 6,
-                color: '#94a3b8',
-                cursor: 'pointer',
-              }}
-            >
-              Overview
-            </button>
-            <button
-              onClick={() => removeSession(activeSessionIndex)}
-              style={{
-                flex: 1,
-                padding: '5px 8px',
-                fontSize: 11,
-                background: '#0f172a',
-                border: '1px solid #334155',
-                borderRadius: 6,
-                color: '#94a3b8',
-                cursor: 'pointer',
-              }}
-            >
-              Close Session
-            </button>
-          </div>
-
-          <div style={{
-            marginTop: 12,
-            paddingTop: 12,
-            borderTop: '1px solid #334155',
-            fontSize: 10,
-            color: '#64748b',
-            lineHeight: 1.5,
-          }}>
-            Click a node for details. Click Overview for session summary.
-          </div>
-        </div>
+        <MonitorLegend
+          sessions={sessions}
+          activeSessionIndex={activeSessionIndex}
+          monitorSession={monitorSession}
+          selectedModel={selectedModel}
+          monitorSearchQuery={monitorSearchQuery}
+          monitorMatchCount={monitorMatchCount}
+          onSelectSession={(i) => { setActiveSessionIndex(i); setSelectedNode(null); setShowSessionOverview(true); }}
+          onRemoveSession={removeSession}
+          onAddSession={() => setShowAddSessionOverlay(true)}
+          onShowOverview={() => { setSelectedNode(null); setShowSessionOverview(true); }}
+          onSearchChange={setMonitorSearchQuery}
+        />
       )}
 
+      {/* Non-monitor legend and detail panels */}
       {viewMode !== 'monitor' && (
         <>
           <Legend
@@ -694,28 +519,19 @@ export default function App() {
           />
 
           {viewMode === 'domainArchitecture' && selectedNode && selectedNode.type === 'domainNode' ? (
-            <DomainDetailPanel
-              node={selectedNode}
-              allNodes={activeNodes}
-              allEdges={activeEdges}
-              onClose={() => setSelectedNode(null)}
-            />
+            <DomainDetailPanel node={selectedNode} allNodes={activeNodes} allEdges={activeEdges} onClose={() => setSelectedNode(null)} />
           ) : (
-            <DetailPanel
-              node={selectedNode}
-              viewMode={viewMode}
-              allNodes={activeNodes}
-              allEdges={activeEdges}
-              onClose={() => setSelectedNode(null)}
-            />
+            <DetailPanel node={selectedNode} viewMode={viewMode} allNodes={activeNodes} allEdges={activeEdges} onClose={() => setSelectedNode(null)} />
           )}
         </>
       )}
 
+      {/* Architecture docs overlay */}
       {showArchDocs && viewMode === 'domainArchitecture' && (
         <ArchitectureDocsPanel onClose={() => setShowArchDocs(false)} />
       )}
 
+      {/* Session detail panel */}
       {viewMode === 'monitor' && monitorSession && (selectedNode || showSessionOverview) && (
         <SessionDetailPanel
           node={selectedNode}
@@ -726,6 +542,7 @@ export default function App() {
         />
       )}
 
+      {/* Timeline */}
       {viewMode === 'monitor' && monitorSession && (
         <Timeline
           session={monitorSession}
@@ -739,10 +556,7 @@ export default function App() {
               const d = n.data as MonitorNodeData;
               return d.turn && d.turn.index === turnIndex && (d.nodeType === 'user' || d.nodeType === 'agent');
             });
-            if (target) {
-              setSelectedNode(target);
-              setShowSessionOverview(false);
-            }
+            if (target) { setSelectedNode(target); setShowSessionOverview(false); }
           }}
         />
       )}

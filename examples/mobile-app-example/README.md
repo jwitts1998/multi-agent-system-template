@@ -33,7 +33,7 @@ After setup, the repo looks like:
 
 ```
 fittracker/
-├── .cursorrules                       # Configured for Flutter/Dart/Riverpod
+├── CLAUDE.md                       # Configured for Flutter/Dart/Riverpod
 ├── AGENTS.md                          # Mobile-specific agent roles
 ├── tasks.yml                          # Portfolio-level tracking
 ├── tasks/
@@ -41,7 +41,7 @@ fittracker/
 ├── docs/
 │   ├── product_design/                # PDB goes here (empty, ready for step 2)
 │   └── architecture/
-├── .cursor/
+├── .claude/
 │   └── agents/
 │       ├── generic/                   # code-reviewer, debugger, designer, etc.
 │       ├── ideation/                  # idea-to-pdb, pdb-to-tasks
@@ -60,10 +60,10 @@ Verify setup:
 
 ## Step 2: Flush the Idea
 
-Open the project in Cursor and invoke the ideation agent:
+Open the project in Claude Code and invoke the ideation agent:
 
 ```
-@idea-to-pdb
+idea-to-pdb subagent
 
 I want to build a fitness tracking app called FitTracker for iOS and Android.
 
@@ -88,7 +88,7 @@ The PDB covers: Executive Summary, Core Features (MVP/Phase 2/Future), Personas,
 ## Step 3: Create Tasks from the PDB
 
 ```
-@pdb-to-tasks
+pdb-to-tasks subagent
 
 Read docs/product_design/fittracker_pdb.md and decompose it into epics and task files.
 ```
@@ -195,9 +195,9 @@ Clone repo
     ↓
 ./setup.sh (mobile-app, Flutter, Riverpod)
     ↓
-@idea-to-pdb → docs/product_design/fittracker_pdb.md
+idea-to-pdb subagent → docs/product_design/fittracker_pdb.md
     ↓
-@pdb-to-tasks → tasks/00-05_*.yml
+pdb-to-tasks subagent → tasks/00-05_*.yml
     ↓
 Pick first task → implement → review → test → done
     ↓

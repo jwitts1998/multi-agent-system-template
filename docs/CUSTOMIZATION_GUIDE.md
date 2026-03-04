@@ -78,12 +78,12 @@ For large teams, complex platforms, or projects that need coordination across ma
 
 ## 🔌 Cursor Plugins and Skills
 
-Cursor marketplace plugins add **agent skills** and **MCP tools** that agents use automatically when relevant. A starter list of available capabilities ships with this template at [docs/CURSOR_PLUGINS.md](./CURSOR_PLUGINS.md).
+Claude Code skills plugins add **agent skills** and **MCP tools** that agents use automatically when relevant. A starter list of available capabilities ships with this template at [docs/CLAUDE_CODE_CAPABILITIES.md](./CURSOR_PLUGINS.md).
 
 ### Customizing for Your Project
 
 1. **Remove what you don't use**: If you don't process payments, delete the Stripe entries. If you don't use Figma, delete the Figma entries. Keeping the list focused prevents agents from referencing unavailable capabilities.
-2. **Add what you install**: When you add a new plugin from the Cursor marketplace, add its skills and MCP tools to the appropriate section in `docs/CURSOR_PLUGINS.md`.
+2. **Add what you install**: When you add a new plugin from the Claude Code skills, add its skills and MCP tools to the appropriate section in `docs/CLAUDE_CODE_CAPABILITIES.md`.
 3. **Stack-specific entries**: The "Stack-Specific" section is a good place to add plugins that match your tech stack (e.g., Rails plugins for a Rails project, Supabase plugins if you use Supabase).
 
 Agents reference this file to know which skills and tools are available, so keeping it current improves the quality of agent suggestions.
@@ -111,30 +111,30 @@ These are template-library files, not project files:
 After choosing your project type, delete the templates for other types:
 
 **If you chose `mobile-app`**, remove:
-- `templates/cursorrules/web-app.cursorrules`
-- `templates/cursorrules/backend-service.cursorrules`
-- `templates/cursorrules/full-stack.cursorrules`
+- `templates/claude-config/web-appCLAUDE.md`
+- `templates/claude-config/backend-serviceCLAUDE.md`
+- `templates/claude-config/full-stack.md`
 - `templates/agents/AGENTS-web.md`, `AGENTS-backend.md`, `AGENTS-full-stack.md`
 - `templates/subagents/specialists/react-specialist.md`, `node-specialist.md`
 
 **If you chose `web-app`**, remove:
-- `templates/cursorrules/mobile-app.cursorrules`
-- `templates/cursorrules/backend-service.cursorrules`
-- `templates/cursorrules/full-stack.cursorrules`
+- `templates/claude-config/mobile-appCLAUDE.md`
+- `templates/claude-config/backend-serviceCLAUDE.md`
+- `templates/claude-config/full-stack.md`
 - `templates/agents/AGENTS-mobile.md`, `AGENTS-backend.md`, `AGENTS-full-stack.md`
 - `templates/subagents/specialists/flutter-specialist.md`, `node-specialist.md`
 
 **If you chose `backend-service`**, remove:
-- `templates/cursorrules/mobile-app.cursorrules`
-- `templates/cursorrules/web-app.cursorrules`
-- `templates/cursorrules/full-stack.cursorrules`
+- `templates/claude-config/mobile-appCLAUDE.md`
+- `templates/claude-config/web-appCLAUDE.md`
+- `templates/claude-config/full-stack.md`
 - `templates/agents/AGENTS-mobile.md`, `AGENTS-web.md`, `AGENTS-full-stack.md`
 - `templates/subagents/specialists/flutter-specialist.md`, `react-specialist.md`
 
 **If you chose `full-stack`**, remove:
-- `templates/cursorrules/mobile-app.cursorrules`
-- `templates/cursorrules/web-app.cursorrules`
-- `templates/cursorrules/backend-service.cursorrules`
+- `templates/claude-config/mobile-appCLAUDE.md`
+- `templates/claude-config/web-appCLAUDE.md`
+- `templates/claude-config/backend-serviceCLAUDE.md`
 - `templates/agents/AGENTS-mobile.md`, `AGENTS-web.md`, `AGENTS-backend.md`
 - `templates/subagents/specialists/flutter-specialist.md`
 
@@ -142,10 +142,10 @@ After choosing your project type, delete the templates for other types:
 
 | File / Directory | Why |
 |-----------------|-----|
-| `.cursorrules` | Active project rules (at root) |
+| `CLAUDE.md` | Active project rules (at root) |
 | `AGENTS.md` | Active agent definitions (at root) |
 | `tasks.yml` and `tasks/` | Active task tracking |
-| `.cursor/agents/` | Active subagent configs |
+| `.claude/agents/` | Active subagent configs |
 | `docs/` | Project documentation |
 | `SETUP_GUIDE.md` | Useful reference for understanding the system |
 | `CHANGELOG.md` | Template version history (helpful for updates) |
@@ -165,7 +165,7 @@ After choosing your project type, delete the templates for other types:
 
 ## 🔧 Component Customization
 
-### `.cursorrules` Customization
+### `CLAUDE.md` Customization
 
 **Required Variables**:
 - `{{PROJECT_NAME}}` - Your project name
@@ -206,20 +206,20 @@ After choosing your project type, delete the templates for other types:
 - Run contract tests in CI/CD
 ```
 
-### `.cursor/rules/` Customization (Alternative Format)
+### `.claude/rules/` Customization (Alternative Format)
 
-Instead of (or in addition to) a single `.cursorrules` file, you can use `.cursor/rules/*.mdc` files. Each `.mdc` file uses YAML frontmatter to control when it applies.
+Instead of (or in addition to) a single `CLAUDE.md` file, you can use `.claude/rules/*.md` files. Each `.md` file uses YAML frontmatter to control when it applies.
 
-**When to prefer `.cursor/rules/`**:
+**When to prefer `.claude/rules/`**:
 - You want rules that activate only when specific file types are open (e.g., `globs: **/*.ts`)
 - You prefer separate, focused rule files over a single large file
-- Your team wants to discover and toggle rules via Cursor's rule picker
+- Your team wants to discover and toggle rules via Claude Code's rule picker
 
-**How to split `.cursorrules` into `.mdc` files**:
-1. Identify logical sections in your `.cursorrules` (e.g., code style, security, testing, workflow)
-2. Create one `.mdc` file per section in `.cursor/rules/`
+**How to split `CLAUDE.md` into `.md` files**:
+1. Identify logical sections in your `CLAUDE.md` (e.g., code style, security, testing, workflow)
+2. Create one `.md` file per section in `.claude/rules/`
 3. Add frontmatter with `description` and either `globs` (file-specific) or `alwaysApply: true` (global)
-4. Move the relevant content from `.cursorrules` into each `.mdc` file
+4. Move the relevant content from `CLAUDE.md` into each `.md` file
 
 **Example frontmatter**:
 ```yaml
@@ -230,7 +230,7 @@ alwaysApply: false
 ---
 ```
 
-Pre-made `.mdc` templates are available at `templates/cursorrules/rules/`. Copy them to your project's `.cursor/rules/` and customize.
+Pre-made `.md` templates are available at `templates/claude-config/rules/`. Copy them to your project's `.claude/rules/` and customize.
 
 ### `AGENTS.md` Customization
 
@@ -331,7 +331,7 @@ Add project-specific sections:
 
 **Changes needed**:
 
-**.cursorrules**:
+**CLAUDE.md**:
 ```markdown
 ## Architecture: Microservices
 
@@ -363,7 +363,7 @@ Manages Kubernetes, service mesh, and infrastructure as code.
 
 **Changes needed**:
 
-**.cursorrules**:
+**CLAUDE.md**:
 ```markdown
 ## Monorepo Structure
 ```
@@ -437,7 +437,7 @@ Start minimal, add customizations as needed.
 
 Keep the structure intact, add within sections.
 
-❌ **Bad**: Completely restructure `.cursorrules`  
+❌ **Bad**: Completely restructure `CLAUDE.md`  
 ✅ **Good**: Add custom sections within existing structure
 
 ### Don't Leave Variables Unfilled
@@ -460,7 +460,7 @@ Search for `{{` to find remaining variables.
 
 ### Test Your Setup
 
-1. **Manual Test**: Ask AI to review a file using your `.cursorrules`
+1. **Manual Test**: Ask AI to review a file using your `CLAUDE.md`
 2. **Agent Test**: Invoke a subagent and verify it uses project context
 3. **Task Test**: Have AI select and work on a task
 
@@ -470,12 +470,12 @@ Search for `{{` to find remaining variables.
 
 ### Optional: Cursor Profiles
 
-For projects with multiple domains, verticals, or concerns, you can create **instruction profile** files in `.cursor/` that pre-load domain-specific context before a session. This narrows the AI assistant's focus to a particular area.
+For projects with multiple domains, verticals, or concerns, you can create **instruction profile** files in `.claude/` that pre-load domain-specific context before a session. This narrows the AI assistant's focus to a particular area.
 
 **Example**: A multi-vertical analytics platform might have:
 
 ```
-.cursor/
+.claude/
 ├── analytics_profile.json     # Focus on analytics pipeline concerns
 ├── vendor_profile.json        # Focus on vendor integration concerns
 └── infra_profile.json         # Focus on infrastructure concerns

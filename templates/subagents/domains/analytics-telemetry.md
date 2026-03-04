@@ -2,6 +2,9 @@
 name: analytics-telemetry
 description: Domain agent for event tracking, funnels, cohorts, dashboards, privacy compliance, and data-driven decision making. Tier 3 experience — ensures the product generates actionable insights.
 last_reviewed: 2026-02-24
+tools: Read, Grep, Glob, Edit, Write
+model: sonnet
+maxTurns: 15
 knowledge_sources:
   - "OpenTelemetry documentation"
   - "PostHog/Amplitude docs"
@@ -31,7 +34,7 @@ Always evaluate: **where can AI replace, augment, or create something new in ana
 - **Scope**: Owns event tracking design, funnels, cohorts, and privacy-compliant data collection. Ensures actionable insights flow from user actions.
 - **Top 3 modern practices**: Event taxonomy before implementation; Server-side tracking for critical events; Privacy by design
 - **Top 3 AI applications**: Auto-generate event tracking from specs; Natural language analytics queries; Anomaly detection on metrics
-- **Dependencies**: `@schema-data`, `@api-connections`
+- **Dependencies**: `schema-data subagent`, `api-connections subagent`
 
 ## When to Invoke
 
@@ -57,10 +60,10 @@ Always evaluate: **where can AI replace, augment, or create something new in ana
 - Product metrics framework (North Star metrics, input metrics, guardrail metrics)
 
 **Does not own:**
-- Event data models (see `@schema-data`)
-- Analytics API endpoints (see `@api-connections`)
-- User consent management (see `@auth-identity`)
-- Infrastructure monitoring (see `@infrastructure`)
+- Event data models (see `schema-data subagent`)
+- Analytics API endpoints (see `api-connections subagent`)
+- User consent management (see `auth-identity subagent`)
+- Infrastructure monitoring (see `infrastructure subagent`)
 
 ## Extended Reference
 
@@ -97,15 +100,15 @@ Always evaluate: **where can AI replace, augment, or create something new in ana
 
 ## Dependencies
 
-- `@schema-data` — event storage schemas, aggregation tables
-- `@api-connections` — analytics platform APIs (Mixpanel, Amplitude, PostHog, GA4)
+- `schema-data subagent` — event storage schemas, aggregation tables
+- `api-connections subagent` — analytics platform APIs (Mixpanel, Amplitude, PostHog, GA4)
 
 ## Consulted By
 
 - Product Orchestrator — data-driven product decisions, metric reviews
-- `@payments-billing` — revenue tracking, MRR/ARR metrics
-- `@search-discovery` — search behavior analysis, zero-result insights
-- `@notifications` — notification engagement metrics
+- `payments-billing subagent` — revenue tracking, MRR/ARR metrics
+- `search-discovery subagent` — search behavior analysis, zero-result insights
+- `notifications subagent` — notification engagement metrics
 
 ## Monitoring Hooks
 

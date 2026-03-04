@@ -51,6 +51,19 @@ See `AGENTS.md` for detailed agent responsibilities. Common roles:
 - **Agent B** → Works on feature/task B simultaneously
 - **Agent C** → Works on feature/task C simultaneously
 
+#### Conflict Avoidance
+
+Before starting parallel work, check for file-level overlap to prevent merge conflicts and duplicated effort:
+
+1. **Check `code_areas` overlap**: Compare the `code_areas` of all `in_progress` tasks. If two tasks list the same file or directory, they risk conflicts.
+2. **If overlap is detected**:
+   - **Serialize**: Work on one task first if the overlap is significant (same core file)
+   - **Designate ownership**: If the overlap is incidental (e.g., both touch a shared utility), the task whose `code_areas` lists the file as its primary concern owns it. The other task waits for the shared-file changes before modifying it.
+   - **Coordinate via handoff notes**: If both tasks must proceed, add a note to each task identifying the shared files and which task owns them
+3. **Shared file convention**: A task "owns" a file when that file is central to the task's purpose (listed first in `code_areas` or directly referenced in `description`). Tasks that touch a file incidentally (e.g., adding an import) should coordinate with the owner.
+
+This is advisory — convention over runtime locking. The goal is to avoid wasted work from conflicting edits, not to enforce strict file locking.
+
 ### Pattern 3: Review-Based Collaboration
 
 **Use Case**: Implementation followed by multi-perspective review
@@ -82,25 +95,84 @@ When multiple agents work on the same task:
 
 1. **First Agent**:
    - Complete their portion
-   - Update task notes: "{{AGENT_NAME}}: {{WORK_COMPLETED}}. Ready for {{NEXT_AGENT}}."
+   - Write a structured handoff note to the task's `notes` field (see format below)
    - Propose status update if appropriate
 
 2. **Subsequent Agents**:
-   - Review previous work
+   - Read previous handoff notes to understand context
    - Complete their portion
-   - Update task with progress
+   - Write their own handoff note
    - Hand off to next agent or mark complete
 
 3. **Final Agent**:
    - Validate all acceptance criteria
    - Ensure all previous work is integrated
-   - Propose `status: done`
+   - Write final handoff note and propose `status: done`
+
+### Structured Handoff Note Format
+
+Use structured YAML entries in the `notes` field for consistency and parseability:
+
+```yaml
+notes:
+  - agent: implementation
+    status: complete
+    summary: "PUT /api/v1/users/:id/profile endpoint created."
+    files_changed:
+      - src/api/controllers/profileController.ts
+      - src/services/profileService.ts
+    decisions:
+      - "5MB avatar limit based on S3 constraints"
+    open_questions: []
+    next: testing
+```
+
+**Required fields**:
+- `agent` — which role wrote this note (matches `agent_roles` values)
+- `status` — `complete`, `blocked`, or `escalated`
+- `summary` — concise description of what was done (1-3 sentences)
+- `next` — which agent role should pick up next (omit on final handoff)
+
+**Optional fields**:
+- `files_changed` — list of files created or modified
+- `decisions` — non-obvious choices made and why
+- `open_questions` — unresolved items the next agent should be aware of
+
+Freeform string notes remain valid for backward compatibility, but the structured format is the recommended convention for new tasks.
+
+---
+
+## 🔄 Recovery & Escalation
+
+When a task stalls, fails, or an agent cannot complete their portion, follow the escalation protocol rather than leaving the task in limbo.
+
+### Escalation Ladder
+
+| Tier | Trigger | Action |
+|------|---------|--------|
+| **1 — Route** | Agent encounters an issue they can classify | Route to the appropriate agent with context and recommended action |
+| **2 — Decompose/Reassign** | Tier 1 agent cannot resolve after one attempt | Break the task into subtasks, or reassign to a different agent/specialist |
+| **3 — Surface to user** | Tier 2 fails, or the issue requires a human decision | Present diagnosis with concrete options, pause task as `blocked` |
+
+### How to Escalate
+
+1. Write an escalation note to the task's `notes` field with: what went wrong, what was tried, and what should happen next
+2. If the issue can be routed to another agent (Tier 1), do so immediately — don't wait for the next session
+3. If routing didn't work (Tier 2), assess whether the problem needs decomposition or a different specialist
+4. If the problem is outside agent capabilities (Tier 3), surface to the user with options and a recommendation
+
+### When to Escalate vs. Retry
+
+- **Retry** when the failure is transient (flaky test, network timeout, typo in config)
+- **Escalate** when the failure is structural (missing dependency, ambiguous requirements, access permissions) or when the same fix has been attempted and failed
+
+For the full escalation protocol with note formats and examples, see the Execution Monitor (`@execution-monitor`).
 
 ---
 
 ## 🎙️ Agent Invocation in Practice
 
-In a typical Cursor (or other AI assistant) session, you are always talking to a single AI assistant. Agent "roles" are not separate processes -- they are perspectives enforced by context files (`.cursorrules`, `AGENTS.md`, task `agent_roles`).
+In a typical Cursor (or other AI assistant) session, you are always talking to a single AI assistant. Agent "roles" are not separate processes -- they are perspectives enforced by context files (`CLAUDE.md`, `AGENTS.md`, task `agent_roles`).
 
 ### How to Invoke a Specific Agent Role
 
@@ -124,7 +196,7 @@ Follow the handoff protocol above. After completing your portion of a task:
 
 For larger projects, you may add an **agent-router** that acts as a single entry point. The router triages intent and delegates to the appropriate agent role. To use this pattern:
 
-- Create a router subagent (e.g., `.cursor/agents/system/agent-router.md`) with a delegation matrix mapping keywords/intents to agent roles.
+- Create a router subagent (e.g., `.claude/agents/system/agent-router.md`) with a delegation matrix mapping keywords/intents to agent roles.
 - Invoke the router with "Route this to the right agent" or use a convention like "@agent-router" in your prompt.
 - The router will suggest which agent role should handle the request.
 
@@ -140,7 +212,7 @@ When agents need to access external tools or communicate with agents built on di
 
 **Standard for tool discovery and calling.**
 
-MCP defines how agents discover and invoke tools exposed by servers. Python SDK (21.8k stars), TypeScript SDK (11.7k stars). Already integrated into this template system via Cursor plugins.
+MCP defines how agents discover and invoke tools exposed by servers. Python SDK (21.8k stars), TypeScript SDK (11.7k stars). Already integrated into this template system via Claude Code skills.
 
 For your own project, expose project-specific tools as MCP servers so any MCP-compatible agent or IDE can use them:
 
@@ -177,6 +249,69 @@ Use A2A when: agents built with different frameworks or running in different ser
 Both protocols are complementary. A project may use MCP for tool access and A2A for inter-agent task delegation simultaneously.
 
 See `docs/research/agent_runtime_tooling_landscape.md` Section 6 for full evaluation of interoperability protocols.
+
+---
+
+## ⏸️ Session Boundaries
+
+Cursor sessions have limited context windows and may end mid-task. This section defines how to checkpoint progress and resume cleanly.
+
+### End-of-Session Checkpoint
+
+Before ending a session with work in progress, write a checkpoint note to the current task's `notes` field:
+
+```yaml
+- agent: implementation
+  status: in_progress
+  type: session_checkpoint
+  summary: "Profile editing endpoint 70% complete. Validation logic done, avatar upload in progress."
+  files_in_progress:
+    - src/services/profileService.ts (upload logic incomplete)
+  completed_this_session:
+    - Request validation for name/bio
+    - Error response formatting
+  remaining:
+    - Avatar upload to S3
+    - Rate limiting
+  decisions:
+    - "Using presigned URLs for avatar upload instead of proxy"
+  gotchas:
+    - "S3 bucket CORS not configured yet — needed before upload works"
+```
+
+**Required fields** for checkpoint notes:
+- `agent` — which role was active
+- `status` — always `in_progress` for checkpoints
+- `type` — always `session_checkpoint` (distinguishes from handoff notes)
+- `summary` — what's done and what's left (1-2 sentences)
+- `remaining` — concrete list of what still needs to be done
+
+**Optional but recommended**:
+- `files_in_progress` — files being actively edited (with notes on incomplete state)
+- `completed_this_session` — what was finished (helps avoid re-doing work)
+- `decisions` — choices made that the next session should know about
+- `gotchas` — blockers, surprises, or traps the next session should watch for
+
+### Session Resume Protocol
+
+When starting a new session that may continue previous work:
+
+1. **Check for in-progress tasks**: Scan `tasks/*.yml` for any task with `status: in_progress`
+2. **Read checkpoint notes**: If the task has a `type: session_checkpoint` note, read it for context — this is the minimum needed to resume
+3. **Read recent episodic memory**: Check `docs/memory/episodic/` for the most recent session entry for continuity
+4. **Read semantic memory**: Load `docs/memory/semantic/validated-patterns.md` for project-wide conventions
+5. **Resume or start fresh**: Use the checkpoint to pick up where the previous session left off, avoiding re-reading all source files or re-deriving decisions
+
+### When to Checkpoint vs. Archive
+
+| Situation | Action |
+|-----------|--------|
+| Session ending mid-task | Write a **session_checkpoint** note to the task file |
+| Session ending with completed tasks | Invoke `@memory-updater` for full episodic archive |
+| Session ending with both | Checkpoint the in-progress task, then archive completed work to episodic memory |
+| Quick pause (same day, same context) | Checkpoint is optional — the task's existing handoff notes may suffice |
+
+The task file is the source of truth for in-progress work. Episodic memory is for completed work and cross-session learnings.
 
 ---
 
@@ -241,7 +376,7 @@ See `AGENTS.md` for complete checklists. Key items:
 ## 🔗 Related Documentation
 
 - **AGENTS.md**: Detailed agent role definitions
-- **.cursorrules**: Architecture and code standards
+- **CLAUDE.md**: Architecture and code standards
 - **TASK_SCHEMA_GUIDE.md**: Task file schema documentation
 - **[TASK_LIFECYCLE_EXAMPLE.md](./TASK_LIFECYCLE_EXAMPLE.md)**: End-to-end walkthrough of a task from `todo` to `done` with handoff notes
 

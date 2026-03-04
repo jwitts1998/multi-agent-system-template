@@ -46,6 +46,37 @@ const VISUAL_TOOLS = [
   { id: 'monitor', label: 'Session Monitor', desc: 'Visualize transcripts', hash: '#monitor' },
 ] as const;
 
+// Config data - Rules
+const RULES = [
+  { id: 'token-efficiency', name: 'Token Efficiency', path: '.claude/rules/token-efficiency.md', desc: 'Guidelines for cost-effective Claude Code sessions' },
+  { id: 'domain-routing', name: 'Domain Routing', path: '.claude/rules/domain-routing.md', desc: 'Route tasks to appropriate domain agents' },
+  { id: 'domain-consultation', name: 'Domain Consultation', path: '.claude/rules/domain-consultation.md', desc: 'Cross-domain agent collaboration rules' },
+  { id: 'domain-agent-loading', name: 'Domain Agent Loading', path: '.claude/rules/domain-agent-loading.md', desc: 'When and how to load domain agents' },
+  { id: 'domain-knowledge-freshness', name: 'Knowledge Freshness', path: '.claude/rules/domain-knowledge-freshness.md', desc: 'Keep domain knowledge up to date' },
+  { id: 'docs-editing', name: 'Docs Editing', path: '.claude/rules/docs-editing.md', desc: 'Rules for editing documentation' },
+  { id: 'template-editing', name: 'Template Editing', path: '.claude/rules/template-editing.md', desc: 'Rules for editing template files' },
+] as const;
+
+// Config data - Skills
+const SKILLS = [
+  { id: 'full-pipeline', name: 'Full Pipeline', cmd: '/full-pipeline', path: '.claude/skills/full-pipeline/', desc: 'Run the complete development pipeline' },
+  { id: 'apply-multi-agent-template', name: 'Apply Template', cmd: '/apply-multi-agent-template', path: '.claude/skills/apply-multi-agent-template/', desc: 'Apply multi-agent template to a project' },
+  { id: 'calibrate-domains', name: 'Calibrate Domains', cmd: '/calibrate-domains', path: '.claude/skills/calibrate-domains/', desc: 'Calibrate domain agents for your product' },
+  { id: 'domain-routing', name: 'Domain Routing', cmd: '/domain-routing', path: '.claude/skills/domain-routing/', desc: 'Route to appropriate domain agent' },
+  { id: 'feature-audit', name: 'Feature Audit', cmd: '/feature-audit', path: '.claude/skills/feature-audit/', desc: 'Audit a feature implementation' },
+  { id: 'descript-captions', name: 'Descript Captions', cmd: '/descript-inspired-captions', path: '.claude/skills/descript-inspired-captions/', desc: 'Generate Descript-style captions' },
+] as const;
+
+// Config data - MCP Servers
+const MCP_SERVERS = [
+  { id: 'idea-reality', name: 'Idea Reality', command: 'uvx idea-reality-mcp', desc: 'Transform ideas into reality with structured workflows' },
+] as const;
+
+// Config data - Hooks
+const HOOKS = [
+  { id: 'session-logger', name: 'Session Logger', path: '.claude/hooks/session-logger.sh', events: ['PreToolUse', 'PostToolUse', 'Stop'], desc: 'Log session events to JSONL for monitoring' },
+] as const;
+
 interface Task {
   id: string;
   title: string;
@@ -59,7 +90,7 @@ export function CommandCenter({
   onLoadLogFile,
   onClearLog,
 }: CommandCenterProps) {
-  const [activeTab, setActiveTab] = useState<'logs' | 'tasks' | 'agents'>('logs');
+  const [activeTab, setActiveTab] = useState<'logs' | 'tasks' | 'agents' | 'config'>('logs');
   const [taskContent, setTaskContent] = useState('');
   const [taskFilename, setTaskFilename] = useState<string | null>(null);
   const [copiedCmd, setCopiedCmd] = useState<string | null>(null);
@@ -160,7 +191,7 @@ export function CommandCenter({
       <nav className="flex-none border-b border-white/10 px-6">
         <div className="flex items-center justify-between">
           <div className="flex gap-6">
-            {(['logs', 'tasks', 'agents'] as const).map(tab => (
+            {(['logs', 'tasks', 'agents', 'config'] as const).map(tab => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -171,7 +202,7 @@ export function CommandCenter({
                     : 'border-transparent text-white/40 hover:text-white/70'}
                 `}
               >
-                {tab === 'logs' ? 'Session Logs' : tab === 'tasks' ? 'Tasks' : 'Agents'}
+                {tab === 'logs' ? 'Session Logs' : tab === 'tasks' ? 'Tasks' : tab === 'agents' ? 'Agents' : 'Config'}
                 {tab === 'tasks' && tasks.length > 0 && (
                   <span className="ml-2 text-xs text-white/30">{tasks.length}</span>
                 )}
@@ -227,6 +258,17 @@ export function CommandCenter({
         {activeTab === 'agents' && (
           <AgentsView
             agents={AGENTS}
+            copiedCmd={copiedCmd}
+            onCopy={copyCmd}
+          />
+        )}
+
+        {activeTab === 'config' && (
+          <ConfigView
+            rules={RULES}
+            skills={SKILLS}
+            mcpServers={MCP_SERVERS}
+            hooks={HOOKS}
             copiedCmd={copiedCmd}
             onCopy={copyCmd}
           />
@@ -684,6 +726,235 @@ function AgentsView({ agents, copiedCmd, onCopy }: AgentsViewProps) {
             Click any agent to copy its invocation command. Paste into Claude Code to invoke.
           </div>
         </section>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Config View
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface ConfigViewProps {
+  rules: readonly { id: string; name: string; path: string; desc: string }[];
+  skills: readonly { id: string; name: string; cmd: string; path: string; desc: string }[];
+  mcpServers: readonly { id: string; name: string; command: string; desc: string }[];
+  hooks: readonly { id: string; name: string; path: string; events: readonly string[]; desc: string }[];
+  copiedCmd: string | null;
+  onCopy: (cmd: string) => void;
+}
+
+function ConfigView({ rules, skills, mcpServers, hooks, copiedCmd, onCopy }: ConfigViewProps) {
+  const [expandedSection, setExpandedSection] = useState<string | null>('rules');
+
+  const sections = [
+    { id: 'rules', label: 'Rules', count: rules.length, icon: '📜' },
+    { id: 'skills', label: 'Skills', count: skills.length, icon: '⚡' },
+    { id: 'mcp', label: 'MCP Servers', count: mcpServers.length, icon: '🔌' },
+    { id: 'hooks', label: 'Hooks', count: hooks.length, icon: '🪝' },
+  ];
+
+  return (
+    <div className="h-full flex">
+      {/* Sidebar */}
+      <div className="w-56 flex-none border-r border-white/10 p-4">
+        <div className="space-y-1">
+          {sections.map(section => (
+            <button
+              key={section.id}
+              onClick={() => setExpandedSection(expandedSection === section.id ? null : section.id)}
+              className={`
+                w-full flex items-center justify-between px-3 py-2 rounded-lg text-left transition-colors
+                ${expandedSection === section.id
+                  ? 'bg-white/10 text-white'
+                  : 'text-white/50 hover:text-white/80 hover:bg-white/5'}
+              `}
+            >
+              <div className="flex items-center gap-2">
+                <span>{section.icon}</span>
+                <span className="text-sm font-medium">{section.label}</span>
+              </div>
+              <span className="text-xs text-white/30">{section.count}</span>
+            </button>
+          ))}
+        </div>
+
+        <div className="mt-6 pt-4 border-t border-white/10">
+          <div className="text-xs text-white/30 mb-2">Quick Reference</div>
+          <a
+            href="https://docs.anthropic.com/en/docs/claude-code"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block text-xs text-white/50 hover:text-white/80 py-1"
+          >
+            Claude Code Docs →
+          </a>
+          <button
+            onClick={() => onCopy('cat CLAUDE.md')}
+            className="block text-xs text-white/50 hover:text-white/80 py-1 text-left"
+          >
+            View CLAUDE.md
+          </button>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 overflow-y-auto p-6">
+        {expandedSection === 'rules' && (
+          <div className="max-w-2xl">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-medium text-white/90">Rules</h3>
+              <span className="text-xs text-white/40">.claude/rules/</span>
+            </div>
+            <p className="text-sm text-white/40 mb-6">
+              Rules are auto-loaded instructions that guide Claude's behavior. They can be global or path-specific.
+            </p>
+            <div className="space-y-3">
+              {rules.map(rule => (
+                <div
+                  key={rule.id}
+                  className="p-4 rounded-lg border border-white/10 bg-white/[0.02] hover:bg-white/[0.04] transition-colors"
+                >
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <div className="font-medium text-white/90">{rule.name}</div>
+                      <p className="text-xs text-white/40 mt-1">{rule.desc}</p>
+                    </div>
+                    <code className="text-xs text-white/30 bg-white/5 px-2 py-1 rounded shrink-0 ml-4">
+                      {rule.path.split('/').pop()}
+                    </code>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {expandedSection === 'skills' && (
+          <div className="max-w-2xl">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-medium text-white/90">Skills</h3>
+              <span className="text-xs text-white/40">.claude/skills/</span>
+            </div>
+            <p className="text-sm text-white/40 mb-6">
+              Skills are reusable workflows invoked with slash commands. Click to copy the command.
+            </p>
+            <div className="space-y-3">
+              {skills.map(skill => (
+                <button
+                  key={skill.id}
+                  onClick={() => onCopy(skill.cmd)}
+                  className={`
+                    w-full p-4 rounded-lg border text-left transition-all
+                    ${copiedCmd === skill.cmd
+                      ? 'border-emerald-500/50 bg-emerald-500/10'
+                      : 'border-white/10 bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.04]'}
+                  `}
+                >
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-white/90">{skill.name}</span>
+                        <code className="text-xs text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded">
+                          {skill.cmd}
+                        </code>
+                      </div>
+                      <p className="text-xs text-white/40 mt-1">{skill.desc}</p>
+                    </div>
+                    <span className={`
+                      text-xs font-medium transition-colors shrink-0 ml-4
+                      ${copiedCmd === skill.cmd ? 'text-emerald-400' : 'text-white/20'}
+                    `}>
+                      {copiedCmd === skill.cmd ? '✓ Copied' : 'Copy'}
+                    </span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {expandedSection === 'mcp' && (
+          <div className="max-w-2xl">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-medium text-white/90">MCP Servers</h3>
+              <span className="text-xs text-white/40">.mcp.json</span>
+            </div>
+            <p className="text-sm text-white/40 mb-6">
+              Model Context Protocol servers extend Claude's capabilities with external tools.
+            </p>
+            <div className="space-y-3">
+              {mcpServers.map(server => (
+                <div
+                  key={server.id}
+                  className="p-4 rounded-lg border border-white/10 bg-white/[0.02]"
+                >
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                        <span className="font-medium text-white/90">{server.name}</span>
+                      </div>
+                      <p className="text-xs text-white/40 mt-1">{server.desc}</p>
+                      <code className="text-xs text-white/30 mt-2 block">{server.command}</code>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {mcpServers.length === 0 && (
+                <div className="text-center py-8 text-white/30 text-sm">
+                  No MCP servers configured
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {expandedSection === 'hooks' && (
+          <div className="max-w-2xl">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-medium text-white/90">Hooks</h3>
+              <span className="text-xs text-white/40">.claude/hooks/</span>
+            </div>
+            <p className="text-sm text-white/40 mb-6">
+              Hooks run shell commands in response to Claude Code events like tool calls.
+            </p>
+            <div className="space-y-3">
+              {hooks.map(hook => (
+                <div
+                  key={hook.id}
+                  className="p-4 rounded-lg border border-white/10 bg-white/[0.02]"
+                >
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <div className="font-medium text-white/90">{hook.name}</div>
+                      <p className="text-xs text-white/40 mt-1">{hook.desc}</p>
+                      <div className="flex gap-2 mt-2">
+                        {hook.events.map(event => (
+                          <span
+                            key={event}
+                            className="text-xs text-blue-400 bg-blue-500/10 px-1.5 py-0.5 rounded"
+                          >
+                            {event}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    <code className="text-xs text-white/30 bg-white/5 px-2 py-1 rounded shrink-0 ml-4">
+                      {hook.path.split('/').pop()}
+                    </code>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {!expandedSection && (
+          <div className="h-full flex items-center justify-center text-white/20 text-sm">
+            Select a section from the sidebar
+          </div>
+        )}
       </div>
     </div>
   );

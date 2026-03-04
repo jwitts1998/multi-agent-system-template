@@ -17,6 +17,7 @@ Thumbs.db
 # Logs
 *.log
 npm-debug.log*
+.claude/logs/*.jsonl
 
 # Dependencies and build output
 node_modules/

@@ -1,0 +1,22 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [".claude/hooks/session-logger.sh PreToolUse"]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [".claude/hooks/session-logger.sh PostToolUse"]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [".claude/hooks/session-logger.sh Stop"]
+      }
+    ]
+  }
+}

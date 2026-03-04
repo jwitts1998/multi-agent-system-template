@@ -1,9 +1,253 @@
 {
   "mcpServers": {
+    "//": "═══════════════════════════════════════════════════════════════",
+    "// TIER 1": "ESSENTIAL - Core capabilities for multi-agent system",
+    "//": "═══════════════════════════════════════════════════════════════",
+
+    "context7": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@context7/mcp"]
+    },
+
+    "sequential-thinking": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+    },
+
     "idea-reality": {
       "type": "stdio",
       "command": "uvx",
       "args": ["idea-reality-mcp"]
+    },
+
+    "github": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": ""
+      }
+    },
+
+    "filesystem": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/Users/jacksonwittenberg/dev/projects"]
+    },
+
+    "//": "═══════════════════════════════════════════════════════════════",
+    "// TIER 2": "UI/UX & DESIGN - Creative frontend capabilities",
+    "//": "═══════════════════════════════════════════════════════════════",
+
+    "figma": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@figma/mcp-server"],
+      "env": {
+        "FIGMA_ACCESS_TOKEN": ""
+      }
+    },
+
+    "shadcn": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "shadcn-mcp"]
+    },
+
+    "magic-21st": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@21st-dev/magic-mcp"]
+    },
+
+    "//": "═══════════════════════════════════════════════════════════════",
+    "// TIER 3": "CODEBASE INTELLIGENCE - Deep repo understanding",
+    "//": "═══════════════════════════════════════════════════════════════",
+
+    "tng": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@tng/mcp-server"],
+      "env": {
+        "TNG_API_KEY": ""
+      }
+    },
+
+    "codebase-checkup": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@alfahadgm/codebase-checkup-mcp"]
+    },
+
+    "code-indexer": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@johnhuang/code-indexer-mcp"]
+    },
+
+    "//": "═══════════════════════════════════════════════════════════════",
+    "// TIER 4": "SECURITY & QUALITY - Secure at inception",
+    "//": "═══════════════════════════════════════════════════════════════",
+
+    "snyk": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "snyk@latest", "mcp", "--tool=claude-cli", "--rule-type=smart-apply"],
+      "env": {
+        "SNYK_TOKEN": ""
+      }
+    },
+
+    "sonarqube": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@sonarsource/mcp-server-sonarqube"],
+      "env": {
+        "SONAR_TOKEN": "",
+        "SONAR_HOST_URL": ""
+      }
+    },
+
+    "//": "═══════════════════════════════════════════════════════════════",
+    "// TIER 5": "TASK ORCHESTRATION - Workflow management",
+    "//": "═══════════════════════════════════════════════════════════════",
+
+    "workflows": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@cyanheads/workflows-mcp-server"]
+    },
+
+    "task-orchestrator": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@echoingvesper/mcp-task-orchestrator"]
+    },
+
+    "tasks": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "tasks-mcp"]
+    },
+
+    "linear": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@linear/mcp"],
+      "env": {
+        "LINEAR_API_KEY": ""
+      }
+    },
+
+    "notion": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@notionhq/mcp-server"],
+      "env": {
+        "NOTION_API_KEY": ""
+      }
+    },
+
+    "//": "═══════════════════════════════════════════════════════════════",
+    "// TIER 6": "BACKEND & DEPLOYMENT - Dynamic stack support",
+    "//": "═══════════════════════════════════════════════════════════════",
+
+    "supabase": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@supabase/mcp-server"],
+      "env": {
+        "SUPABASE_URL": "",
+        "SUPABASE_KEY": ""
+      }
+    },
+
+    "sqlite": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sqlite"]
+    },
+
+    "e2b": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@e2b/mcp-server"],
+      "env": {
+        "E2B_API_KEY": ""
+      }
+    },
+
+    "vercel": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@vercel/mcp"],
+      "env": {
+        "VERCEL_TOKEN": ""
+      }
+    },
+
+    "//": "═══════════════════════════════════════════════════════════════",
+    "// TIER 7": "OBSERVABILITY - Production monitoring",
+    "//": "═══════════════════════════════════════════════════════════════",
+
+    "sentry": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@sentry/mcp-server"],
+      "env": {
+        "SENTRY_AUTH_TOKEN": "",
+        "SENTRY_ORG": ""
+      }
+    },
+
+    "datadog": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@datadog/mcp-server"],
+      "env": {
+        "DD_API_KEY": "",
+        "DD_APP_KEY": ""
+      }
+    },
+
+    "//": "═══════════════════════════════════════════════════════════════",
+    "// TIER 8": "DOCUMENTATION - Auto-generation",
+    "//": "═══════════════════════════════════════════════════════════════",
+
+    "mintlify": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@mintlify/mcp-server"]
+    },
+
+    "aws-code-doc-gen": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@aws/code-doc-gen-mcp"]
+    },
+
+    "//": "═══════════════════════════════════════════════════════════════",
+    "// TIER 9": "CI/CD & DEPLOYMENT OPS",
+    "//": "═══════════════════════════════════════════════════════════════",
+
+    "github-actions": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@github/actions-mcp"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": ""
+      }
+    },
+
+    "gitlab": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@gitlab/mcp-server"],
+      "env": {
+        "GITLAB_PERSONAL_ACCESS_TOKEN": ""
+      }
     }
   }
 }

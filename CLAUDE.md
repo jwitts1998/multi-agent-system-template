@@ -99,15 +99,50 @@ Subagent configs are in `templates/subagents/`. After running `./setup.sh`, they
 - `@gap-analysis` — Identify production-readiness gaps
 - `@documentation-backfill` — Generate PDB from existing code
 
-### Cursor Plugins and Skills
+### Claude Code MCP Capabilities
 
-Agents have access to **agent skills** and **MCP tools** provided by installed Claude Code skills. Use them when relevant — for example, web search for research, Context7 for library docs, BrowserStack for cross-browser testing, Figma skills for design-to-code, and workflow skills for structured plans and code review.
+This system integrates **30 Model Context Protocol (MCP) servers** organized across 9 tiers, providing specialized capabilities for each workflow phase. All MCPs are configured in `.mcp.json` with detailed setup instructions in `docs/MCP_SETUP_GUIDE.md`.
 
-**Permissions**: Agents may leverage existing skills and create new ones at any time. Use `/skill-name` when a task would benefit. Use the `create-skill` workflow to author project-specific skills. Update `docs/CLAUDE_CODE_CAPABILITIES.md` after adding capabilities.
+**Essential MCPs** (start here):
+- **Context7** — Real-time library documentation (eliminates hallucinations)
+- **Sequential Thinking** — Multi-step reasoning for complex problems
+- **Figma** — Design-to-code with structural metadata + Code Connect
+- **GitHub** — Repository management, PR reviews, CI/CD intelligence
+- **Filesystem** — Local file operations across projects
 
-**Antigravity Awesome Skills**: If installed (`./scripts/install-antigravity-skills.sh`), 946+ skills are in `.claude/skills/`. Project config agents can run the install script during setup or when requested. See `docs/CLAUDE_CODE_CAPABILITIES.md`.
+**UI/UX Creative Stack** (addresses AI's frontend weaknesses):
+- **Figma MCP** — Structural design intelligence, responsive constraints
+- **Shadcn Registry** — 50+ production-ready accessible components
+- **21st.dev Magic** — Modern UI patterns and creative layouts
+- **Context7** — Latest framework docs (Next.js 15, React 19, Tailwind 4)
 
-See `docs/CLAUDE_CODE_CAPABILITIES.md` for the full list of available capabilities.
+**Codebase Intelligence** (deep repo understanding):
+- **TNG.sh** — Framework-aware auditor (finds N+1 queries, dead code, side effects)
+- **Codebase Checkup** — 10-phase autonomous audit with fix plan generation
+- **Code Indexer** — Local code search with ripgrep (monorepo support)
+
+**Security & Quality** (secure at inception):
+- **Snyk** — Auto-scan and patch vulnerabilities with smart-apply rules
+- **SonarQube** — Code quality analysis and technical debt tracking
+- **Sentry** — Production error monitoring with closed-loop debugging
+- **Datadog** — Performance metrics and observability
+
+**Task Orchestration** (workflow management):
+- **Cyanheads Workflows** — Declarative YAML-based multi-step workflows
+- **Task Orchestrator** — SQLite-backed persistent state across sessions
+- **Linear** — Issue tracking and sprint management
+- **Notion** — PDB storage and documentation
+
+**Backend & Deployment** (dynamic stack support):
+- **Supabase** — Quick backend scaffolding (auth, database, storage)
+- **E2B** — Secure cloud sandboxes for code execution
+- **Vercel** — Frontend deployment and environment management
+- **SQLite** — Local database prototyping
+
+**Full MCP Configuration**: See `.mcp.json` for all 30 servers organized by tier.
+**Setup Guide**: See `docs/MCP_SETUP_GUIDE.md` for installation, API keys, and usage examples.
+
+**Agent Skills**: In addition to MCPs, agents can use Claude Code skills via `/skill-name`. Create project-specific skills with the `create-skill` workflow.
 
 ---
 

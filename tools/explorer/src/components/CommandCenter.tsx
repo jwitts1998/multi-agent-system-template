@@ -1,6 +1,28 @@
-import { useState, useCallback, useRef, useMemo } from 'react';
+import { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import { parseSessionLog, formatTimestamp, formatDuration, type ParsedLogEntry } from '../data/log-parser';
 import yaml from 'js-yaml';
+
+// Recent files storage key
+const RECENT_FILES_KEY = 'command-center-recent-files';
+const MAX_RECENT_FILES = 5;
+
+interface RecentFile {
+  name: string;
+  type: 'log' | 'task';
+  timestamp: number;
+}
+
+// Bundled config data type
+interface BundledConfigData {
+  generatedAt: string;
+  projectRoot: string;
+  claudeMd: string | null;
+  agents: Array<{ id: string; name: string; cmd: string; path: string; category: string; desc: string; content: string }>;
+  rules: Array<{ id: string; name: string; path: string; content: string }>;
+  skills: Array<{ id: string; name: string; cmd: string; path: string; content: string }>;
+  hooks: Array<{ id: string; name: string; path: string; content: string }>;
+  mcpConfig: { path: string; content: string } | null;
+}
 
 interface CommandCenterProps {
   logContent: string;
@@ -8,33 +30,6 @@ interface CommandCenterProps {
   onLoadLogFile: (content: string, filename: string) => void;
   onClearLog: () => void;
 }
-
-// Agent data - organized by workflow stage
-const AGENTS = [
-  // Ideation & Planning
-  { id: 'idea-to-pdb', name: 'Idea → PDB', cmd: '@idea-to-pdb', cat: 'ideation', desc: 'Explore idea, generate Product Design Blueprint' },
-  { id: 'context-to-pdb', name: 'Context → PDB', cmd: '@context-to-pdb', cat: 'ideation', desc: 'Transform stakeholder context into PDB' },
-  { id: 'pdb-to-tasks', name: 'PDB → Tasks', cmd: '@pdb-to-tasks', cat: 'ideation', desc: 'Decompose PDB into epics and tasks' },
-
-  // Development
-  { id: 'code-reviewer', name: 'Code Review', cmd: '@code-reviewer', cat: 'dev', desc: 'Quality, security, architecture review' },
-  { id: 'test-writer', name: 'Test Writer', cmd: '@test-writer', cat: 'dev', desc: 'Test creation and coverage' },
-  { id: 'debugger', name: 'Debugger', cmd: '@debugger', cat: 'dev', desc: 'Error investigation and fixes' },
-  { id: 'designer', name: 'Designer', cmd: '@designer', cat: 'dev', desc: 'UI/UX, design system, accessibility' },
-  { id: 'doc-generator', name: 'Doc Generator', cmd: '@doc-generator', cat: 'dev', desc: 'Documentation creation and maintenance' },
-
-  // Quality & Security
-  { id: 'security-auditor', name: 'Security Audit', cmd: '@security-auditor', cat: 'quality', desc: 'Security scanning and hardening' },
-  { id: 'performance', name: 'Performance', cmd: '@performance-optimizer', cat: 'quality', desc: 'Performance analysis and optimization' },
-
-  // Specialists
-  { id: 'figma-specialist', name: 'Figma Specialist', cmd: '@figma-specialist', cat: 'specialist', desc: 'Figma-to-code, Code Connect, design system' },
-
-  // Ingestion (for existing codebases)
-  { id: 'codebase-auditor', name: 'Codebase Auditor', cmd: '@codebase-auditor', cat: 'ingestion', desc: 'Analyze existing code structure' },
-  { id: 'gap-analysis', name: 'Gap Analysis', cmd: '@gap-analysis', cat: 'ingestion', desc: 'Identify production-readiness gaps' },
-  { id: 'doc-backfill', name: 'Doc Backfill', cmd: '@documentation-backfill', cat: 'ingestion', desc: 'Generate PDB from existing code' },
-] as const;
 
 // Visual tool links
 const VISUAL_TOOLS = [
@@ -46,36 +41,6 @@ const VISUAL_TOOLS = [
   { id: 'monitor', label: 'Session Monitor', desc: 'Visualize transcripts', hash: '#monitor' },
 ] as const;
 
-// Config data - Rules
-const RULES = [
-  { id: 'token-efficiency', name: 'Token Efficiency', path: '.claude/rules/token-efficiency.md', desc: 'Guidelines for cost-effective Claude Code sessions' },
-  { id: 'domain-routing', name: 'Domain Routing', path: '.claude/rules/domain-routing.md', desc: 'Route tasks to appropriate domain agents' },
-  { id: 'domain-consultation', name: 'Domain Consultation', path: '.claude/rules/domain-consultation.md', desc: 'Cross-domain agent collaboration rules' },
-  { id: 'domain-agent-loading', name: 'Domain Agent Loading', path: '.claude/rules/domain-agent-loading.md', desc: 'When and how to load domain agents' },
-  { id: 'domain-knowledge-freshness', name: 'Knowledge Freshness', path: '.claude/rules/domain-knowledge-freshness.md', desc: 'Keep domain knowledge up to date' },
-  { id: 'docs-editing', name: 'Docs Editing', path: '.claude/rules/docs-editing.md', desc: 'Rules for editing documentation' },
-  { id: 'template-editing', name: 'Template Editing', path: '.claude/rules/template-editing.md', desc: 'Rules for editing template files' },
-] as const;
-
-// Config data - Skills
-const SKILLS = [
-  { id: 'full-pipeline', name: 'Full Pipeline', cmd: '/full-pipeline', path: '.claude/skills/full-pipeline/', desc: 'Run the complete development pipeline' },
-  { id: 'apply-multi-agent-template', name: 'Apply Template', cmd: '/apply-multi-agent-template', path: '.claude/skills/apply-multi-agent-template/', desc: 'Apply multi-agent template to a project' },
-  { id: 'calibrate-domains', name: 'Calibrate Domains', cmd: '/calibrate-domains', path: '.claude/skills/calibrate-domains/', desc: 'Calibrate domain agents for your product' },
-  { id: 'domain-routing', name: 'Domain Routing', cmd: '/domain-routing', path: '.claude/skills/domain-routing/', desc: 'Route to appropriate domain agent' },
-  { id: 'feature-audit', name: 'Feature Audit', cmd: '/feature-audit', path: '.claude/skills/feature-audit/', desc: 'Audit a feature implementation' },
-  { id: 'descript-captions', name: 'Descript Captions', cmd: '/descript-inspired-captions', path: '.claude/skills/descript-inspired-captions/', desc: 'Generate Descript-style captions' },
-] as const;
-
-// Config data - MCP Servers
-const MCP_SERVERS = [
-  { id: 'idea-reality', name: 'Idea Reality', command: 'uvx idea-reality-mcp', desc: 'Transform ideas into reality with structured workflows' },
-] as const;
-
-// Config data - Hooks
-const HOOKS = [
-  { id: 'session-logger', name: 'Session Logger', path: '.claude/hooks/session-logger.sh', events: ['PreToolUse', 'PostToolUse', 'Stop'], desc: 'Log session events to JSONL for monitoring' },
-] as const;
 
 interface Task {
   id: string;
@@ -90,14 +55,80 @@ export function CommandCenter({
   onLoadLogFile,
   onClearLog,
 }: CommandCenterProps) {
-  const [activeTab, setActiveTab] = useState<'logs' | 'tasks' | 'agents' | 'config'>('logs');
+  const [activeTab, setActiveTab] = useState<'logs' | 'tasks' | 'files'>('logs');
   const [taskContent, setTaskContent] = useState('');
   const [taskFilename, setTaskFilename] = useState<string | null>(null);
   const [copiedCmd, setCopiedCmd] = useState<string | null>(null);
   const [selectedEntry, setSelectedEntry] = useState<ParsedLogEntry | null>(null);
   const [logFilter, setLogFilter] = useState<'all' | 'tools' | 'agents'>('all');
+  const [recentFiles, setRecentFiles] = useState<RecentFile[]>([]);
+  const [configData, setConfigData] = useState<BundledConfigData | null>(null);
+  const [configLoading, setConfigLoading] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const taskInputRef = useRef<HTMLInputElement>(null);
+
+  // Load bundled config data
+  useEffect(() => {
+    fetch('/config-data.json')
+      .then(res => res.json())
+      .then((data: BundledConfigData) => {
+        setConfigData(data);
+        setConfigLoading(false);
+      })
+      .catch(err => {
+        console.warn('Could not load config data:', err);
+        setConfigLoading(false);
+      });
+  }, []);
+
+  // Load recent files from localStorage
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(RECENT_FILES_KEY);
+      if (saved) {
+        setRecentFiles(JSON.parse(saved));
+      }
+    } catch {
+      // Ignore errors
+    }
+  }, []);
+
+  // Save recent file
+  const addRecentFile = useCallback((name: string, type: 'log' | 'task') => {
+    setRecentFiles(prev => {
+      const filtered = prev.filter(f => f.name !== name);
+      const updated = [{ name, type, timestamp: Date.now() }, ...filtered].slice(0, MAX_RECENT_FILES);
+      try {
+        localStorage.setItem(RECENT_FILES_KEY, JSON.stringify(updated));
+      } catch {
+        // Ignore storage errors
+      }
+      return updated;
+    });
+  }, []);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore if in input
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
+
+      // Tab shortcuts: 1-3
+      if (e.key === '1') setActiveTab('logs');
+      else if (e.key === '2') setActiveTab('tasks');
+      else if (e.key === '3') setActiveTab('files');
+      // Focus file input with 'o'
+      else if (e.key === 'o' && !e.metaKey && !e.ctrlKey) {
+        e.preventDefault();
+        if (activeTab === 'logs') fileInputRef.current?.click();
+        else if (activeTab === 'tasks') taskInputRef.current?.click();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeTab]);
 
   // Parse logs
   const session = useMemo(() => {
@@ -141,10 +172,13 @@ export function CommandCenter({
     const reader = new FileReader();
     reader.onload = (e) => {
       const content = e.target?.result as string;
-      if (content?.trim()) onLoadLogFile(content, file.name);
+      if (content?.trim()) {
+        onLoadLogFile(content, file.name);
+        addRecentFile(file.name, 'log');
+      }
     };
     reader.readAsText(file);
-  }, [onLoadLogFile]);
+  }, [onLoadLogFile, addRecentFile]);
 
   const handleTaskFile = useCallback((file: File) => {
     const reader = new FileReader();
@@ -153,10 +187,11 @@ export function CommandCenter({
       if (content?.trim()) {
         setTaskContent(content);
         setTaskFilename(file.name);
+        addRecentFile(file.name, 'task');
       }
     };
     reader.readAsText(file);
-  }, []);
+  }, [addRecentFile]);
 
   const copyCmd = useCallback((cmd: string) => {
     navigator.clipboard.writeText(cmd);
@@ -191,7 +226,7 @@ export function CommandCenter({
       <nav className="flex-none border-b border-white/10 px-6">
         <div className="flex items-center justify-between">
           <div className="flex gap-6">
-            {(['logs', 'tasks', 'agents', 'config'] as const).map(tab => (
+            {(['logs', 'tasks', 'files'] as const).map(tab => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -202,9 +237,14 @@ export function CommandCenter({
                     : 'border-transparent text-white/40 hover:text-white/70'}
                 `}
               >
-                {tab === 'logs' ? 'Session Logs' : tab === 'tasks' ? 'Tasks' : tab === 'agents' ? 'Agents' : 'Config'}
+                {tab === 'logs' ? 'Session Logs' : tab === 'tasks' ? 'Tasks' : 'Files'}
                 {tab === 'tasks' && tasks.length > 0 && (
                   <span className="ml-2 text-xs text-white/30">{tasks.length}</span>
+                )}
+                {tab === 'files' && configData && (
+                  <span className="ml-2 text-xs text-white/30">
+                    {(configData.agents?.length || 0) + configData.rules.length + configData.skills.length + configData.hooks.length + (configData.mcpConfig ? 1 : 0) + (configData.claudeMd ? 1 : 0)}
+                  </span>
                 )}
               </button>
             ))}
@@ -241,6 +281,7 @@ export function CommandCenter({
             onLoadFile={handleLogFile}
             onClear={onClearLog}
             fileInputRef={fileInputRef}
+            recentFiles={recentFiles.filter(f => f.type === 'log')}
           />
         )}
 
@@ -252,23 +293,14 @@ export function CommandCenter({
             onLoadFile={handleTaskFile}
             onClear={() => { setTaskContent(''); setTaskFilename(null); }}
             fileInputRef={taskInputRef}
+            recentFiles={recentFiles.filter(f => f.type === 'task')}
           />
         )}
 
-        {activeTab === 'agents' && (
-          <AgentsView
-            agents={AGENTS}
-            copiedCmd={copiedCmd}
-            onCopy={copyCmd}
-          />
-        )}
-
-        {activeTab === 'config' && (
-          <ConfigView
-            rules={RULES}
-            skills={SKILLS}
-            mcpServers={MCP_SERVERS}
-            hooks={HOOKS}
+        {activeTab === 'files' && (
+          <FilesView
+            configData={configData}
+            configLoading={configLoading}
             copiedCmd={copiedCmd}
             onCopy={copyCmd}
           />
@@ -293,6 +325,7 @@ interface LogsViewProps {
   onLoadFile: (file: File) => void;
   onClear: () => void;
   fileInputRef: React.RefObject<HTMLInputElement | null>;
+  recentFiles: RecentFile[];
 }
 
 function LogsView({
@@ -306,6 +339,7 @@ function LogsView({
   onLoadFile,
   onClear,
   fileInputRef,
+  recentFiles,
 }: LogsViewProps) {
   const [isDragging, setIsDragging] = useState(false);
 
@@ -348,8 +382,26 @@ function LogsView({
             Load Session
           </button>
           <p className="text-xs text-white/30 mt-4">
-            Find logs in <code className="text-white/50">.claude/logs/</code>
+            Find logs in <code className="text-white/50">.claude/logs/</code> &middot; Press <kbd className="px-1 py-0.5 bg-white/10 rounded text-white/50">o</kbd> to open
           </p>
+
+          {/* Recent Files */}
+          {recentFiles.length > 0 && (
+            <div className="mt-6 pt-4 border-t border-white/10">
+              <div className="text-xs text-white/40 mb-2">Recent logs</div>
+              <div className="flex flex-wrap gap-2 justify-center">
+                {recentFiles.map(f => (
+                  <span
+                    key={f.name}
+                    className="text-xs text-white/50 bg-white/5 px-2 py-1 rounded"
+                    title={new Date(f.timestamp).toLocaleString()}
+                  >
+                    {f.name}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -512,9 +564,10 @@ interface TasksViewProps {
   onLoadFile: (file: File) => void;
   onClear: () => void;
   fileInputRef: React.RefObject<HTMLInputElement | null>;
+  recentFiles: RecentFile[];
 }
 
-function TasksView({ tasks, stats, filename, onLoadFile, onClear, fileInputRef }: TasksViewProps) {
+function TasksView({ tasks, stats, filename, onLoadFile, onClear, fileInputRef, recentFiles }: TasksViewProps) {
   const [isDragging, setIsDragging] = useState(false);
 
   if (tasks.length === 0) {
@@ -556,8 +609,26 @@ function TasksView({ tasks, stats, filename, onLoadFile, onClear, fileInputRef }
             Load Tasks
           </button>
           <p className="text-xs text-white/30 mt-4">
-            Find tasks in <code className="text-white/50">tasks/</code>
+            Find tasks in <code className="text-white/50">tasks/</code> &middot; Press <kbd className="px-1 py-0.5 bg-white/10 rounded text-white/50">o</kbd> to open
           </p>
+
+          {/* Recent Files */}
+          {recentFiles.length > 0 && (
+            <div className="mt-6 pt-4 border-t border-white/10">
+              <div className="text-xs text-white/40 mb-2">Recent tasks</div>
+              <div className="flex flex-wrap gap-2 justify-center">
+                {recentFiles.map(f => (
+                  <span
+                    key={f.name}
+                    className="text-xs text-white/50 bg-white/5 px-2 py-1 rounded"
+                    title={new Date(f.timestamp).toLocaleString()}
+                  >
+                    {f.name}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -655,304 +726,410 @@ function TasksView({ tasks, stats, filename, onLoadFile, onClear, fileInputRef }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Agents View
+// Files View (Directory Browser)
 // ─────────────────────────────────────────────────────────────────────────────
 
-interface AgentsViewProps {
-  agents: readonly { id: string; name: string; cmd: string; cat: string; desc: string }[];
+interface FilesViewProps {
+  configData: BundledConfigData | null;
+  configLoading: boolean;
   copiedCmd: string | null;
   onCopy: (cmd: string) => void;
 }
 
-const CATEGORY_INFO = {
-  ideation: { label: 'Ideation & Planning', cols: 1 },
-  dev: { label: 'Development', cols: 2 },
-  quality: { label: 'Quality & Security', cols: 2 },
-  specialist: { label: 'Specialists', cols: 1 },
-  ingestion: { label: 'Codebase Ingestion', cols: 1 },
-} as const;
+// Category labels for agents
+const AGENT_CATEGORIES: Record<string, string> = {
+  ideation: 'Ideation & Planning',
+  generic: 'Development',
+  domains: 'Domain Experts',
+  specialists: 'Specialists',
+  ingestion: 'Codebase Ingestion',
+  system: 'System',
+};
 
-function AgentsView({ agents, copiedCmd, onCopy }: AgentsViewProps) {
-  const categories = ['ideation', 'dev', 'quality', 'specialist', 'ingestion'] as const;
+function FilesView({
+  configData,
+  configLoading,
+  copiedCmd,
+  onCopy,
+}: FilesViewProps) {
+  const [expandedSection, setExpandedSection] = useState<string | null>('agents');
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+  const [agentCategoryFilter, setAgentCategoryFilter] = useState<string | null>(null);
 
-  return (
-    <div className="h-full overflow-y-auto p-6">
-      <div className="max-w-3xl mx-auto space-y-8">
-        {categories.map(cat => {
-          const catAgents = agents.filter(a => a.cat === cat);
-          if (catAgents.length === 0) return null;
-          const info = CATEGORY_INFO[cat];
+  // Get counts from config data
+  const agentsCount = configData?.agents?.length ?? 0;
+  const rulesCount = configData?.rules.length ?? 0;
+  const skillsCount = configData?.skills.length ?? 0;
+  const hooksCount = configData?.hooks.length ?? 0;
+  const hasMcp = configData?.mcpConfig !== null;
 
-          return (
-            <section key={cat}>
-              <h3 className="text-xs font-medium text-white/40 uppercase tracking-wider mb-4">
-                {info.label}
-              </h3>
-              <div className={`grid gap-3 ${info.cols === 2 ? 'grid-cols-2' : 'grid-cols-1'}`}>
-                {catAgents.map(agent => (
-                  <button
-                    key={agent.id}
-                    onClick={() => onCopy(agent.cmd)}
-                    className={`
-                      flex items-center justify-between p-4 rounded-lg border transition-all text-left
-                      ${copiedCmd === agent.cmd
-                        ? 'border-emerald-500/50 bg-emerald-500/10'
-                        : 'border-white/10 bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.04]'}
-                    `}
-                  >
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium text-white/90">{agent.name}</span>
-                        <code className="text-xs text-white/30 bg-white/5 px-1.5 py-0.5 rounded">{agent.cmd}</code>
-                      </div>
-                      <p className="text-xs text-white/40 mt-1 truncate">{agent.desc}</p>
-                    </div>
-                    <span className={`
-                      ml-3 text-xs font-medium transition-colors flex-none
-                      ${copiedCmd === agent.cmd ? 'text-emerald-400' : 'text-white/20'}
-                    `}>
-                      {copiedCmd === agent.cmd ? '✓ Copied' : 'Copy'}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </section>
-          );
-        })}
+  // Group agents by category
+  const agentCategories = useMemo(() => {
+    if (!configData?.agents) return [];
+    const cats = new Map<string, number>();
+    configData.agents.forEach(a => {
+      cats.set(a.category, (cats.get(a.category) || 0) + 1);
+    });
+    return Array.from(cats.entries()).sort((a, b) => b[1] - a[1]);
+  }, [configData?.agents]);
 
-        {/* Quick Help */}
-        <section className="pt-4 border-t border-white/5">
-          <div className="text-xs text-white/30">
-            Click any agent to copy its invocation command. Paste into Claude Code to invoke.
-          </div>
-        </section>
-      </div>
-    </div>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Config View
-// ─────────────────────────────────────────────────────────────────────────────
-
-interface ConfigViewProps {
-  rules: readonly { id: string; name: string; path: string; desc: string }[];
-  skills: readonly { id: string; name: string; cmd: string; path: string; desc: string }[];
-  mcpServers: readonly { id: string; name: string; command: string; desc: string }[];
-  hooks: readonly { id: string; name: string; path: string; events: readonly string[]; desc: string }[];
-  copiedCmd: string | null;
-  onCopy: (cmd: string) => void;
-}
-
-function ConfigView({ rules, skills, mcpServers, hooks, copiedCmd, onCopy }: ConfigViewProps) {
-  const [expandedSection, setExpandedSection] = useState<string | null>('rules');
+  const filteredAgents = useMemo(() => {
+    if (!configData?.agents) return [];
+    if (!agentCategoryFilter) return configData.agents;
+    return configData.agents.filter(a => a.category === agentCategoryFilter);
+  }, [configData?.agents, agentCategoryFilter]);
 
   const sections = [
-    { id: 'rules', label: 'Rules', count: rules.length, icon: '📜' },
-    { id: 'skills', label: 'Skills', count: skills.length, icon: '⚡' },
-    { id: 'mcp', label: 'MCP Servers', count: mcpServers.length, icon: '🔌' },
-    { id: 'hooks', label: 'Hooks', count: hooks.length, icon: '🪝' },
+    { id: 'agents', label: 'Agents', count: agentsCount, icon: '🤖' },
+    { id: 'rules', label: 'Rules', count: rulesCount, icon: '📜' },
+    { id: 'skills', label: 'Skills', count: skillsCount, icon: '⚡' },
+    { id: 'hooks', label: 'Hooks', count: hooksCount, icon: '🪝' },
+    { id: 'mcp', label: 'MCP Config', count: hasMcp ? 1 : 0, icon: '🔌' },
+    { id: 'claudemd', label: 'CLAUDE.md', count: configData?.claudeMd ? 1 : 0, icon: '📄' },
   ];
+
+  // Get current item content
+  const getSelectedContent = useCallback((): { name: string; path: string; content: string; cmd?: string } | null => {
+    if (!configData || !selectedItemId) return null;
+
+    if (expandedSection === 'agents') {
+      const agent = configData.agents?.find(a => a.id === selectedItemId);
+      if (agent) return { name: agent.name, path: agent.path, content: agent.content, cmd: agent.cmd };
+    } else if (expandedSection === 'rules') {
+      const rule = configData.rules.find(r => r.id === selectedItemId);
+      if (rule) return { name: rule.name, path: rule.path, content: rule.content };
+    } else if (expandedSection === 'skills') {
+      const skill = configData.skills.find(s => s.id === selectedItemId);
+      if (skill) return { name: skill.name, path: skill.path, content: skill.content, cmd: skill.cmd };
+    } else if (expandedSection === 'hooks') {
+      const hook = configData.hooks.find(h => h.id === selectedItemId);
+      if (hook) return { name: hook.name, path: hook.path, content: hook.content };
+    }
+    return null;
+  }, [configData, selectedItemId, expandedSection]);
+
+  const selectedContent = getSelectedContent();
+
+  // Loading state
+  if (configLoading) {
+    return (
+      <div className="h-full flex items-center justify-center text-white/40">
+        Loading files...
+      </div>
+    );
+  }
+
+  // No data state
+  if (!configData) {
+    return (
+      <div className="h-full flex flex-col items-center justify-center text-white/40">
+        <p className="mb-4">Files not loaded</p>
+        <p className="text-xs text-white/30">Run <code className="bg-white/10 px-1.5 py-0.5 rounded">npm run bundle-config</code> to generate</p>
+      </div>
+    );
+  }
 
   return (
     <div className="h-full flex">
-      {/* Sidebar */}
-      <div className="w-56 flex-none border-r border-white/10 p-4">
-        <div className="space-y-1">
+      {/* Directory Sidebar */}
+      <div className="w-44 flex-none border-r border-white/10 p-3 overflow-y-auto">
+        <div className="text-[10px] uppercase tracking-wider text-white/30 mb-2 px-2">Directory</div>
+        <div className="space-y-0.5">
           {sections.map(section => (
             <button
               key={section.id}
-              onClick={() => setExpandedSection(expandedSection === section.id ? null : section.id)}
+              onClick={() => {
+                setExpandedSection(section.id);
+                setSelectedItemId(null);
+                setAgentCategoryFilter(null);
+              }}
               className={`
-                w-full flex items-center justify-between px-3 py-2 rounded-lg text-left transition-colors
+                w-full flex items-center justify-between px-2 py-1.5 rounded text-left transition-colors text-sm
                 ${expandedSection === section.id
                   ? 'bg-white/10 text-white'
                   : 'text-white/50 hover:text-white/80 hover:bg-white/5'}
               `}
             >
               <div className="flex items-center gap-2">
-                <span>{section.icon}</span>
-                <span className="text-sm font-medium">{section.label}</span>
+                <span className="text-xs">{section.icon}</span>
+                <span className="font-medium">{section.label}</span>
               </div>
               <span className="text-xs text-white/30">{section.count}</span>
             </button>
           ))}
         </div>
 
-        <div className="mt-6 pt-4 border-t border-white/10">
-          <div className="text-xs text-white/30 mb-2">Quick Reference</div>
-          <a
-            href="https://docs.anthropic.com/en/docs/claude-code"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block text-xs text-white/50 hover:text-white/80 py-1"
-          >
-            Claude Code Docs →
-          </a>
-          <button
-            onClick={() => onCopy('cat CLAUDE.md')}
-            className="block text-xs text-white/50 hover:text-white/80 py-1 text-left"
-          >
-            View CLAUDE.md
-          </button>
+        <div className="mt-4 pt-3 border-t border-white/10">
+          <div className="text-[10px] uppercase tracking-wider text-white/30 mb-1 px-2">Updated</div>
+          <div className="text-xs text-white/40 px-2">
+            {new Date(configData.generatedAt).toLocaleTimeString()}
+          </div>
         </div>
       </div>
 
-      {/* Content */}
-      <div className="flex-1 overflow-y-auto p-6">
-        {expandedSection === 'rules' && (
-          <div className="max-w-2xl">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-medium text-white/90">Rules</h3>
-              <span className="text-xs text-white/40">.claude/rules/</span>
-            </div>
-            <p className="text-sm text-white/40 mb-6">
-              Rules are auto-loaded instructions that guide Claude's behavior. They can be global or path-specific.
-            </p>
-            <div className="space-y-3">
-              {rules.map(rule => (
-                <div
-                  key={rule.id}
-                  className="p-4 rounded-lg border border-white/10 bg-white/[0.02] hover:bg-white/[0.04] transition-colors"
+      {/* File List */}
+      <div className={`${selectedContent ? 'w-56' : 'w-64'} flex-none border-r border-white/10 overflow-y-auto`}>
+        {/* Agents with category filter */}
+        {expandedSection === 'agents' && configData.agents && (
+          <div className="p-3">
+            {/* Category filter chips */}
+            <div className="flex flex-wrap gap-1 mb-3">
+              <button
+                onClick={() => setAgentCategoryFilter(null)}
+                className={`px-2 py-1 text-xs rounded transition-colors ${
+                  !agentCategoryFilter ? 'bg-white/20 text-white' : 'bg-white/5 text-white/50 hover:bg-white/10'
+                }`}
+              >
+                All ({agentsCount})
+              </button>
+              {agentCategories.map(([cat, count]) => (
+                <button
+                  key={cat}
+                  onClick={() => setAgentCategoryFilter(cat)}
+                  className={`px-2 py-1 text-xs rounded transition-colors ${
+                    agentCategoryFilter === cat ? 'bg-white/20 text-white' : 'bg-white/5 text-white/50 hover:bg-white/10'
+                  }`}
                 >
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <div className="font-medium text-white/90">{rule.name}</div>
-                      <p className="text-xs text-white/40 mt-1">{rule.desc}</p>
-                    </div>
-                    <code className="text-xs text-white/30 bg-white/5 px-2 py-1 rounded shrink-0 ml-4">
-                      {rule.path.split('/').pop()}
-                    </code>
-                  </div>
-                </div>
+                  {AGENT_CATEGORIES[cat] || cat} ({count})
+                </button>
               ))}
             </div>
-          </div>
-        )}
 
-        {expandedSection === 'skills' && (
-          <div className="max-w-2xl">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-medium text-white/90">Skills</h3>
-              <span className="text-xs text-white/40">.claude/skills/</span>
-            </div>
-            <p className="text-sm text-white/40 mb-6">
-              Skills are reusable workflows invoked with slash commands. Click to copy the command.
-            </p>
-            <div className="space-y-3">
-              {skills.map(skill => (
+            <div className="space-y-1">
+              {filteredAgents.map(agent => (
                 <button
-                  key={skill.id}
-                  onClick={() => onCopy(skill.cmd)}
+                  key={agent.id}
+                  onClick={() => setSelectedItemId(agent.id)}
                   className={`
-                    w-full p-4 rounded-lg border text-left transition-all
-                    ${copiedCmd === skill.cmd
-                      ? 'border-emerald-500/50 bg-emerald-500/10'
-                      : 'border-white/10 bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.04]'}
+                    w-full p-2 rounded text-left transition-all text-sm
+                    ${selectedItemId === agent.id
+                      ? 'bg-blue-500/20 text-white'
+                      : 'hover:bg-white/5 text-white/70'}
                   `}
                 >
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium text-white/90">{skill.name}</span>
-                        <code className="text-xs text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded">
-                          {skill.cmd}
-                        </code>
-                      </div>
-                      <p className="text-xs text-white/40 mt-1">{skill.desc}</p>
-                    </div>
-                    <span className={`
-                      text-xs font-medium transition-colors shrink-0 ml-4
-                      ${copiedCmd === skill.cmd ? 'text-emerald-400' : 'text-white/20'}
-                    `}>
-                      {copiedCmd === skill.cmd ? '✓ Copied' : 'Copy'}
-                    </span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium truncate">{agent.name}</span>
                   </div>
+                  <code className="text-xs text-emerald-400/70">{agent.cmd}</code>
                 </button>
               ))}
             </div>
           </div>
         )}
 
-        {expandedSection === 'mcp' && (
-          <div className="max-w-2xl">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-medium text-white/90">MCP Servers</h3>
-              <span className="text-xs text-white/40">.mcp.json</span>
-            </div>
-            <p className="text-sm text-white/40 mb-6">
-              Model Context Protocol servers extend Claude's capabilities with external tools.
-            </p>
-            <div className="space-y-3">
-              {mcpServers.map(server => (
-                <div
-                  key={server.id}
-                  className="p-4 rounded-lg border border-white/10 bg-white/[0.02]"
-                >
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                        <span className="font-medium text-white/90">{server.name}</span>
-                      </div>
-                      <p className="text-xs text-white/40 mt-1">{server.desc}</p>
-                      <code className="text-xs text-white/30 mt-2 block">{server.command}</code>
-                    </div>
-                  </div>
-                </div>
-              ))}
-              {mcpServers.length === 0 && (
-                <div className="text-center py-8 text-white/30 text-sm">
-                  No MCP servers configured
-                </div>
-              )}
-            </div>
+        {/* Rules */}
+        {expandedSection === 'rules' && (
+          <div className="p-3 space-y-1">
+            {configData.rules.map(rule => (
+              <button
+                key={rule.id}
+                onClick={() => setSelectedItemId(rule.id)}
+                className={`
+                  w-full p-2 rounded text-left transition-all text-sm
+                  ${selectedItemId === rule.id
+                    ? 'bg-blue-500/20 text-white'
+                    : 'hover:bg-white/5 text-white/70'}
+                `}
+              >
+                <div className="font-medium">{rule.name}</div>
+                <code className="text-xs text-white/40 truncate block">{rule.path.split('/').pop()}</code>
+              </button>
+            ))}
           </div>
         )}
 
+        {/* Skills */}
+        {expandedSection === 'skills' && (
+          <div className="p-3 space-y-1">
+            {configData.skills.map(skill => (
+              <button
+                key={skill.id}
+                onClick={() => setSelectedItemId(skill.id)}
+                className={`
+                  w-full p-2 rounded text-left transition-all text-sm
+                  ${selectedItemId === skill.id
+                    ? 'bg-blue-500/20 text-white'
+                    : 'hover:bg-white/5 text-white/70'}
+                `}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="font-medium">{skill.name}</span>
+                  <code className="text-xs text-emerald-400 bg-emerald-500/10 px-1 rounded">{skill.cmd}</code>
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Hooks */}
         {expandedSection === 'hooks' && (
-          <div className="max-w-2xl">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-medium text-white/90">Hooks</h3>
-              <span className="text-xs text-white/40">.claude/hooks/</span>
-            </div>
-            <p className="text-sm text-white/40 mb-6">
-              Hooks run shell commands in response to Claude Code events like tool calls.
-            </p>
-            <div className="space-y-3">
-              {hooks.map(hook => (
-                <div
-                  key={hook.id}
-                  className="p-4 rounded-lg border border-white/10 bg-white/[0.02]"
-                >
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <div className="font-medium text-white/90">{hook.name}</div>
-                      <p className="text-xs text-white/40 mt-1">{hook.desc}</p>
-                      <div className="flex gap-2 mt-2">
-                        {hook.events.map(event => (
-                          <span
-                            key={event}
-                            className="text-xs text-blue-400 bg-blue-500/10 px-1.5 py-0.5 rounded"
-                          >
-                            {event}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                    <code className="text-xs text-white/30 bg-white/5 px-2 py-1 rounded shrink-0 ml-4">
-                      {hook.path.split('/').pop()}
-                    </code>
-                  </div>
-                </div>
-              ))}
-            </div>
+          <div className="p-3 space-y-1">
+            {configData.hooks.map(hook => (
+              <button
+                key={hook.id}
+                onClick={() => setSelectedItemId(hook.id)}
+                className={`
+                  w-full p-2 rounded text-left transition-all text-sm
+                  ${selectedItemId === hook.id
+                    ? 'bg-blue-500/20 text-white'
+                    : 'hover:bg-white/5 text-white/70'}
+                `}
+              >
+                <div className="font-medium">{hook.name}</div>
+                <code className="text-xs text-white/40">{hook.path.split('/').pop()}</code>
+              </button>
+            ))}
           </div>
         )}
 
-        {!expandedSection && (
-          <div className="h-full flex items-center justify-center text-white/20 text-sm">
-            Select a section from the sidebar
+        {/* MCP Config */}
+        {expandedSection === 'mcp' && configData.mcpConfig && (
+          <div className="p-3">
+            <button
+              onClick={() => setSelectedItemId('mcp')}
+              className={`
+                w-full p-2 rounded text-left transition-all text-sm
+                ${selectedItemId === 'mcp'
+                  ? 'bg-blue-500/20 text-white'
+                  : 'hover:bg-white/5 text-white/70'}
+              `}
+            >
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                <span className="font-medium">.mcp.json</span>
+              </div>
+            </button>
+          </div>
+        )}
+
+        {/* CLAUDE.md */}
+        {expandedSection === 'claudemd' && configData.claudeMd && (
+          <div className="p-3">
+            <button
+              onClick={() => setSelectedItemId('claudemd')}
+              className={`
+                w-full p-2 rounded text-left transition-all text-sm
+                ${selectedItemId === 'claudemd'
+                  ? 'bg-blue-500/20 text-white'
+                  : 'hover:bg-white/5 text-white/70'}
+              `}
+            >
+              <div className="font-medium">CLAUDE.md</div>
+              <span className="text-xs text-white/40">Project configuration</span>
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Content Viewer */}
+      <div className="flex-1 flex flex-col overflow-hidden bg-[#0d0d0d]">
+        {/* Show selected content */}
+        {selectedContent && (
+          <>
+            <div className="flex-none px-4 py-3 border-b border-white/10 flex items-center justify-between">
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="font-medium text-white/90">{selectedContent.name}</span>
+                  {selectedContent.cmd && (
+                    <code className="text-xs text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded">
+                      {selectedContent.cmd}
+                    </code>
+                  )}
+                </div>
+                <code className="text-xs text-white/40 truncate block">{selectedContent.path}</code>
+              </div>
+              <div className="flex items-center gap-2">
+                {selectedContent.cmd && (
+                  <button
+                    onClick={() => onCopy(selectedContent.cmd!)}
+                    className={`
+                      px-3 py-1.5 text-xs font-medium rounded-md transition-colors
+                      ${copiedCmd === selectedContent.cmd
+                        ? 'bg-emerald-500/20 text-emerald-400'
+                        : 'bg-white/10 text-white/70 hover:bg-white/20'}
+                    `}
+                  >
+                    {copiedCmd === selectedContent.cmd ? 'Copied!' : 'Copy Cmd'}
+                  </button>
+                )}
+                <button
+                  onClick={() => onCopy(selectedContent.content)}
+                  className={`
+                    px-3 py-1.5 text-xs font-medium rounded-md transition-colors
+                    ${copiedCmd === selectedContent.content
+                      ? 'bg-emerald-500/20 text-emerald-400'
+                      : 'bg-white/10 text-white/70 hover:bg-white/20'}
+                  `}
+                >
+                  {copiedCmd === selectedContent.content ? 'Copied!' : 'Copy All'}
+                </button>
+              </div>
+            </div>
+            <div className="flex-1 overflow-auto p-4">
+              <pre className="text-sm text-white/80 font-mono whitespace-pre-wrap">{selectedContent.content}</pre>
+            </div>
+            <div className="flex-none px-4 py-2 border-t border-white/10 text-xs text-white/40">
+              {selectedContent.content.split('\n').length} lines
+            </div>
+          </>
+        )}
+
+        {/* Show CLAUDE.md content */}
+        {expandedSection === 'claudemd' && selectedItemId === 'claudemd' && configData.claudeMd && !selectedContent && (
+          <>
+            <div className="flex-none px-4 py-3 border-b border-white/10 flex items-center justify-between">
+              <div>
+                <div className="font-medium text-white/90">CLAUDE.md</div>
+                <code className="text-xs text-white/40">Project root</code>
+              </div>
+              <button
+                onClick={() => onCopy(configData.claudeMd!)}
+                className={`
+                  px-3 py-1.5 text-xs font-medium rounded-md transition-colors
+                  ${copiedCmd === configData.claudeMd
+                    ? 'bg-emerald-500/20 text-emerald-400'
+                    : 'bg-white/10 text-white/70 hover:bg-white/20'}
+                `}
+              >
+                {copiedCmd === configData.claudeMd ? 'Copied!' : 'Copy'}
+              </button>
+            </div>
+            <div className="flex-1 overflow-auto p-4">
+              <pre className="text-sm text-white/80 font-mono whitespace-pre-wrap">{configData.claudeMd}</pre>
+            </div>
+          </>
+        )}
+
+        {/* Show MCP config */}
+        {expandedSection === 'mcp' && selectedItemId === 'mcp' && configData.mcpConfig && !selectedContent && (
+          <>
+            <div className="flex-none px-4 py-3 border-b border-white/10 flex items-center justify-between">
+              <div>
+                <div className="font-medium text-white/90">MCP Configuration</div>
+                <code className="text-xs text-white/40">.mcp.json</code>
+              </div>
+              <button
+                onClick={() => onCopy(configData.mcpConfig!.content)}
+                className={`
+                  px-3 py-1.5 text-xs font-medium rounded-md transition-colors
+                  ${copiedCmd === configData.mcpConfig!.content
+                    ? 'bg-emerald-500/20 text-emerald-400'
+                    : 'bg-white/10 text-white/70 hover:bg-white/20'}
+                `}
+              >
+                {copiedCmd === configData.mcpConfig!.content ? 'Copied!' : 'Copy'}
+              </button>
+            </div>
+            <div className="flex-1 overflow-auto p-4">
+              <pre className="text-sm text-white/80 font-mono whitespace-pre-wrap">{configData.mcpConfig.content}</pre>
+            </div>
+          </>
+        )}
+
+        {/* Empty state */}
+        {!selectedItemId && (
+          <div className="flex-1 flex items-center justify-center text-white/30 text-sm">
+            Select a file to view its content
           </div>
         )}
       </div>

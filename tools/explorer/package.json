@@ -4,7 +4,10 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
+    "bundle-config": "node ../../scripts/bundle-config.js",
+    "predev": "npm run bundle-config",
     "dev": "vite",
+    "prebuild": "npm run bundle-config",
     "build": "tsc -b && vite build",
     "preview": "vite preview"
   },
